@@ -1,0 +1,2579 @@
+; Lucas DAC6338 - 1990 Jaguar XJS V12 16 CU ECU
+; Firmware revision 9009
+; disassembly using MAME unidasm.exe
+;
+; RhinoPower Ltd
+; 12th July 2019
+;
+; Microproceesor uPD7810
+; 64k external EPROM
+; Internal ADC disabled ???
+; External A/D converter uPD7004 mapped at 2000h ???
+;
+;
+; Interrupt mapping taken from User Manual - not uPD7810 datasheet which is incorrect ?????
+;
+; vv register points to RAM area
+;
+;
+;
+; Port A
+; 0
+; 1
+; 2
+; 3
+; 4
+; 5
+; 6
+; 7 = ADC End of Conversion
+;
+; Port B
+; 0
+; 1
+; 2
+; 3
+; 4
+; 5
+; 6
+; 7
+; 
+; Port C
+; 0
+; 1
+; 2
+; 3
+; 4
+; 5 = CI - CAS input capture
+; 6 = CO0 - Output compare - Injectors bank 1
+; 7 = CO1 - Output compare - Injectors bank 2
+; Port D
+; 0
+; 1
+; 2
+; 3
+; 4
+; 5
+; 6
+; 7
+;
+; Port F
+; 0
+; 1
+; 2
+; 3
+; 4
+; 5
+; 6
+; 7
+;
+;
+; External ADC
+;
+; Ch0 =
+; Ch1 = CO Adj
+; Ch2 =
+; Ch3 =
+; Ch4 =
+; Ch5 = TPS
+; Ch6 = CTS
+; Ch7 = IAT
+;
+;
+;----------------------------- Reset Vector -------------------------   
+;
+00000000: 4E B4              JRE     $00B6		; reset vector - jump to initialise
+;
+ 
+;
+00000002: FF                 JR      $0002
+00000003: FF                 JR      $0003
+;
+;------------------Interrupt Service Routines -------------------------  
+;
+; /NMI - External Interrupt
+;
+00000004: AA			 	 EI      
+00000005: 62                 RETI   
+00000006: FF                 
+00000007: FF    
+;
+; INTT0 or INTT1 - Timer 0 or Timer 1 Match
+;     
+00000008: 4E 58              JRE     $0062
+0000000A: FF                 
+0000000B: FF                 
+0000000C: FF                 
+0000000D: FF                 
+0000000E: FF                 
+0000000F: FF  
+;
+; INT1 or /INT2 - External Interrupts
+;               
+00000010: 48 43              SKIT    F1
+00000012: 00                 NOP     
+00000013: 48 44              SKIT    F2
+00000015: 00                 NOP     
+00000016: AA                 EI      
+00000017: 62                 RETI    
+;
+; INTE0 or INTE1 - Match signal from timer event counters
+;
+00000018: 48 45              SKIT    FE0
+0000001A: 00                 NOP     
+0000001B: 48 46              SKIT    FE1
+0000001D: 00                 NOP     
+0000001E: AA                 EI      
+0000001F: 62                 RETI   
+;
+; INTEIN Timer Event (CI pin or TO fall) or INTAD A/D converter interrupt
+; 
+00000020: 48 68              SKNIT   FAD		; skip jump if no A/D interrupt
+00000022: 00                 NOP     
+00000023: 48 67              SKNIT   FEIN		; skip jump if no CAS interrupt
+00000025: CA                 JR      $0030
+00000026: AA                 EI      
+00000027: 62                 RETI  
+;
+; INTSR - serial Rx or INST serial Tx
+;
+00000028: 48 49              SKIT    FSR
+0000002A: 00                 NOP     
+0000002B: 48 4A              SKIT    FST
+0000002D: 00                 NOP     
+0000002E: AA                 EI      
+0000002F: 62                 RETI 
+;
+; CAS Event handler
+;   
+00000030: 30 34     L0030:   DCRW    VV:34			; decrement register skip if borrow		
+00000032: C9                 JR      $003C 			;
+00000033: 69 02              MVI     A,$02			; A=2h
+00000035: 70 79 34 FF        MOV     ($FF34),A		; FF34 = 2H	
+00000039: 54 C9 05           JMP     $05C9			; CAS service routine
+0000003C: 35 34 02           LTIW    VV:34,$02		; F034-02, skip if borrow
+0000003F: 4E 75              JRE     $00B6			; jump to init
+00000041: AA                 EI      
+00000042: 62                 RETI    
+;----------------------------- FILL -------------------------  
+00000043:  fill FF  
+;
+;----------------------------- ISR-------------------------                 
+;
+; SOFTI - software interrupt
+; 
+00000060: AA                 EI      
+00000061: 62                 RETI    
+;
+;------------------------ Timer 0, Timer 1 interrupt handler -------------------------  
+; 
+00000062: 10                 EXA     			; Exchange V, A, EA and V', A', EA')
+00000063: 48 41              SKIT    FT0		; skip if timer 0 interrupt
+00000065: DF                 JR      $0085
+;
+; Timer 0 handler
+;
+00000066: 01 23              LDAW    VV:23
+00000068: 37 FF              LTI     A,$FF	
+0000006A: D0                 JR      $007B
+0000006B: 27 00              GTI     A,$00
+0000006D: C4                 JR      $0072
+0000006E: 64 49 08           ONI     PB,$08			; test PB bit3
+00000071: C9                 JR      $007B
+00000072: 64 09 F7           ANI     PB,$F7			; clear PB bit 3
+00000075: 64 19 04           ORI     PB,$04			; set PB bit 2
+00000078: 01 24              LDAW    VV:24
+0000007A: C8                 JR      $0083
+0000007B: 64 19 08           ORI     PB,$08			; set PB bit 3
+0000007E: 64 09 FB           ANI     PB,$FB			; clear PB bit 21 
+00000081: 01 23              LDAW    VV:23
+00000083: 4D DA              MOV     TM0,A			; 
+;
+00000085: 48 62              SKNIT   FT1			; Set (1) by TIMER1 match signal.
+00000087: C3                 JR      $008B			; skip if not timer 1 interrupt/jump if timer 1
+00000088: 10                 EXA     				; just return
+00000089: AA                 EI      
+0000008A: 62                 RETI 
+;
+; timer 1 Handler   
+;
+0000008B: 01 25              LDAW    VV:25			; get FF25
+0000008D: 37 FF              LTI     A,$FF			; A-FF skip if borrow 
+0000008F: D0                 JR      $00A0			;   
+00000090: 27 00              GTI     A,$00			; skip if A>00
+00000092: C4                 JR      $0097
+00000093: 64 49 80           ONI     PB,$80			; test PB bit 7
+00000096: C9                 JR      $00A0
+00000097: 64 09 7F           ANI     PB,$7F			; clear PB bit 7
+0000009A: 64 19 02           ORI     PB,$02			; set PB bit 1
+0000009D: 01 26              LDAW    VV:26
+0000009F: C8                 JR      $00A8
+000000A0: 64 19 80           ORI     PB,$80			; set PB bit 7
+000000A3: 64 09 FD           ANI     PB,$FD			; clear PB bit 1
+000000A6: 01 25              LDAW    VV:25			
+000000A8: 4D DB              MOV     TM1,A
+000000AA: 10                 EXA     
+000000AB: AA                 EI      
+000000AC: 62                 RETI 
+;
+;----------------------------- how do we get here?-------------------------     
+000000AD: 48 61              SKNIT   FT0		; timer 0 
+000000AF: 00                 NOP     
+000000B0: 48 62              SKNIT   FT1		; timer 1
+000000B2: 00                 NOP     
+000000B3: 10                 EXA     
+000000B4: AA                 EI      
+000000B5: 62                 RETI 
+;
+;----------------------------- initialise -------------------------   
+
+; initialise stack pointer and V reg
+;
+000000B6: 04 FF FF           LXI     SP,$FFFF		; stack pointer at FFFF
+000000B9: 68 FF              MVI     V,$FF			; V = 00FF, points to top of memory (RAM)
+;
+; Initialise IO ports
+;
+000000BB: 69 08              MVI     A,$08
+000000BD: 4D D0              MOV     MM,A			; initialise PD  and PF mode
+000000BF: 10                 EXA     				
+000000C0: 68 FF              MVI     V,$FF			; V = 00FF, points to top of memory (RAM)  why is this done again?
+000000C2: 69 01              MVI     A,$01
+000000C4: 4D D3              MOV     MB,A			; initialise PB mode
+000000C6: 64 01 08           MVI     PB,$08			; set something?
+000000C9: 69 FF              MVI     A,$FF
+000000CB: 4D D1              MOV     MCC,A			; initialise PC mode
+;
+; initialise serial port
+;
+; SMH = 00001101 
+; bit7=0, not used
+; bit6=0, /sck disabled
+; bit5=0, IO interface disabled
+; bit4=0, search mode disabled
+; bit3=1, Rx enabled
+; bit2=1, Tx enabled
+; bit1=0, |
+; bit0=1, | internal clock = Fosc/384 = 20.83 kbaud (Asynchronous)
+;
+000000CD: 64 81 0D           MVI     SMH,$0D		 
+;
+; SML = 0100 1101 
+; bit7=0, |
+; bit6=1, | 1 stop bit
+; bit5=0, odd parity
+; bit4=0, parity disabled
+; bit3=1, |
+; bit2=1, | character length 8-bits
+; bit1=0, |
+; bit0=1, | clock rate x1
+;
+000000D0: 69 4D              MVI     A,$4D
+000000D2: 4D CA              MOV     SML,A
+;
+; timer/event counter operating mode
+;
+; ETMM = 0000 0100 
+; bit7=0, |
+; bit6=0, | CO1 output timing = Match between ECNT and ETM1
+; bit5=0, |
+; bit4=0, | CO0 output timing = Match between ECNT and ETM0 
+; bit3=0, |
+; bit2=1, | cleared on fall of ??
+; bit1=0, |
+; bit0=0, | internal clock /12
+;
+000000D4: 69 04              MVI     A,$04
+000000D6: 4D CC              MOV     ETMM,A
+;
+; timer/event counter output mode
+;
+; EOM = 1000 1000 
+; bit7=1, |
+; bit6=0, | LV1 set
+; bit5=0,   LV1 inversion disabled
+; bit4=0,   LV1 data output off
+; bit3=1, | 
+; bit2=0, | LV0 set
+; bit1=0,   LV0 inversion disabled
+; bit0=0,   LV0 data output off
+;
+000000D8: 64 83 88           MVI     EOM,$88
+000000DB: 64 9B 99           ORI     EOM,$99		;LV0,LV1 data output on
+;
+; timer mode
+;
+; TMM = 0010 0111 
+; bit7=0,   timer 1 count up
+; bit6=0, | 
+; bit5=1, | timer1 internal clk /12  
+; bit4=0,   timer 0 count up 
+; bit3=0, | 
+; bit2=1, | internal clock /384
+; bit1=1, |  
+; bit0=1, | timer f/f reset 
+;
+000000DE: 64 85 27           MVI     TMM,$27
+;
+; Timer 1, Timer 0 interval
+;
+000000E1: 69 80              MVI     A,$80			; roll over at 80h
+000000E3: 4D DA              MOV     TM0,A
+000000E5: 4D DB              MOV     TM1,A
+;
+; initialise RAM from FF00 to FFFFh with 00h
+;
+000000E7: 69 00              MVI     A,$00			; A <=0
+000000E9: 24 00 FF           LXI     DE,$FF00		; X uses DE, which is initialised as FF00h
+000000EC: 3C                 STAX    (DE+)		
+000000ED: 74 7D 00           EQI     E,$00			; check for roll over
+000000F0: FB                 JR      $00EC			; loop back if not finished
+;
+000000F1: 24 80 80           LXI     DE,$8080	 
+000000F4: 70 2E 23 FF        SDED    $FF23			; initialise FF23 = $8080 (2 x signed 8-bit)
+000000F8: 70 2E 25 FF        SDED    $FF25			; initialise FF25 = $8080
+000000FC: 24 00 80           LXI     DE,$8000
+000000FF: 70 2E 4D FF        SDED    $FF4D			; FF4D = 16-bit signed
+00000103: 70 2E 56 FF        SDED    $FF56			; FF56 = 16-bit signed
+00000107: 24 68 1F           LXI     DE,$1F68	
+0000010A: 70 2E 96 FF        SDED    $FF96			; FF96 = 1F68h (2 x 8-bit?)
+0000010E: 24 68 1F           LXI     DE,$1F68
+00000111: 70 2E 98 FF        SDED    $FF98			; FF98 = 1B16h
+00000115: 24 16 1B           LXI     DE,$1B16
+00000118: 70 2E 9A FF        SDED    $FF9A			; DE = FF9A
+0000011C: 71 9C FF           MVIW    VV:9C,$FF		; FF9C = FFh
+0000011F: 69 87              MVI     A,$87
+00000121: 4D D2              MOV     MA,A			; Port A direction
+00000123: 64 11 20           XRI     PB,$20
+;
+; A1:0 = config setting ??
+;
+00000126: 4C C0              MOV     A,PA			; read Port A data 
+00000128: 07 03              ANI     A,$03			; config bits (my ECU==02h)
+;
+0000012A: 70 79 40 FF        MOV     ($FF40),A		; save in (FF40)?
+0000012E: 57 02              OFFI    A,$02			; is A=2?
+00000130: 71 43 FF           MVIW    VV:43,$FF		; (==skipped) if config != 02 then FF43 <= FFh
+00000133: 57 01              OFFI    A,$01			; is A=1?
+00000135: 70 79 42 FF        MOV     ($FF42),A		; if config != 01 then FF42 <= A
+00000139: 48 25              SLL     A				; shift left A (==04h)
+;
+0000013B: 34 04 1A           LXI     HL,$1A04		; load HL with 1A04h
+0000013E: 60 C7              ADD     A,L			; 
+00000140: 1F                 MOV     L,A			; my ECU == HL+4 (1A08)
+00000141: 48 83              LDEAX   (HL)			; EA = 1A08
+00000143: B6                 DMOV    DE,EA			; move EA  to DE
+00000144: 48 82              LDEAX   (DE)			; load EA with (DE)
+00000146: B7                 DMOV    HL,EA			; move HL <- EA
+00000147: 70 3E 69 FF        SHLD    $FF69			; store HL into FF69
+00000151: 70 2E 3C FF        SDED    $FF3C			; FF3C = 1A08h
+00000155: 74 45 C0           ADI     E,$C0
+00000158: 74 54 00           ACI     D,$00
+0000015B: 70 2E 3E FF        SDED    $FF3E			; FF3E = 1A08+00C0 = 1AC8
+0000015F: 44 C5 00           LXI     EA,$00C5		; load C5h into EA = (1A08+C5)=1ACD
+00000162: 74 C6              DADD    EA,DE			; EA = EA + DE
+00000164: B6                 DMOV    DE,EA			; DE <- EA
+00000165: 70 2E A3 FF        SDED    $FFA3			; store contents in FFA3h
+;
+; Clear all interrupt flags
+; 
+00000169: 64 07 FF           MVI     MKL,$FF		; disable all interrupts
+0000016C: 64 06 FF           MVI     MKH,$FF
+0000016F: 48 60              SKNIT   NMI			; read all flags to clear
+00000171: 00                 NOP     
+00000172: 48 63              SKNIT   F1				; Set (1) by a rising edge input to the INT1 pin.
+00000174: 00                 NOP     
+00000175: 48 64              SKNIT   F2				; Set (1) by a falling edge input to the INT2 pin.
+00000177: 00                 NOP     
+00000178: 48 65              SKNIT   FE0			; Set (1) when timer/event counter ECNT and ETM0 register contents match.
+0000017A: 00                 NOP     
+0000017B: 48 66              SKNIT   FE1			; Set (1) when timer/event counter ECNT and ETM1 register contents match.
+0000017D: 00                 NOP     
+0000017E: 48 67              SKNIT   FEIN			; Set (1) by a falling edge of the timer/event countr input (CI input) or timer output (TO).
+00000180: 00                 NOP     
+00000181: 48 68              SKNIT   FAD			; Set (1) when A/D converter conversion values are transferred to the four registers CR0 to CR3.
+00000183: 00                 NOP     
+00000184: 48 69              SKNIT   FSR			; Set (1) when the serial interface receive buffer becomes full.
+00000186: 00                 NOP     
+00000187: 48 6A              SKNIT   FST			; Set (1) when the serial interface transmit buffer becomes empty.
+00000189: 00                 NOP     
+0000018A: 48 6C              SKNIT   OV				; Set (1) when the timer/event counter ECNT overflows.
+0000018C: 00                 NOP     
+0000018D: AA                 EI      
+0000018E: 64 06 FE           MVI     MKH,$FE		; disable interrupt again (bit 0 is not implemented)
+00000191: 64 07 FF           MVI     MKL,$FF
+00000194: 00                 NOP     
+;
+; doADCConversion - External A/D converter
+;
+00000195: 69 03              MVI     A,$03			
+00000197: 70 79 01 20        MOV     ($2001),A		; set up converter? 
+0000019B: 69 03              MVI     A,$03
+0000019D: 70 79 00 20        MOV     ($2000),A		; set up channel 3
+;
+000001A1: 64 80 10           MVI     ANM,$10	; Initialise internal A/D - dead code ????
+;
+000001A4: 69 02              MVI     A,$02
+000001A6: 40 39 09           CALL    $0939		; get ext ADC channel 3 - set to ch2
+000001A9: 70 3E 44 FF        SHLD    $FF44		; store HL in $FF44
+;
+000001AD: 69 04              MVI     A,$04		; get ADC ch2 set to ch4
+000001AF: 40 39 09           CALL    $0939		; GetExtADCdata
+000001B2: 70 3E 46 FF        SHLD    $FF46
+;
+000001B6: 70 2F 44 FF        LDED    $FF44
+000001BA: 0E                 MOV     A,H
+000001BB: 37 E6              LTI     A,$E6
+000001BD: 4E 36              JRE     $01F5
+000001BF: 27 1A              GTI     A,$1A
+000001C1: 4E 32              JRE     $01F5
+000001C3: 0C                 MOV     A,D
+000001C4: 37 E6              LTI     A,$E6
+000001C6: 4E 2D              JRE     $01F5
+000001C8: 27 1A              GTI     A,$1A
+000001CA: 4E 29              JRE     $01F5
+000001CC: A6                 DMOV    EA,DE
+000001CD: 74 E7              DSUB    EA,HL
+000001CF: 08                 MOV     A,EAH
+000001D0: 1A                 MOV     B,A
+000001D1: 70 2F 00 1A        LDED    $1A00				; default maybe?? (7017h)
+000001D5: A6                 DMOV    EA,DE
+000001D6: 48 3D              DIV     A
+000001D8: 09                 MOV     A,EAL				
+000001D9: 63 48              STAW    VV:48			
+000001DB: 1A                 MOV     B,A
+000001DC: 70 2F 44 FF        LDED    $FF44				; ADC channel 3?
+000001E0: 0C                 MOV     A,D
+000001E1: 48 2E              MUL     B
+000001E3: 48 A4              DSLL    EA
+000001E5: 48 A4              DSLL    EA
+000001E7: B6                 DMOV    DE,EA
+000001E8: 70 3F 02 1A        LHLD    $1A02				; (80BB) ??
+000001EC: A7                 DMOV    EA,HL
+000001ED: 74 E6              DSUB    EA,DE
+000001EF: 34 4A FF           LXI     HL,$FF4A
+000001F2: 48 93              STEAX   (HL)
+000001F4: CC                 JR      $0201
+000001F5: 69 4B              MVI     A,$4B
+000001F7: 63 48              STAW    VV:48
+000001F9: 44 00 00           LXI     EA,$0000
+000001FC: 34 4A FF           LXI     HL,$FF4A
+000001FF: 48 93              STEAX   (HL)
+00000201: AA                 EI      
+00000202: 69 04              MVI     A,$04				; get ch4 (MAP) set ch4?
+00000204: 70 79 00 20        MOV     ($2000),A		
+00000208: 69 06              MVI     A,$06				; ADC get ch4 set ch6
+0000020A: 40 39 09           CALL    $0939				;GetExtADCdata
+0000020D: 70 3E 30 FF        SHLD    $FF30				; MAP_RAW = FF30
+00000211: 70 6A 48 FF        MOV     B,($FF48)
+00000215: 0F                 MOV     A,L
+00000216: 48 2E              MUL     B
+00000218: 48 A4              DSLL    EA
+0000021A: 48 A4              DSLL    EA
+0000021C: 08                 MOV     A,EAH
+0000021D: 1B                 MOV     C,A
+0000021E: 0E                 MOV     A,H
+0000021F: 48 2E              MUL     B
+00000221: 48 A4              DSLL    EA
+00000223: 48 0A              SK      CY
+00000225: 48 A4              DSLL    EA
+00000227: 48 1A              SKN     CY
+00000229: D4                 JR      $023E
+0000022A: 6A 00              MVI     B,$00
+0000022C: 74 C5              DADD    EA,BC
+0000022E: 48 1A              SKN     CY
+00000230: CD                 JR      $023E
+00000231: 70 3F 4A FF        LHLD    $FF4A
+00000235: 74 C7              DADD    EA,HL
+00000237: 48 0A              SK      CY
+00000239: C7                 JR      $0241
+0000023A: 74 3E BB           LTI     H,$BB
+0000023D: C3                 JR      $0241
+0000023E: 44 00 FF           LXI     EA,$FF00
+00000241: 34 32 FF           LXI     HL,$FF32
+00000244: 48 93              STEAX   (HL)
+ ;get ch6 set ch5
+00000246: 69 05              MVI     A,$05				; ADC get ch6 set ch5
+00000248: 40 39 09           CALL    $0939				; GetExtADCdata
+0000024B: 0E                 MOV     A,H				; High reg of CTS 
+0000024C: 63 5E              STAW    VV:5E				; FF5E = CTS_RAW
+0000024E: 63 16              STAW    VV:16				; FF16 = CTS_RAW_2
+00000250: 6A 08              MVI     B,$08
+00000252: 70 2F 3E FF        LDED    $FF3E				; DE = ff3e 
+00000256: 40 49 09           CALL    $0949				; 2D table, offset in DE, index in B
+00000259: 40 57 09           CALL    $0957
+0000025C: 63 0E              STAW    VV:0E				; FF0E = CTS ????
+; ADC get ch5 set ch0 
+0000025E: 69 00              MVI     A,$00				; ADC get ch5 set ch0 ***************
+00000260: 40 39 09           CALL    $0939				; external A/D
+00000263: 70 3E 1F FF        SHLD    $FF1F				; TPS_RAW = FF1F
+00000267: 75 A5 00           EQIW    VV:A5,$00
+0000026A: 4E A1              JRE     $030D
+0000026C: 74 3E 16           LTI     H,$16
+0000026F: CC                 JR      $027C
+00000270: 74 3E 12           LTI     H,$12
+00000273: CE                 JR      $0282
+00000274: 71 0A FF           MVIW    VV:0A,$FF
+00000277: 71 0C 00           MVIW    VV:0C,$00
+0000027A: 4E 91              JRE     $030D
+0000027C: 69 00              MVI     A,$00
+0000027E: 70 79 0A FF        MOV     ($FF0A),A
+00000282: 75 09 00           EQIW    VV:09,$00
+00000285: 4E 86              JRE     $030D
+00000287: 75 0A 00           EQIW    VV:0A,$00
+0000028A: 4E 81              JRE     $030D
+0000028C: 75 0C 00           EQIW    VV:0C,$00
+0000028F: 4E 7C              JRE     $030D
+00000291: 48 C0              DMOV    EA,ECNT
+00000293: 70 2F 27 FF        LDED    $FF27
+00000297: 74 E6              DSUB    EA,DE
+00000299: 14 15 34           LXI     BC,$3415
+0000029C: 74 AD              DGT     EA,BC
+0000029E: 4E 78              JRE     $0318
+000002A0: 70 1F 3A FF        LBCD    $FF3A
+000002A4: A7                 DMOV    EA,HL
+000002A5: 74 B5              DSUBNB  EA,BC
+000002A7: 4E 64              JRE     $030D
+000002A9: 70 2F 3E FF        LDED    $FF3E			; DE = ff3e
+000002AD: AB 90              LDAX    (DE+$90)
+000002AF: 70 6A 16 FF        MOV     B,($FF16)		; B = MAP
+000002B3: 60 BA              LTA     A,B
+000002B5: 74 45 01           ADI     E,$01
+000002B8: 48 A4              DSLL    EA
+000002BA: 48 1A              SKN     CY
+000002BC: CC                 JR      $02C9
+000002BD: 48 A4              DSLL    EA
+000002BF: 48 1A              SKN     CY
+000002C1: C7                 JR      $02C9
+000002C2: B5                 DMOV    BC,EA
+000002C3: AB 9D              LDAX    (DE+$9D)
+000002C5: 60 32              SUBNB   B,A
+000002C7: 4E 44              JRE     $030D
+000002C9: 70 6A 16 FF        MOV     B,($FF16)		; B = MAP
+000002CD: 70 2F 3E FF        LDED    $FF3E			; DE = ff3e
+000002D1: AB A0              LDAX    (DE+$A0)
+000002D3: 60 2A              GTA     B,A
+000002D5: C6                 JR      $02DC
+000002D6: AB 9F              LDAX    (DE+$9F)
+000002D8: 60 3A              LTA     B,A
+000002DA: 1A                 MOV     B,A
+000002DB: CB                 JR      $02E7
+000002DC: AB A1              LDAX    (DE+$A1)
+000002DE: 60 2A              GTA     B,A
+000002E0: 1A                 MOV     B,A
+000002E1: 74 45 02           ADI     E,$02
+000002E4: 74 54 00           ACI     D,$00
+000002E7: AB A2              LDAX    (DE+$A2)
+000002E9: 60 42              ADD     B,A
+000002EB: AB A3              LDAX    (DE+$A3)
+000002ED: 48 2E              MUL     B					; EA = A*B
+000002EF: B5                 DMOV    BC,EA				; copy to BC
+000002F0: 48 C0              DMOV    EA,ECNT			; load EA with timer value
+000002F2: 74 C5              DADD    EA,BC				; move BC back to EA
+000002F4: B7                 DMOV    HL,EA				; copy EA to HL
+;
+000002F5: 48 D2              DMOV    ETM0,EA			; schedule a CO0 output compare - injector bank 1
+000002F7: 48 D3              DMOV    ETM1,EA			; schedule a CO1 output compare - injector bank 2
+;
+000002F9: 70 3E 61 FF        SHLD    $FF61				; back up EA to FF61
+000002FD: 70 3E 63 FF        SHLD    $FF63				; back up EA to FF63
+00000301: 64 83 44           MVI     EOM,$44
+00000304: 64 83 55           MVI     EOM,$55
+00000307: 64 83 88           MVI     EOM,$88
+0000030A: 71 0C FF           MVIW    VV:0C,$FF
+0000030D: 70 3E 3A FF        SHLD    $FF3A
+00000311: 48 C0              DMOV    EA,ECNT			; get timer value
+00000313: 24 27 FF           LXI     DE,$FF27			
+00000316: 48 92              STEAX   (DE)
+00000318: 69 07              MVI     A,$07				; ADC get ch0 set ch7?
+0000031A: 40 39 09           CALL    $0939				; external ADC?
+0000031D: 70 7E 13 FF        MOV     ($FF13),H
+00000321: 70 2F 3E FF        LDED    $FF3E				; DE = ff3e
+00000325: AB A6              LDAX    (DE+$A6)
+00000327: 60 BE              LTA     A,H
+00000329: 1E                 MOV     H,A
+0000032A: AB A7              LDAX    (DE+$A7)
+0000032C: 60 AE              GTA     A,H
+0000032E: 1E                 MOV     H,A
+0000032F: AB AA              LDAX    (DE+$AA)
+00000331: 1A                 MOV     B,A
+00000332: 0E                 MOV     A,H
+00000333: 48 2E              MUL     B
+00000335: B5                 DMOV    BC,EA
+00000336: 48 8B A8           LDEAX   (DE+$A8)
+00000339: 74 E5              DSUB    EA,BC
+0000033B: 48 A0              DSLR    EA
+0000033D: 48 A0              DSLR    EA
+0000033F: 48 A0              DSLR    EA
+00000341: 48 A0              DSLR    EA
+00000343: 24 17 FF           LXI     DE,$FF17
+00000346: 48 92              STEAX   (DE)
+;
+; Get_IAT
+;
+00000348: 69 01              MVI     A,$01				; ADC get ch7 set ch1
+0000034A: 40 39 09           CALL    $0939				; external ADC?
+0000034D: 0E                 MOV     A,H
+0000034E: 48 3A              NEGA    					; get twos complement
+00000350: 66 01              SUI     A,$01				; A = 1s complement
+
+00000352: 1E                 MOV     H,A				; mov A into H
+00000353: 70 2F 3E FF        LDED    $FF3E				; DE = ff3e
+;
+;
+00000357: 74 45 18           ADI     E,$18
+0000035A: 74 54 00           ACI     D,$00				; DE = 24 decimal
+0000035D: 6A 08              MVI     B,$08				; B = 8
+0000035F: 0E                 MOV     A,H				
+00000360: 40 49 09           CALL    $0949				; 2D table, offset in DE, index in B
+00000363: 70 79 37 FF        MOV     ($FF37),A			; copy result to FF37
+00000367: 40 57 09           CALL    $0957				; do something with result
+0000036A: 70 79 36 FF        MOV     ($FF36),A			; copy to FF36h
+;
+; internal ADC
+;
+0000036E: 4C C8              MOV     A,ANM
+00000370: 47 08              ONI     A,$08
+00000372: 4E F3              JRE     $0467
+00000374: 4C E0              MOV     A,CR0				;adc result register 0
+00000376: 1A                 MOV     B,A
+00000377: 4C E1              MOV     A,CR1				;adc result register 1
+00000379: 63 4C              STAW    VV:4C
+0000037B: 4C E2              MOV     A,CR2				;adc result register 2
+0000037D: 63 55              STAW    VV:55
+0000037F: 4C E3              MOV     A,CR3				;adc result register 3
+00000381: 63 38              STAW    VV:38
+00000383: 64 88 F7           ANI     ANM,$F7
+00000386: 54 A8 04           JMP     $04A8
+00000389: 4C E2              MOV     A,CR2
+0000038B: 1B                 MOV     C,A
+0000038C: 64 98 08           ORI     ANM,$08
+0000038F: 70 2F 3E FF        LDED    $FF3E				; DE = ff3e
+00000393: 69 00              MVI     A,$00
+00000395: 74 2B 50           GTI     C,$50
+00000398: AB AC              LDAX    (DE+$AC)
+0000039A: 70 79 11 FF        MOV     ($FF11),A
+0000039E: 54 0F 05           JMP     $050F
+000003A1: 70 2F 14 FF        LDED    $FF14
+000003A5: 44 30 75           LXI     EA,$7530
+000003A8: 74 B6              DSUBNB  EA,DE
+000003AA: D3                 JR      $03BE
+000003AB: 70 69 2D FF        MOV     A,($FF2D)
+000003AF: 70 6B 11 FF        MOV     C,($FF11)
+000003B3: 70 6C 65 FF        MOV     D,($FF65)
+000003B7: 60 9B              ORA     A,C
+000003B9: 60 9C              ORA     A,D
+000003BB: 48 1C              SKN     Z
+000003BD: DF                 JR      $03DD
+000003BE: 65 42 00           NEIW    VV:42,$00		; not equal immediate
+000003C1: CE                 JR      $03D0
+000003C2: 24 4C FF           LXI     DE,$FF4C
+000003C5: 40 A2 0A           CALL    $0AA2
+000003C8: 24 55 FF           LXI     DE,$FF55
+000003CB: 40 A2 0A           CALL    $0AA2
+000003CE: 4E 7D              JRE     $044D
+000003D0: 24 00 80           LXI     DE,$8000
+000003D3: 70 2E 4D FF        SDED    $FF4D
+000003D7: 70 2E 56 FF        SDED    $FF56
+000003DB: 4E 70              JRE     $044D
+000003DD: 69 00              MVI     A,$00
+000003DF: 70 2F 14 FF        LDED    $FF14
+000003E3: 70 3F A3 FF        LHLD    $FFA3		; FFA3 = 1ACD?
+000003E7: 48 8F 00           LDEAX   (HL+$00)
+000003EA: 74 AE              DGT     EA,DE
+000003EC: C8                 JR      $03F5
+000003ED: 37 47              LTI     A,$47
+000003EF: C5                 JR      $03F5
+000003F0: 46 18              ADI     A,$18
+000003F2: 32                 INX     HL
+000003F3: 32                 INX     HL
+000003F4: F2                 JR      $03E7
+;
+000003F5: 63 A1              STAW    VV:A1
+000003F7: 1B                 MOV     C,A
+000003F8: 69 00              MVI     A,$00
+000003FA: 70 3F A3 FF        LHLD    $FFA3
+000003FE: 70 2F 9F FF        LDED    $FF9F
+00000402: 48 8F 06           LDEAX   (HL+$06)
+00000405: 74 BE              DLT     EA,DE
+00000407: C8                 JR      $0410
+00000408: 37 05              LTI     A,$05
+0000040A: C5                 JR      $0410
+0000040B: 46 02              ADI     A,$02
+0000040D: 32                 INX     HL
+0000040E: 32                 INX     HL
+0000040F: F2                 JR      $0402
+00000410: 63 A2              STAW    VV:A2
+00000412: 60 C3              ADD     A,C
+00000414: 63 9E              STAW    VV:9E
+00000416: 44 00 00           LXI     EA,$0000
+00000419: 19                 MOV     EAL,A
+0000041A: 70 3F A3 FF        LHLD    $FFA3
+0000041E: 74 C7              DADD    EA,HL
+00000420: B7                 DMOV    HL,EA
+00000421: 24 00 FF           LXI     DE,$FF00
+00000424: 48 8F 0F           LDEAX   (HL+$0F)
+00000427: 48 9B 96           STEAX   (DE+$96)
+0000042A: 40 27 0B           CALL    $0B27			; add 8 to HL
+0000042D: 48 8F 0F           LDEAX   (HL+$0F)
+00000430: 48 9B 98           STEAX   (DE+$98)
+00000433: 40 27 0B           CALL    $0B27
+00000436: 48 8F 0F           LDEAX   (HL+$0F)
+00000439: 48 9B 9A           STEAX   (DE+$9A)
+0000043C: 75 93 01           EQIW    VV:93,$01
+0000043F: 4F 7D              JRE     $03BE
+00000441: 24 4C FF           LXI     DE,$FF4C
+00000444: 40 6E 09           CALL    $096E
+00000447: 24 55 FF           LXI     DE,$FF55
+0000044A: 40 6E 09           CALL    $096E
+0000044D: 00                 NOP     
+0000044E: 01 4E              LDAW    VV:4E
+00000450: 63 23              STAW    VV:23
+00000452: 48 3A              NEGA    
+00000454: 51                 DCR     A
+00000455: 00                 NOP     
+00000456: 63 24              STAW    VV:24
+00000458: 01 57              LDAW    VV:57
+0000045A: 63 25              STAW    VV:25
+0000045C: 48 3A              NEGA    
+0000045E: 51                 DCR     A
+0000045F: 00                 NOP     
+00000460: 63 26              STAW    VV:26
+00000462: 64 0F F8           ANI     MKL,$F8
+00000465: 4E A8              JRE     $050F
+00000467: 70 69 9C FF        MOV     A,($FF9C)
+0000046B: 27 80              GTI     A,$80
+0000046D: DA                 JR      $0488
+0000046E: 69 00              MVI     A,$00
+00000470: 63 9C              STAW    VV:9C
+00000472: 70 6B 16 FF        MOV     C,($FF16)		; C =MAP
+00000476: 70 2F A3 FF        LDED    $FFA3
+0000047A: AB 0E              LDAX    (DE+$0E)
+0000047C: 60 BB              LTA     A,C
+0000047E: C5                 JR      $0484
+0000047F: AB 0D              LDAX    (DE+$0D)
+00000481: 63 9D              STAW    VV:9D
+00000483: C4                 JR      $0488
+00000484: AB 0C              LDAX    (DE+$0C)
+00000486: 63 9D              STAW    VV:9D
+00000488: 4C E3              MOV     A,CR3
+0000048A: 6A FF              MVI     B,$FF
+0000048C: 27 80              GTI     A,$80
+0000048E: 4E 11              JRE     $04A1
+00000490: 65 42 00           NEIW    VV:42,$00
+00000493: 4E 0C              JRE     $04A1
+00000495: 70 69 16 FF        MOV     A,($FF16)		; C = MAP
+00000499: 70 6B 9D FF        MOV     C,($FF9D)
+0000049D: 60 AB              GTA     A,C
+0000049F: 6A 00              MVI     B,$00
+000004A1: 70 7A 65 FF        MOV     ($FF65),B
+000004A5: 54 89 03           JMP     $0389
+000004A8: 70 3F 3E FF        LHLD    $FF3E			; load DE direct
+000004AC: 74 3A 80           LTI     B,$80
+000004AF: DD                 JR      $04CD
+000004B0: 71 A5 00           MVIW    VV:A5,$00
+000004B3: 70 6A 16 FF        MOV     B,($FF16)		; B=MAP
+000004B7: AF C1              LDAX    (HL+$C1)
+000004B9: 60 2A              GTA     B,A
+000004BB: 4E 08              JRE     $04C5
+000004BD: 70 69 76 FF        MOV     A,($FF76)
+000004C1: 37 01              LTI     A,$01
+000004C3: 4E 0F              JRE     $04D4
+000004C5: 6A 00              MVI     B,$00
+000004C7: 70 7A 08 FF        MOV     ($FF08),B
+000004CB: 4E 3F              JRE     $050C
+000004CD: 71 A5 FF           MVIW    VV:A5,$FF
+000004D0: AF C3              LDAX    (HL+$C3)
+000004D2: 63 76              STAW    VV:76
+000004D4: 70 6A FF 00        MOV     B,($00FF)
+000004D8: 70 7A 08 FF        MOV     ($FF08),B
+000004DC: 64 09 BF           ANI     PB,$BF
+000004DF: 70 2F 3E FF        LDED    $FF3E				; DE = ff3e
+000004E3: 74 45 30           ADI     E,$30
+000004E6: 74 54 00           ACI     D,$00
+000004E9: 6A 18              MVI     B,$18
+000004EB: 70 69 5E FF        MOV     A,($FF5E)			; A = MAP
+000004EF: 40 49 09           CALL    $0949				; 2D table, offset in DE, index in B
+000004F2: AB 18              LDAX    (DE+$18)
+000004F4: 63 0F              STAW    VV:0F
+000004F6: 70 6A 16 FF        MOV     B,($FF16)			; B = MAP
+000004FA: AF C2              LDAX    (HL+$C2)
+000004FC: 60 2A              GTA     B,A
+000004FE: 4E 0A              JRE     $050A
+00000500: AF C4              LDAX    (HL+$C4)
+00000502: 1A                 MOV     B,A
+00000503: 70 69 0F FF        MOV     A,($FF0F)
+00000507: 48 2E              MUL     B
+00000509: 08                 MOV     A,EAH
+0000050A: 63 10              STAW    VV:10
+0000050C: 54 A1 03           JMP     $03A1
+0000050F: 44 00 00           LXI     EA,$0000
+00000512: 69 04              MVI     A,$04				; ADC channel 4
+00000514: 40 39 09           CALL    $0939				; external ADC?
+00000517: 70 69 0A FF        MOV     A,($FF0A)
+0000051B: 47 FF              ONI     A,$FF
+0000051D: 4E 1F              JRE     $053E
+0000051F: 60 E6              SUB     A,H
+00000521: 19                 MOV     EAL,A
+00000522: 1A                 MOV     B,A
+00000523: 70 2F 3E FF        LDED    $FF3E				; DE = ff3e
+00000527: AB BD              LDAX    (DE+$BD)
+00000529: 60 BA              LTA     A,B
+0000052B: C9                 JR      $0535
+0000052C: 1F                 MOV     L,A
+0000052D: AB BE              LDAX    (DE+$BE)
+0000052F: 60 67              SUB     L,A
+00000531: 0F                 MOV     A,L
+00000532: 70 41              EADD    EA,A
+00000534: CC                 JR      $0541
+00000535: AB BE              LDAX    (DE+$BE)
+00000537: 60 32              SUBNB   B,A
+00000539: 6A 00              MVI     B,$00
+0000053B: 70 42              EADD    EA,B
+0000053D: C3                 JR      $0541
+0000053E: 44 80 00           LXI     EA,$0080
+00000541: 34 7F FF           LXI     HL,$FF7F
+00000544: 48 93              STEAX   (HL)
+00000546: 64 0F 7F           ANI     MKL,$7F
+;
+;
+00000549: 64 11 20           XRI     PB,$20			; xor pb bit5 (watchdog?)
+0000054C: 4E 37              JRE     $0585			; jump to diagnostics/test
+;
+0000054E: 48 4C              SKIT    OV
+00000550: 54 01 02           JMP     $0201
+00000553: 01 2F              LDAW    VV:2F
+00000555: 26 01              ADINC   A,$01
+00000557: 66 01              SUI     A,$01
+00000559: 63 2F              STAW    VV:2F
+0000055B: 20 6E              INRW    VV:6E
+0000055D: 00                 NOP     
+0000055E: 27 1E              GTI     A,$1E
+00000560: 54 95 01           JMP     $0195
+00000563: 64 19 10           ORI     PB,$10
+00000566: 75 8A 00           EQIW    VV:8A,$00
+00000569: 54 95 01           JMP     $0195
+0000056C: 69 00              MVI     A,$00
+0000056E: 34 01 00           LXI     HL,$0001
+00000571: 44 FF 1F           LXI     EA,$1FFF			; end of data memory ??
+00000574: B6                 DMOV    DE,EA
+00000575: 70 C6              ADDX    (DE-)
+00000577: 64 11 20           XRI     PB,$20
+0000057A: 74 B7              DSUBNB  EA,HL
+0000057C: C1                 JR      $057E
+0000057D: F7                 JR      $0575
+0000057E: 63 39              STAW    VV:39
+00000580: 20 8A              INRW    VV:8A
+00000582: 54 95 01           JMP     $0195
+;
+;------------------ Diagnostics ----------------------------------------
+;
+00000585: 64 99 08           ORI     SMH,$08				; enable Rx
+00000588: 48 49              SKIT    FSR					; test serial interrupt flag
+0000058A: 4F C2              JRE     $054E					; return if no data
+0000058C: 4C D9              MOV     A,RXB					; else get the rx byte
+0000058E: 6C FF              MVI     D,$FF					; D <= FFh
+00000590: 1D                 MOV     E,A					; move the Rx byte into E
+00000591: 70 2E 66 FF        SDED    $FF66					; save ED in FF66
+00000595: 27 EF              GTI     A,$EF					; if A<EFh then skip;
+00000597: DF                 JR      $05B7					
+; execute if A>EFh (???)
+00000598: 07 0F              ANI     A,$0F					; clear high nibble
+0000059A: 1D                 MOV     E,A					; back up in E
+0000059B: 69 00              MVI     A,$00					; clear A
+0000059D: 18                 MOV     EAH,A					; clear the high byte of the 16-bit acc
+0000059E: 70 69 78 FF        MOV     A,($FF78)				; move the contents of FF78 into A
+000005A2: 19                 MOV     EAL,A					; move A into the low byte of the 16-bit acc
+000005A3: 0D                 MOV     A,E					; move E into A
+000005A4: 70 61              ESUB    EA,A					; EA - A (compare)
+000005A6: 48 0C              SK      Z						; skip if equal
+000005A8: CE                 JR      $05B7
+;
+000005A9: 20 78              INRW    VV:78
+000005AB: 0D                 MOV     A,E
+000005AC: 17 F0              ORI     A,$F0						; set the top bits
+000005AE: 4D D8              MOV     TXB,A						; transmit A
+000005B0: 75 78 03           EQIW    VV:78,$03					
+000005B3: D3                 JR      $05C7
+000005B4: 54 2E 0B           JMP     $0B2E						; call the serial handler
+; transmit a byte from DE
+000005B7: 69 00              MVI     A,$00						; clear A
+000005B9: 70 79 78 FF        MOV     ($FF78),A					; fetch from FF78?
+000005BD: 64 99 04           ORI     SMH,$04					; Tx enable
+000005C0: 70 2F 66 FF        LDED    $FF66						; retrieve data from FF66h
+000005C4: 2A                 LDAX    (DE)						; A = contents of address pointed to by FF66h
+000005C5: 4D D8              MOV     TXB,A						; transmit A
+000005C7: 4F 85              JRE     $054E						; return to main prog
+;
+; ;------------------ CAS service routine ??? ----------------------------------------
+;
+000005C9: 71 93 01           MVIW    VV:93,$01					; set flag FF93 bit0 - event occurred
+000005CC: 64 11 20           XRI     PB,$20						; toggle PB5 ??
+000005CF: 04 FF FF           LXI     SP,$FFFF					; stack pointer to top of memory
+000005D2: 48 C0              DMOV    EA,ECNT					; move the event counter to EA
+000005D4: 6D 00              MVI     E,$00						; clear MS byte
+000005D6: B5                 DMOV    BC,EA						; and copy to BC
+000005D7: 70 69 2F FF        MOV     A,($FF2F)					; get contents of FF2F and put in A
+000005DB: 48 C1              DMOV    EA,ECPT					; get the Event Capture Register
+000005DD: 48 4C              SKIT    OV							
+000005DF: CB                 JR      $05EB						; skipped if overflow interrupt set
+000005E0: 6D 01              MVI     E,$01						; E <= $01
+000005E2: 74 BD              DLT     EA,BC						; EA - BC
+000005E4: C6                 JR      $05EB						; skipped if EA<BC
+000005E5: 41                 INR     A							
+000005E6: 48 1C              SKN     Z
+000005E8: 51                 DCR     A
+000005E9: 6D 00              MVI     E,$00						; zero CAS value
+;
+; CAS overflow
+;
+000005EB: 70 7D 2F FF        MOV     ($FF2F),E					; back up capture value
+000005EF: 48 21              SLR     A							; A/2 (Shift logical right through carry)
+000005F1: 48 B0              DRLR    EA							; rotate logical right
+000005F3: 70 2F 29 FF        LDED    $FF29						
+000005F7: 67 01              NEI     A,$01
+000005F9: C4                 JR      $05FE
+000005FA: 67 00              NEI     A,$00
+000005FC: C8                 JR      $0605
+000005FD: C3                 JR      $0601
+000005FE: 74 B6              DSUBNB  EA,DE
+00000600: C6                 JR      $0607
+00000601: 44 FF FF           LXI     EA,$FFFF
+00000604: C2                 JR      $0607
+00000605: 74 E6              DSUB    EA,DE
+00000607: 24 14 FF           LXI     DE,$FF14
+0000060A: 48 92              STEAX   (DE)
+0000060C: 48 C1              DMOV    EA,ECPT				; get the Event Capture Register
+0000060E: 48 A0              DSLR    EA						; divide by two
+00000610: 48 9B 15           STEAX   (DE+$15)
+00000613: 70 2F 32 FF        LDED    $FF32
+00000617: A6                 DMOV    EA,DE
+00000618: 34 40 74           LXI     HL,$7440
+0000061B: 74 BF              DLT     EA,HL
+0000061D: C9                 JR      $0627
+0000061E: 34 40 1F           LXI     HL,$1F40
+00000621: 74 B7              DSUBNB  EA,HL
+00000623: 44 00 00           LXI     EA,$0000
+00000626: C7                 JR      $062E
+00000627: 48 A0              DSLR    EA						; divide by two
+00000629: 34 E0 1A           LXI     HL,$1AE0
+0000062C: 74 C7              DADD    EA,HL
+0000062E: 08                 MOV     A,EAH
+0000062F: 6A C3              MVI     B,$C3
+00000631: 48 2E              MUL     B
+00000633: 08                 MOV     A,EAH
+00000634: 37 70              LTI     A,$70
+00000636: 69 70              MVI     A,$70
+00000638: 1A                 MOV     B,A
+00000639: 07 70              ANI     A,$70
+0000063B: 74 0A 0F           ANI     B,$0F
+0000063E: 63 1A              STAW    VV:1A
+00000640: 70 7A 1B FF        MOV     ($FF1B),B
+00000644: 70 2F 3E FF        LDED    $FF3E				; DE = ff3e
+00000648: 74 45 30           ADI     E,$30
+0000064B: 74 54 00           ACI     D,$00
+0000064E: 6A 18              MVI     B,$18
+00000650: 70 69 5E FF        MOV     A,($FF5E)		; A=MAP
+00000654: 40 49 09           CALL    $0949			; 2D table, offset in DE, index in B
+00000657: AB 30              LDAX    (DE+$30)
+00000659: 63 7A              STAW    VV:7A
+0000065B: AB 48              LDAX    (DE+$48)
+0000065D: 63 7B              STAW    VV:7B
+0000065F: 69 05              MVI     A,$05
+00000661: 70 79 00 20        MOV     ($2000),A
+00000665: 69 04              MVI     A,$04			; ADC channel 4?
+00000667: 40 39 09           CALL    $0939			; external ADC?
+0000066A: A7                 DMOV    EA,HL
+0000066B: 48 A0              DSLR    EA
+0000066D: 48 A0              DSLR    EA
+0000066F: 48 A0              DSLR    EA
+00000671: 48 A0              DSLR    EA
+00000673: 48 A0              DSLR    EA
+00000675: 48 A0              DSLR    EA
+00000677: B7                 DMOV    HL,EA
+00000678: 75 0A 00           EQIW    VV:0A,$00
+0000067B: C5                 JR      $0681
+0000067C: 01 A5              LDAW    VV:A5
+0000067E: 67 00              NEI     A,$00
+00000680: CE                 JR      $068F
+00000681: 70 3E 74 FF        SHLD    $FF74
+00000685: 44 00 04           LXI     EA,$0400
+00000688: 34 1D FF           LXI     HL,$FF1D
+0000068B: 48 93              STEAX   (HL)
+0000068D: 4E AD              JRE     $073C
+0000068F: 70 2F 88 FF        LDED    $FF88
+00000693: 74 E6              DSUB    EA,DE
+00000695: 09                 MOV     A,EAL
+00000696: 48 1A              SKN     CY
+00000698: C5                 JR      $069E
+00000699: 27 02              GTI     A,$02
+0000069B: C7                 JR      $06A3
+0000069C: A7                 DMOV    EA,HL
+0000069D: CA                 JR      $06A8
+0000069E: 37 FD              LTI     A,$FD
+000006A0: C2                 JR      $06A3
+000006A1: A7                 DMOV    EA,HL
+000006A2: C5                 JR      $06A8
+;
+; investigate
+;
+000006A3: 70 3F 88 FF        LHLD    $FF88
+000006A7: A7                 DMOV    EA,HL
+000006A8: 24 88 FF           LXI     DE,$FF88
+000006AB: 48 92              STEAX   (DE)
+000006AD: 70 2F 3E FF        LDED    $FF3E			; DE = ff3e
+000006B1: 01 0E              LDAW    VV:0E
+000006B3: 74 45 90           ADI     E,$90
+000006B6: 74 54 00           ACI     D,$00
+000006B9: 70 AA              GTAX    (DE)
+000006BB: C7                 JR      $06C3
+000006BC: 74 45 01           ADI     E,$01
+000006BF: 74 54 00           ACI     D,$00
+000006C2: C6                 JR      $06C9
+000006C3: 74 45 02           ADI     E,$02
+000006C6: 74 54 00           ACI     D,$00
+000006C9: 70 1F 74 FF        LBCD    $FF74
+000006CD: 74 BD              DLT     EA,BC
+000006CF: D0                 JR      $06E0
+000006D0: 74 45 02           ADI     E,$02
+000006D3: 74 54 00           ACI     D,$00
+000006D6: 71 68 FF           MVIW    VV:68,$FF
+000006D9: A5                 DMOV    EA,BC
+000006DA: 74 E7              DSUB    EA,HL
+000006DC: 71 0C 00           MVIW    VV:0C,$00
+000006DF: C5                 JR      $06E5
+000006E0: 74 E5              DSUB    EA,BC
+000006E2: 71 68 00           MVIW    VV:68,$00
+000006E5: B5                 DMOV    BC,EA
+000006E6: 74 7A 00           EQI     B,$00
+000006E9: 6B FF              MVI     C,$FF
+000006EB: 2A                 LDAX    (DE)
+000006EC: 75 68 00           EQIW    VV:68,$00
+000006EF: C5                 JR      $06F5
+000006F0: 01 7B              LDAW    VV:7B
+000006F2: 48 2F              MUL     C
+000006F4: C2                 JR      $06F7
+000006F5: 48 2F              MUL     C
+000006F7: 08                 MOV     A,EAH
+000006F8: 1A                 MOV     B,A
+000006F9: AB 08              LDAX    (DE+$08)
+000006FB: 65 68 00           NEIW    VV:68,$00
+000006FE: 01 7A              LDAW    VV:7A
+00000700: 60 AA              GTA     A,B
+00000702: 18                 MOV     EAH,A
+00000703: 48 A0              DSLR    EA
+00000705: 48 A0              DSLR    EA
+00000707: 48 A0              DSLR    EA
+00000709: 65 68 00           NEIW    VV:68,$00
+0000070C: C7                 JR      $0714
+0000070D: B7                 DMOV    HL,EA
+0000070E: 44 00 04           LXI     EA,$0400
+00000711: 74 E7              DSUB    EA,HL
+00000713: C5                 JR      $0719
+00000714: 34 00 04           LXI     HL,$0400
+00000717: 74 C7              DADD    EA,HL
+00000719: 34 1D FF           LXI     HL,$FF1D
+0000071C: 48 93              STEAX   (HL)
+0000071E: AB 04              LDAX    (DE+$04)
+00000720: 48 2F              MUL     C
+00000722: B6                 DMOV    DE,EA
+00000723: 48 8F 56           LDEAX   (HL+$56)
+00000726: 70 69 75 FF        MOV     A,($FF75)
+0000072A: 65 68 00           NEIW    VV:68,$00
+0000072D: C5                 JR      $0733
+0000072E: 74 E6              DSUB    EA,DE
+00000730: 76 00              SBI     A,$00
+00000732: C4                 JR      $0737
+00000733: 74 C6              DADD    EA,DE
+00000735: 56 00              ACI     A,$00
+00000737: 48 9F 56           STEAX   (HL+$56)
+0000073A: 63 75              STAW    VV:75
+0000073C: 75 0D 00           EQIW    VV:0D,$00
+0000073F: 4E F1              JRE     $0832
+00000741: 75 2D 00           EQIW    VV:2D,$00
+00000744: 4E EC              JRE     $0832
+00000746: 01 0E              LDAW    VV:0E
+00000748: 44 00 00           LXI     EA,$0000
+0000074B: 19                 MOV     EAL,A
+0000074C: 01 10              LDAW    VV:10
+0000074E: 75 08 00           EQIW    VV:08,$00
+00000751: 01 0F              LDAW    VV:0F
+00000753: 70 41              EADD    EA,A
+00000755: 48 A4              DSLL    EA
+00000757: 48 A4              DSLL    EA
+00000759: 01 36              LDAW    VV:36			;get contents of ff36 - IAT ???
+0000075B: 70 41              EADD    EA,A
+0000075D: 48 A4              DSLL    EA
+0000075F: 48 A4              DSLL    EA
+00000761: 48 A4              DSLL    EA
+00000763: 48 A4              DSLL    EA
+00000765: 48 A4              DSLL    EA
+00000767: 48 1A              SKN     CY
+00000769: 44 FF FF           LXI     EA,$FFFF
+0000076C: B7                 DMOV    HL,EA
+0000076D: 24 4D FF           LXI     DE,$FF4D
+00000770: 65 43 00           NEIW    VV:43,$00
+00000773: 24 56 FF           LXI     DE,$FF56
+00000776: 48 82              LDEAX   (DE)
+00000778: 48 A4              DSLL    EA
+0000077A: B5                 DMOV    BC,EA
+0000077B: 70 2F 1D FF        LDED    $FF1D
+0000077F: A6                 DMOV    EA,DE
+00000780: 48 1A              SKN     CY
+00000782: C8                 JR      $078B
+00000783: 0A                 MOV     A,B
+00000784: 48 3A              NEGA    
+00000786: 51                 DCR     A
+00000787: 00                 NOP     
+00000788: 70 61              ESUB    EA,A
+0000078A: C2                 JR      $078D
+0000078B: 70 42              EADD    EA,B
+0000078D: 01 11              LDAW    VV:11
+0000078F: 70 41              EADD    EA,A
+00000791: 70 2F 7F FF        LDED    $FF7F
+00000795: 74 C6              DADD    EA,DE
+00000797: 69 00              MVI     A,$00
+00000799: 75 0A FF           EQIW    VV:0A,$FF
+0000079C: C6                 JR      $07A3
+0000079D: 65 42 00           NEIW    VV:42,$00
+000007A0: C2                 JR      $07A3
+000007A1: 69 40              MVI     A,$40
+000007A3: 70 61              ESUB    EA,A
+000007A5: 48 A4              DSLL    EA
+000007A7: 48 A4              DSLL    EA
+000007A9: 48 A4              DSLL    EA
+000007AB: 48 A4              DSLL    EA
+000007AD: 48 1A              SKN     CY
+000007AF: 44 FF FF           LXI     EA,$FFFF
+000007B2: 40 B9 0A           CALL    $0AB9
+000007B5: 70 2E 00 FF        SDED    $FF00
+000007B9: 40 D0 0A           CALL    $0AD0
+000007BC: B7                 DMOV    HL,EA
+000007BD: 70 3E 9F FF        SHLD    $FF9F
+000007C1: 70 3F 00 FF        LHLD    $FF00
+000007C5: 40 B9 0A           CALL    $0AB9
+000007C8: 48 A4              DSLL    EA
+000007CA: 48 0A              SK      CY
+000007CC: 48 A4              DSLL    EA
+000007CE: 48 1A              SKN     CY
+000007D0: 44 FF FF           LXI     EA,$FFFF
+000007D3: 70 3F 69 FF        LHLD    $FF69
+000007D7: 40 B9 0A           CALL    $0AB9
+000007DA: 48 A4              DSLL    EA
+000007DC: 48 1A              SKN     CY
+000007DE: 44 FF FF           LXI     EA,$FFFF
+000007E1: 70 3F 17 FF        LHLD    $FF17
+000007E5: 74 C7              DADD    EA,HL
+000007E7: 69 0B              MVI     A,$0B
+000007E9: 70 41              EADD    EA,A
+000007EB: 48 1A              SKN     CY
+000007ED: 44 FF FF           LXI     EA,$FFFF
+000007F0: B7                 DMOV    HL,EA
+000007F1: 70 3E 6B FF        SHLD    $FF6B
+000007F5: 48 C0              DMOV    EA,ECNT
+000007F7: 74 C7              DADD    EA,HL
+000007F9: B7                 DMOV    HL,EA
+000007FA: 65 43 00           NEIW    VV:43,$00
+000007FD: D6                 JR      $0814
+000007FE: 70 3E 61 FF        SHLD    $FF61
+00000802: 48 D2              DMOV    ETM0,EA		; schedule a CO0 output compare
+00000804: 64 9B 04           ORI     EOM,$04
+00000807: 64 9B 05           ORI     EOM,$05
+0000080A: 64 8B F0           ANI     EOM,$F0
+0000080D: 64 9B 08           ORI     EOM,$08
+00000810: 71 43 00           MVIW    VV:43,$00
+00000813: DE                 JR      $0832
+00000814: 70 3E 63 FF        SHLD    $FF63
+00000818: 48 D3              DMOV    ETM1,EA		; schedule a CO1 output compare
+0000081A: 64 9B 40           ORI     EOM,$40
+0000081D: 64 9B 50           ORI     EOM,$50
+00000820: 64 8B 0F           ANI     EOM,$0F
+00000823: 64 9B 80           ORI     EOM,$80
+00000826: 71 43 FF           MVIW    VV:43,$FF
+00000829: 70 6A 76 FF        MOV     B,($FF76)
+0000082D: 52                 DCR     B
+0000082E: 70 7A 76 FF        MOV     ($FF76),B
+00000832: AA                 EI      
+00000833: 70 3F 3C FF        LHLD    $FF3C
+00000837: 74 47 80           ADI     L,$80
+0000083A: 74 56 00           ACI     H,$00
+0000083D: 69 0F              MVI     A,$0F
+0000083F: 70 1F 14 FF        LBCD    $FF14
+00000843: 00                 NOP     
+00000844: 00                 NOP     
+00000845: 00                 NOP     
+00000846: 48 83              LDEAX   (HL)
+00000848: 74 E5              DSUB    EA,BC
+0000084A: 48 0A              SK      CY
+0000084C: D1                 JR      $085E
+0000084D: 51                 DCR     A
+0000084E: 67 0F              NEI     A,$0F
+00000850: C7                 JR      $0858
+00000851: 74 47 04           ADI     L,$04
+00000854: 74 56 00           ACI     H,$00
+00000857: EE                 JR      $0846
+00000858: 69 00              MVI     A,$00
+0000085A: 63 19              STAW    VV:19
+0000085C: 4E 23              JRE     $0881
+0000085E: 63 19              STAW    VV:19
+00000860: 67 0F              NEI     A,$0F
+00000862: 44 00 00           LXI     EA,$0000
+00000865: AF 02              LDAX    (HL+$02)
+00000867: 77 80              EQI     A,$80
+00000869: C9                 JR      $0873
+0000086A: 48 A0              DSLR    EA
+0000086C: 48 A0              DSLR    EA
+0000086E: 48 A0              DSLR    EA
+00000870: 48 A0              DSLR    EA
+00000872: C5                 JR      $0878
+00000873: 67 00              NEI     A,$00
+00000875: C2                 JR      $0878
+00000876: 08                 MOV     A,EAH
+00000877: C1                 JR      $0879
+00000878: 09                 MOV     A,EAL
+00000879: 1A                 MOV     B,A
+0000087A: AF 03              LDAX    (HL+$03)
+0000087C: 48 2E              MUL     B
+0000087E: 08                 MOV     A,EAH
+0000087F: 07 0F              ANI     A,$0F
+00000881: 63 1C              STAW    VV:1C
+00000883: 70 3F 3E FF        LHLD    $FF3E				; Load HL direct
+00000887: 70 2F 14 FF        LDED    $FF14				; load DE direct
+0000088B: 48 8F B5           LDEAX   (HL+$B5)
+0000088E: 74 B6              DSUBNB  EA,DE
+00000890: CD                 JR      $089E
+00000891: B6                 DMOV    DE,EA
+00000892: 48 8F B7           LDEAX   (HL+$B7)
+00000895: 74 BE              DLT     EA,DE
+00000897: 4E 54              JRE     $08ED
+00000899: 71 0D FF           MVIW    VV:0D,$FF
+0000089C: 4E 4F              JRE     $08ED
+0000089E: 71 0D 00           MVIW    VV:0D,$00
+000008A1: 70 3F 3E FF        LHLD    $FF3E				; Load HL direct
+000008A5: AF AF              LDAX    (HL+$AF)
+000008A7: 74 A8 16           GTAW    VV:16
+000008AA: 4E 37              JRE     $08E3
+000008AC: 65 0A 00           NEIW    VV:0A,$00
+000008AF: 4E 32              JRE     $08E3
+000008B1: 75 6D 00           EQIW    VV:6D,$00
+000008B4: CA                 JR      $08BF
+000008B5: AF B0              LDAX    (HL+$B0)
+000008B7: 74 B8 6E           LTAW    VV:6E
+000008BA: 4E 2D              JRE     $08E9
+000008BC: 71 6D FF           MVIW    VV:6D,$FF
+000008BF: 70 2F 14 FF        LDED    $FF14
+000008C3: 70 1F 1A FF        LBCD    $FF1A
+000008C7: 0B                 MOV     A,C
+000008C8: 60 42              ADD     B,A
+000008CA: 48 8F BB           LDEAX   (HL+$BB)
+000008CD: 74 B6              DSUBNB  EA,DE
+000008CF: D9                 JR      $08E9
+000008D0: AF B4              LDAX    (HL+$B4)
+000008D2: 60 AA              GTA     A,B
+000008D4: D4                 JR      $08E9
+000008D5: AF B3              LDAX    (HL+$B3)
+000008D7: 60 AA              GTA     A,B
+000008D9: D3                 JR      $08ED
+000008DA: 48 8F B9           LDEAX   (HL+$B9)
+000008DD: 74 B6              DSUBNB  EA,DE
+000008DF: CD                 JR      $08ED
+000008E0: 69 FF              MVI     A,$FF
+000008E2: C8                 JR      $08EB
+000008E3: 71 6D 00           MVIW    VV:6D,$00
+000008E6: 71 6E 00           MVIW    VV:6E,$00
+000008E9: 69 00              MVI     A,$00
+000008EB: 63 2D              STAW    VV:2D
+000008ED: 75 08 00           EQIW    VV:08,$00
+000008F0: 4E 3E              JRE     $0930
+000008F2: 65 10 00           NEIW    VV:10,$00
+000008F5: 4E 39              JRE     $0930
+000008F7: 01 2B              LDAW    VV:2B
+000008F9: 70 6A 15 FF        MOV     B,($FF15)
+000008FD: 48 22              SLR     B
+000008FF: 48 22              SLR     B
+00000901: 74 6A 00           NEI     B,$00
+00000904: 42                 INR     B
+00000905: 60 E2              SUB     A,B
+00000907: 48 0A              SK      CY
+00000909: 4E 23              JRE     $092E
+0000090B: 30 2C              DCRW    VV:2C
+0000090D: D1                 JR      $091F
+0000090E: 30 10              DCRW    VV:10
+00000910: 00                 NOP     
+00000911: 6A 18              MVI     B,$18
+00000913: 70 69 5E FF        MOV     A,($FF5E)		; A = MAP
+00000917: 65 42 00           NEIW    VV:42,$00
+0000091A: C7                 JR      $0922
+0000091B: 24 40 1E           LXI     DE,$1E40
+0000091E: C6                 JR      $0925
+0000091F: 69 FF              MVI     A,$FF
+00000921: CC                 JR      $092E
+00000922: 24 02 1C           LXI     DE,$1C02		
+00000925: 40 49 09           CALL    $0949			; 2D table look up
+00000928: AB 30              LDAX    (DE+$30)
+0000092A: 63 2C              STAW    VV:2C
+0000092C: AB 18              LDAX    (DE+$18)
+0000092E: 63 2B              STAW    VV:2B
+00000930: 64 09 EF           ANI     PB,$EF
+00000933: 04 FF FF           LXI     SP,$FFFF
+00000936: 54 01 02           JMP     $0201
+;
+; SUB939 - GetExtADCdata
+;
+00000939: 64 38 80           LTI     PA,$80		; test for end of conversion
+0000093C: FC                 JR      $0939		; ; GetExtADCdata, loop if A<80
+0000093D: 70 3F 00 20        LHLD    $2000		; HL = $2000
+00000941: 70 79 00 20        MOV     ($2000),A	; move ($2000) <- A (set up next conversion)
+00000945: 74 0F C0           ANI     L,$C0		; AD result is left justified ??
+00000948: B8                 RET     
+;
+; SUB949 -  2D table Look up ??
+; call with table offset in DE and index value in B
+; value in A; result in A
+;
+00000949: 1B                 MOV     C,A		; move C <- A
+0000094A: 52                 DCR     B			; decrement B
+0000094B: 48 1C              SKN     Z			; if its zero then we're done
+0000094D: C7                 JR      $0955		; if zero done
+0000094E: AB 01              LDAX    (DE+$01)	; fetch from memory
+00000950: 60 BB              LTA     A,C		; 
+00000952: C2                 JR      $0955		; skip if A<C
+00000953: 22                 INX     DE			; increment DE
+00000954: F5                 JR      $094A		; repeat
+00000955: 0B                 MOV     A,C
+00000956: B8                 RET  
+;
+; SUB957
+;   
+00000957: 48 2A              CLC     			; clear carry
+00000959: 70 E2              SUBX    (DE)		; subtract (DE) from A
+0000095B: 1A                 MOV     B,A		; copy A to B
+0000095C: 74 45 08           ADI     E,$08
+0000095F: 74 54 00           ACI     D,$00		; add 8 to DE
+00000962: AB 08              LDAX    (DE+$08)	; load A with (DE+8)
+00000964: 48 2E              MUL     B			; EA = A* B
+00000966: 48 A4              DSLL    EA
+00000968: 48 A4              DSLL    EA			; EA*4
+0000096A: 08                 MOV     A,EAH		; move upper byte into A
+0000096B: 70 C2              ADDX    (DE)		; add contents of (DE) to A
+0000096D: B8                 RET    
+;
+; SUB_96E
+; 
+0000096E: BA                 DI      
+0000096F: AB 03              LDAX    (DE+$03)
+00000971: 77 00              EQI     A,$00
+00000973: C4                 JR      $0978
+00000974: 2A                 LDAX    (DE)
+00000975: 27 A0              GTI     A,$A0
+00000977: CB                 JR      $0983
+00000978: 64 19 40           ORI     PB,$40
+0000097B: 44 00 80           LXI     EA,$8000
+0000097E: 48 9B 01           STEAX   (DE+$01)
+00000981: AA                 EI      
+00000982: B8                 RET     
+00000983: 70 6A 38 FF        MOV     B,($FF38)
+00000987: 60 3A              LTA     B,A
+00000989: 4E B2              JRE     $0A3D
+0000098B: 74 42 00           ADI     B,$00
+0000098E: 60 BA              LTA     A,B
+00000990: 4E 3B              JRE     $09CD
+00000992: 48 8B 04           LDEAX   (DE+$04)
+00000995: A8                 INX     EA
+00000996: 48 9B 04           STEAX   (DE+$04)
+00000999: 34 90 01           LXI     HL,$0190
+0000099C: 74 AF              DGT     EA,HL
+0000099E: C4                 JR      $09A3
+0000099F: 69 44              MVI     A,$44
+000009A1: BB 08              STAX    (DE+$08)
+000009A3: AB 08              LDAX    (DE+$08)
+000009A5: 77 44              EQI     A,$44
+000009A7: 4E 1C              JRE     $09C5
+000009A9: 34 B0 B3           LXI     HL,$B3B0
+000009AC: 74 AF              DGT     EA,HL
+000009AE: 4F CB              JRE     $097B
+000009B0: 44 00 00           LXI     EA,$0000
+000009B3: 48 9B 04           STEAX   (DE+$04)
+000009B6: AB 07              LDAX    (DE+$07)
+000009B8: 37 0A              LTI     A,$0A
+000009BA: 4F BC              JRE     $0978
+000009BC: 41                 INR     A
+000009BD: BB 07              STAX    (DE+$07)
+000009BF: 27 09              GTI     A,$09
+000009C1: 4F B8              JRE     $097B
+000009C3: 4F B3              JRE     $0978
+000009C5: AB 06              LDAX    (DE+$06)
+000009C7: 77 00              EQI     A,$00
+000009C9: 4E 21              JRE     $09EC
+000009CB: 4E 9A              JRE     $0A67
+000009CD: 44 00 00           LXI     EA,$0000
+000009D0: 48 9B 04           STEAX   (DE+$04)
+000009D3: 69 00              MVI     A,$00
+000009D5: BB 07              STAX    (DE+$07)
+000009D7: BB 08              STAX    (DE+$08)
+000009D9: AB 06              LDAX    (DE+$06)
+000009DB: 77 00              EQI     A,$00
+000009DD: CE                 JR      $09EC
+000009DE: 69 FF              MVI     A,$FF
+000009E0: BB 06              STAX    (DE+$06)
+000009E2: 70 3F 98 FF        LHLD    $FF98
+000009E6: 48 8B 01           LDEAX   (DE+$01)
+000009E9: 74 E7              DSUB    EA,HL
+000009EB: C9                 JR      $09F5
+000009EC: 48 8B 01           LDEAX   (DE+$01)
+000009EF: 70 69 9B FF        MOV     A,($FF9B)
+000009F3: 70 61              ESUB    EA,A
+000009F5: B5                 DMOV    BC,EA
+000009F6: 48 0A              SK      CY
+000009F8: 4E 8D              JRE     $0A87
+000009FA: 14 00 00           LXI     BC,$0000
+000009FD: 70 3F 8D FF        LHLD    $FF8D
+00000A01: A7                 DMOV    EA,HL
+00000A02: A8                 INX     EA
+00000A03: 34 8D FF           LXI     HL,$FF8D
+00000A06: 48 93              STEAX   (HL)
+00000A08: 71 8F FF           MVIW    VV:8F,$FF
+00000A0B: 71 91 FF           MVIW    VV:91,$FF
+00000A0E: 34 00 00           LXI     HL,$0000
+00000A11: 74 FF              DEQ     EA,HL
+00000A13: 4E 87              JRE     $0A9C
+00000A15: 34 00 B0           LXI     HL,$B000
+00000A18: 70 3E 8B FF        SHLD    $FF8B
+00000A1C: 70 3E 8D FF        SHLD    $FF8D
+00000A20: 70 3F 3E FF        LHLD    $FF3E				; Load HL direct
+00000A24: 75 8F FF           EQIW    VV:8F,$FF
+00000A27: C6                 JR      $0A2E
+00000A28: 74 47 01           ADI     L,$01
+00000A2B: 74 56 00           ACI     H,$00
+00000A2E: 20 90              INRW    VV:90
+00000A30: AF BF              LDAX    (HL+$BF)
+00000A32: 74 B8 90           LTAW    VV:90
+00000A35: 4E 65              JRE     $0A9C
+00000A37: 69 FF              MVI     A,$FF
+00000A39: BB 03              STAX    (DE+$03)
+00000A3B: 4F 3B              JRE     $0978
+00000A3D: 74 62 00           SUI     B,$00
+00000A40: 60 2A              GTA     B,A
+00000A42: 4F 4E              JRE     $0992
+00000A44: 44 00 00           LXI     EA,$0000
+00000A47: 48 9B 04           STEAX   (DE+$04)
+00000A4A: 69 00              MVI     A,$00
+00000A4C: BB 07              STAX    (DE+$07)
+00000A4E: BB 08              STAX    (DE+$08)
+00000A50: 70 3F 3E FF        LHLD    $FF3E				; Load HL direct
+00000A54: AB 06              LDAX    (DE+$06)
+00000A56: 67 00              NEI     A,$00
+00000A58: CE                 JR      $0A67
+00000A59: 69 00              MVI     A,$00
+00000A5B: BB 06              STAX    (DE+$06)
+00000A5D: 48 8B 01           LDEAX   (DE+$01)
+00000A60: 70 1F 96 FF        LBCD    $FF96
+00000A64: 74 C5              DADD    EA,BC
+00000A66: C9                 JR      $0A70
+00000A67: 70 69 9A FF        MOV     A,($FF9A)
+00000A6B: 48 8B 01           LDEAX   (DE+$01)
+00000A6E: 70 41              EADD    EA,A
+00000A70: B5                 DMOV    BC,EA
+00000A71: 48 0A              SK      CY
+00000A73: D3                 JR      $0A87
+00000A74: 14 FF FF           LXI     BC,$FFFF
+00000A77: 70 3F 8B FF        LHLD    $FF8B
+00000A7B: A7                 DMOV    EA,HL
+00000A7C: A8                 INX     EA
+00000A7D: 34 8B FF           LXI     HL,$FF8B
+00000A80: 48 93              STEAX   (HL)
+00000A82: 71 8F 00           MVIW    VV:8F,$00
+00000A85: 4F 84              JRE     $0A0B
+00000A87: 75 91 00           EQIW    VV:91,$00
+00000A8A: CE                 JR      $0A99
+00000A8B: 34 00 B0           LXI     HL,$B000
+00000A8E: 70 3E 8B FF        SHLD    $FF8B
+00000A92: 70 3E 8D FF        SHLD    $FF8D
+00000A96: 71 90 00           MVIW    VV:90,$00
+00000A99: 71 91 00           MVIW    VV:91,$00
+00000A9C: A5                 DMOV    EA,BC
+00000A9D: 48 9B 01           STEAX   (DE+$01)
+00000AA0: AA                 EI      
+00000AA1: B8                 RET 
+;
+; SUBAA2
+;    
+00000AA2: 48 8B 01           LDEAX   (DE+$01)
+00000AA5: 34 00 90           LXI     HL,$9000
+00000AA8: 74 BF              DLT     EA,HL
+00000AAA: 4F 21              JRE     $09CD
+00000AAC: 34 00 70           LXI     HL,$7000
+00000AAF: 74 AF              DGT     EA,HL
+00000AB1: 4F 91              JRE     $0A44
+00000AB3: 44 00 80           LXI     EA,$8000
+00000AB6: B5                 DMOV    BC,EA
+00000AB7: 4F CE              JRE     $0A87
+; SUB_AB9
+00000AB9: B5                 DMOV    BC,EA
+00000ABA: 0F                 MOV     A,L
+00000ABB: 48 2E              MUL     B
+00000ABD: B6                 DMOV    DE,EA
+00000ABE: 0E                 MOV     A,H
+00000ABF: 48 2F              MUL     C
+00000AC1: 0D                 MOV     A,E
+00000AC2: 70 41              EADD    EA,A
+00000AC4: 0E                 MOV     A,H
+00000AC5: B7                 DMOV    HL,EA
+00000AC6: 48 2E              MUL     B
+00000AC8: 0E                 MOV     A,H
+00000AC9: 70 41              EADD    EA,A
+00000ACB: 0C                 MOV     A,D
+00000ACC: 70 41              EADD    EA,A
+00000ACE: B6                 DMOV    DE,EA
+00000ACF: B8                 RET     
+;
+; SUB_AD0
+;
+00000AD0: 70 3F 1B FF        LHLD    $FF1B				; load HL registers
+00000AD4: 44 10 10           LXI     EA,$1010			; expansion accumulator
+00000AD7: 74 E7              DSUB    EA,HL
+00000AD9: B5                 DMOV    BC,EA
+00000ADA: 0F                 MOV     A,L
+00000ADB: 48 2E              MUL     B
+00000ADD: B6                 DMOV    DE,EA
+00000ADE: 0B                 MOV     A,C
+00000ADF: 48 2E              MUL     B
+00000AE1: 09                 MOV     A,EAL
+00000AE2: 1A                 MOV     B,A
+00000AE3: 0E                 MOV     A,H
+00000AE4: 48 2F              MUL     C
+00000AE6: 09                 MOV     A,EAL
+00000AE7: 1C                 MOV     D,A
+00000AE8: 0E                 MOV     A,H
+00000AE9: 1B                 MOV     C,A
+00000AEA: 0F                 MOV     A,L
+00000AEB: 48 2F              MUL     C
+00000AED: 09                 MOV     A,EAL
+00000AEE: 1B                 MOV     C,A
+00000AEF: 70 3F 3C FF        LHLD    $FF3C
+00000AF3: A7                 DMOV    EA,HL
+00000AF4: 01 1A              LDAW    VV:1A				; vv ???
+00000AF6: 74 C0 19           ADDW    VV:19
+00000AF9: 70 41              EADD    EA,A
+00000AFB: B7                 DMOV    HL,EA
+00000AFC: 2B                 LDAX    (HL)
+00000AFD: 00                 NOP     
+00000AFE: 74 7A 00           EQI     B,$00
+00000B01: C5                 JR      $0B07
+00000B02: 44 00 00           LXI     EA,$0000
+00000B05: 18                 MOV     EAH,A
+00000B06: B8                 RET  
+;
+;   
+00000B07: 48 2E              MUL     B
+00000B09: 70 2E 02 FF        SDED    $FF02
+00000B0D: B6                 DMOV    DE,EA
+00000B0E: AF 11              LDAX    (HL+$11)
+00000B10: 48 2F              MUL     C
+00000B12: 74 C6              DADD    EA,DE
+00000B14: B6                 DMOV    DE,EA
+00000B15: 70 1F 02 FF        LBCD    $FF02
+00000B19: AF 10              LDAX    (HL+$10)
+00000B1B: 48 2F              MUL     C
+00000B1D: 74 C6              DADD    EA,DE
+00000B1F: B6                 DMOV    DE,EA
+00000B20: AF 01              LDAX    (HL+$01)
+00000B22: 48 2E              MUL     B
+00000B24: 74 C6              DADD    EA,DE
+00000B26: B8                 RET     
+;
+; SUB_B27
+; Add 8 to EA
+;
+00000B27: 44 08 00           LXI     EA,$0008		; EA = 0008h
+00000B2A: 74 C7              DADD    EA,HL			; add 8 to HL
+00000B2C: B7                 DMOV    HL,EA			; copy HL to EA
+00000B2D: B8                 RET 
+;
+; SUB_B2E   serial handler??
+;
+;	is L0078 a  serial status register?
+;
+00000B2E: 64 11 20   L0B2E   XRI     PB,$20				; toggle PB bit5
+00000B31: 65 78 F4           NEIW    VV:78,$F4			; compare address (vv+78) with $F4 skip if not equal
+00000B34: 40 AC 0B           CALL    $0BAC				; schedule a CO0 event?
+00000B37: 65 78 F5           NEIW    VV:78,$F5			; compare address (vv+78) with $F5 skip if not equal
+00000B3A: 40 C2 0B           CALL    $0BC2				; schedule a CO1 event?
+00000B3D: 64 99 08           ORI     SMH,$08			; handle an F5
+00000B40: 48 49              SKIT    FSR				; skip if serial receive buffer is full
+;
+00000B42: EB                 JR      $0B2E				; loop back to start of routine
+;
+; received a byte process it
+;
+00000B43: 4C D9              MOV     A,RXB				; get the Rx data
+00000B45: 6C FF              MVI     D,$FF				; D <= $FF
+00000B47: 1D                 MOV     E,A				; E <= A
+00000B48: 70 2E 66 FF        SDED    $FF66				; ED <= $FF66
+00000B4C: 65 78 F6           NEIW    VV:78,$F6			; compare address (vv+78) with $F6 skip if equal
+00000B4F: 4E 87              JRE     $0BD8				
+00000B51: 67 FB              NEI     A,$FB
+00000B53: CD                 JR      $0B61				; compare some more address 
+00000B54: 67 F3              NEI     A,$F3				; ship if not equal
+00000B56: CA                 JR      $0B61
+;
+; Tx a byte
+;
+00000B57: 64 99 04   LB57:   ORI     SMH,$04			; serial mode high register
+00000B5A: 48 4A              SKIT    FST				; test serial interrupt
+00000B5C: FA                 JR      $0B57				; wait for interrupt
+00000B5D: 4D D8              MOV     TXB,A				; transmit a byte
+00000B5F: 37 F3              LTI     A,$F3				; skip if A is less than F3
+;
+00000B61: 70 79 78 FF	L0B61: MOV     ($FF78),A		; get data from FF78
+00000B65: 65 78 F7           NEIW    VV:78,$F7			; compare address (vv+78) with $F7 skip if not equal
+00000B68: 4E 2E              JRE     $0B98
+00000B6A: 65 78 F8           NEIW    VV:78,$F8			; compare address (vv+78) with $F8 skip if not equal
+00000B6D: 4E 2E              JRE     $0B9D
+00000B6F: 65 78 F9           NEIW    VV:78,$F9			; compare address (vv+78) with $F9 skip if not equal
+00000B72: 4E 2E              JRE     $0BA2
+00000B74: 65 78 FA           NEIW    VV:78,$FA			; compare address (vv+78) with $FA skip if not equal
+00000B77: 4E 2E              JRE     $0BA7
+00000B79: 65 78 FB           NEIW    VV:78,$FB			; compare address (vv+78) with $FB skip if not equal
+00000B7C: 4E 76              JRE     $0BF4
+00000B7E: 75 78 F3           EQIW    VV:78,$F3			; compare address (vv+78) with $F3 skip if not equal
+00000B81: 4F AB              JRE     $0B2E				; loop back to start of routine
+00000B83: 6C FF              MVI     D,$FF
+00000B85: 6D 40              MVI     E,$40
+00000B87: 2A                 LDAX    (DE)				; load index x with DE
+; wait fot tx interrupt (byte transferred from buffer to tx
+00000B88: 64 99 04 LB88:     ORI     SMH,$04			; enable Rx
+00000B8B: 48 4A              SKIT    FST				; skip next instruction if no serial interrupt
+00000B8D: FA                 JR      $0B88				; wait for Tx interrupt
+; delay 255 for tx to be sent
+00000B8E: 6A FF              MVI     B,$FF				; set  delay counter to 255
+00000B90: 52    	LB90:    DCR     B					; decrement counter
+00000B91: 48 0C              SK      Z					; skip if zero flag set
+00000B93: FC                 JR      $0B90				; else loop back
+; transmit a byte
+00000B94: 4D D8              MOV     TXB,A				; transmit A
+00000B96: 4F 96              JRE     $0B2E				; loop back to start of routine
+;
+00000B98: 64 09 EF  LB98:    ANI     PB,$EF				; clear PB bit 4
+00000B9B: 4F 91              JRE     $0B2E				; loop back to start of routine
+;
+00000B9D: 64 19 10           ORI     PB,$10				; set PB bit 4
+00000BA0: 4F 8C              JRE     $0B2E				; loop back to start of routine
+;
+00000BA2: 64 19 40 L0BA2:    ORI     PB,$40				; set PB bit 6	
+00000BA5: 4F 87              JRE     $0B2E	
+;			; loop back to start of routine
+00000BA7: 64 09 BF           ANI     PB,$BF				; clear PB bit 6 
+00000BAA: 4F 82              JRE     $0B2E				; loop back to start of routine
+;
+; SUB_BAC
+; set up output compare CO0 - injector bank 1
+;
+00000BAC: 48 C0    LBAC:     DMOV    EA,ECNT			; get the current timer count
+00000BAE: 34 00 F0           LXI     HL,$F000			
+00000BB1: 74 C7              DADD    EA,HL				; add the contents of $F000
+00000BB3: 48 D2              DMOV    ETM0,EA			; set up CO0
+00000BB5: 64 9B 04           ORI     EOM,$04			; LV0 reset
+00000BB8: 64 9B 05           ORI     EOM,$05			; LV0 contents output, 
+00000BBB: 64 8B F0           ANI     EOM,$F0			; clear all lower bits (CO0) ?????
+00000BBE: 64 9B 08           ORI     EOM,$08			; LV0 set
+00000BC1: B8                 RET     
+;
+; SUB_BC2
+; set up output compare CO0 - injector bank 2
+;
+00000BC2: 48 C0    LBC2:     DMOV    EA,ECNT			; get the current timer count
+00000BC4: 34 00 F0           LXI     HL,$F000
+00000BC7: 74 C7              DADD    EA,HL				; add the contents of $F000
+00000BC9: 48 D3              DMOV    ETM1,EA			; set up CO1
+00000BCB: 64 9B 40           ORI     EOM,$40			; LV1 reset
+00000BCE: 64 9B 50           ORI     EOM,$50
+00000BD1: 64 8B 0F           ANI     EOM,$0F			; clear all higher bits (CO1) ???
+00000BD4: 64 9B 80           ORI     EOM,$80			; LV1 set
+00000BD7: B8                 RET   
+;
+;  process an F6 command
+00000BD8: 70 2F 66 FF  LBD8: LDED    $FF66			;get contents of FF66h
+00000BDC: 0D                 MOV     A,E			; LSbyte into A
+00000BDD: 74 3D 18           LTI     E,$18			; skip if less than $18
+00000BE0: 4F 75              JRE     $0B57			; transmit a byte
+00000BE2: 74 0D 07           ANI     E,$07			; clear E upper bits
+00000BE5: 70 7D 00 20        MOV     ($2000),E		; ADC ?
+00000BE9: 40 39 09           CALL    $0939			; set up for IAT
+00000BEC: 47 10              ONI     A,$10			; on test A with $10 skip if not zero
+00000BEE: C2                 JR      $0BF1
+00000BEF: 0F                 MOV     A,L			; move L to A
+00000BF0: C1                 JR      $0BF2
+00000BF1: 0E                 MOV     A,H			; move H to L
+00000BF2: 4F 94              JRE     $0B88			; Tx data
+;
+00000BF4: 24 00 FF LBF4:     LXI     DE,$FF00		; Load DE with $FF00
+00000BF7: 69 55              MVI     A,$55
+00000BF9: 3A                 STAX    (DE)			; move A to DE
+00000BFA: 64 11 20           XRI     PB,$20			; toggle PB5
+00000BFD: 2A                 LDAX    (DE)			; load A from DE
+00000BFE: 22                 INX     DE				; increment DE
+00000BFF: 77 55              EQI     A,$55
+00000C01: D8                 JR      $0C1A			; TX data
+00000C02: 74 7D F0           EQI     E,$F0
+00000C05: F3                 JR      $0BF9
+00000C06: 69 AA              MVI     A,$AA
+00000C08: 24 00 FF           LXI     DE,$FF00
+00000C0B: 3A                 STAX    (DE)
+00000C0C: 64 11 20           XRI     PB,$20			; toggle PB5
+00000C0F: 2A                 LDAX    (DE)
+00000C10: 22                 INX     DE
+00000C11: 77 AA              EQI     A,$AA
+00000C13: C6                 JR      $0C1A			; TX data
+00000C14: 74 7D F0           EQI     E,$F0
+00000C17: F3                 JR      $0C0B
+00000C18: 69 67              MVI     A,$67
+00000C1A: 69 11              MVI     A,$11
+00000C1C: 44 FB FF           LXI     EA,$FFFB
+00000C1F: 34 66 FF           LXI     HL,$FF66
+00000C22: 48 93              STEAX   (HL)
+00000C24: 71 78 FB           MVIW    VV:78,$FB
+00000C27: 4F 5F              JRE     $0B88				; Tx data
+;
+;
+FILL $FF, 3543
+;
+;
+; ---------------------------------------------------------------
+; ------------------ Data Section -------------------------------
+; ---------------------------------------------------------------
+;
+; L1A00:
+00001A00: DB: 70 17
+; L1A02
+00001A02: DB: 80 BB 
+; L1A04
+00001A04: DB: BB 0C
+00001A05: DB 1A
+00001A06: 4A 1C
+00001A08: 0C 1A 4A 1C 
+00001A0C: E4
+00001A0D: 3F                 STAX    (HL-)
+00001A0E: A2                 POP     DE
+00001A0F: DB: 04 08 11 12 12 15 15 16 16 16 16 16 16 21 1E 
+00001A1E: 0D                 MOV     A,E
+00001A1F: 0D                 MOV     A,E
+00001A20: 0D                 MOV     A,E
+00001A21: 0D                 MOV     A,E
+00001A22: 0E                 MOV     A,H
+00001A23: 16 18              XRI     A,$18
+00001A25: 1C                 MOV     D,A
+00001A26: 1C                 MOV     D,A
+00001A27: 1C                 MOV     D,A
+00001A28: 1E                 MOV     H,A
+00001A29: 1E                 MOV     H,A
+00001A2A: 1E                 MOV     H,A
+00001A2B: 22                 INX     DE
+00001A2C: 27 29              GTI     A,$29
+
+00001A2E: 19                 MOV     EAL,A
+00001A2F: 19                 MOV     EAL,A
+00001A30: 19                 MOV     EAL,A
+00001A31: 19                 MOV     EAL,A
+00001A32: 19                 MOV     EAL,A
+00001A33: 22                 INX     DE
+00001A34: 23                 DCX     DE
+00001A35: 27 28              GTI     A,$28
+00001A37: 27 2B              GTI     A,$2B
+00001A39: 2B                 LDAX    (HL)
+00001A3A: 2E                 LDAX    (DE-)
+00001A3B: 31                 BLOCK   
+00001A3C: 35 37 2E           LTIW    VV:37,$2E
+
+00001A3F: 2E                 LDAX    (DE-)
+00001A40: 2F                 LDAX    (HL-)
+00001A41: 2B                 LDAX    (HL)
+00001A42: 2C                 LDAX    (DE+)
+00001A43: 2F                 LDAX    (HL-)
+00001A44: 2C                 LDAX    (DE+)
+00001A45: 2E                 LDAX    (DE-)
+00001A46: 2E                 LDAX    (DE-)
+00001A47: 30 37              DCRW    VV:37
+00001A49: 3B                 STAX    (HL)
+00001A4A: 3C                 STAX    (DE+)
+00001A4B: 3D                 STAX    (HL+)
+00001A4C: 40 42 40           CALL    $4042
+00001A4F: 40 41 3A           CALL    $3A41
+00001A52: 3C                 STAX    (DE+)
+00001A53: 3E                 STAX    (DE-)
+00001A54: 3C                 STAX    (DE+)
+00001A55: 3F                 STAX    (HL-)
+00001A56: 3F                 STAX    (HL-)
+00001A57: 43                 INR     C
+00001A58: 47 4B              ONI     A,$4B
+00001A5A: 4D 50              illegal 
+00001A5C: 52                 DCR     B
+00001A5D: 54 57 57           JMP     $5757
+00001A60: 59 5C              BIT     1,VV:5C
+00001A62: 5D 5F              BIT     5,VV:5F
+00001A64: 5E 61              BIT     6,VV:61
+00001A66: 61                 DAA     
+00001A67: 67 6B              NEI     A,$6B
+00001A69: 6D 70              MVI     E,$70
+00001A6B: 75 76 77           EQIW    VV:76,$77
+00001A6E: 87                 CALT    ($008E)
+00001A6F: 87                 CALT    ($008E)
+00001A70: 89                 CALT    ($0092)
+00001A71: 8C                 CALT    ($0098)
+00001A72: 8E                 CALT    ($009C)
+00001A73: 90                 CALT    ($00A0)
+00001A74: 91                 CALT    ($00A2)
+00001A75: 94                 CALT    ($00A8)
+00001A76: 95                 CALT    ($00AA)
+00001A77: 98                 CALT    ($00B0)
+00001A78: 9C                 CALT    ($00B8)
+00001A79: A1                 POP     BC
+00001A7A: 9F                 CALT    ($00BE)
+00001A7B: AA                 EI      
+00001A7C: AD                 LDAX    (HL+B)
+00001A7D: AE                 LDAX    (HL+EA)
+00001A7E: BF BF              STAX    (HL+$BF)
+00001A80: C2                 JR      $1A83
+00001A81: CF                 JR      $1A91
+00001A82: CF                 JR      $1A92
+00001A83: CA                 JR      $1A8E
+00001A84: CA                 JR      $1A8F
+00001A85: CA                 JR      $1A90
+00001A86: D3                 JR      $1A9A
+00001A87: D3                 JR      $1A9B
+00001A88: D3                 JR      $1A9C
+00001A89: D5                 JR      $1A9F
+00001A8A: D5                 JR      $1AA0
+00001A8B: DB                 JR      $1AA7
+00001A8C: E9                 JR      $1A76
+00001A8D: FC                 JR      $1A8A
+00001A8E: 70 06              illegal 
+00001A90: 80                 CALT    ($0080)
+00001A91: 27 9C              GTI     A,$9C
+00001A93: 07 80              ANI     A,$80
+00001A95: DA                 JR      $1AB0
+00001A96: E0                 JR      $1A77
+00001A97: 09                 MOV     A,EAL
+00001A98: 80                 CALT    ($0080)
+00001A99: 70 1E 0B 80        SBCD    $800B
+00001A9D: CC                 JR      $1AAA
+00001A9E: 64 0D 80           ANI     PF,$80
+00001AA1: 70 BA              LTAX    (DE)
+00001AA3: 0F                 MOV     A,L
+00001AA4: 80                 CALT    ($0080)
+00001AA5: 6D FA              MVI     E,$FA
+00001AA7: 10                 EXA     
+00001AA8: 80                 CALT    ($0080)
+00001AA9: CC                 JR      $1AB6
+00001AAA: 40 13 80           CALL    $8013
+00001AAD: 70 96              XRAX    (DE-)
+00001AAF: 15 80 6D           ORIW    VV:80,$6D
+00001AB2: EE                 JR      $1AA1
+00001AB3: 17 80              ORI     A,$80
+00001AB5: 6D 5E              MVI     E,$5E
+00001AB7: 1B                 MOV     C,A
+00001AB8: 80                 CALT    ($0080)
+00001AB9: 4A FA              MVIX    DE,$FA
+00001ABB: 1F                 MOV     L,A
+00001ABC: 80                 CALT    ($0080)
+00001ABD: 37 D8              LTI     A,$D8
+00001ABF: 26 80              ADINC   A,$80
+00001AC1: 25 5A 33           GTIW    VV:5A,$33
+00001AC4: 80                 CALT    ($0080)
+00001AC5: 14 D8 3B           LXI     BC,$3BD8
+;
+00001AC8: 80                 CALT    ($0080)
+00001AC9: 1E                 MOV     H,A
+00001ACA: 12                 INX     BC
+00001ACB: 7F 40              CALF    $0F40
+00001ACD: 3C                 STAX    (DE+)
+;
+; LUT_1ACE
+00001ACE: DB: 00 30 46 95 AD C3 D6 EE
+;
+00001AD6: 25 25 2A           GTIW    VV:25,$2A
+00001AD9: 37 48              LTI     A,$48
+00001ADB: 5D 76              BIT     5,VV:76
+00001ADD: AC                 LDAX    (HL+A)
+00001ADE: 00                 NOP     
+00001ADF: 0F                 MOV     A,L
+;LUT_1AE0:
+00001AE0: 0B                 MOV     A,C
+00001AE1: 2D                 LDAX    (HL+)
+00001AE2: 3D                 STAX    (HL+)
+00001AE3: 54 90 00           JMP     $0090
+00001AE6: 00                 NOP     
+00001AE7: 32                 INX     HL
+00001AE8: 3F                 STAX    (HL-)
+00001AE9: 64 94              illegal 
+00001AEB: C2                 JR      $1AEE
+00001AEC: D5                 JR      $1B02
+00001AED: EE                 JR      $1ADC
+;
+00001AEE: 80                 CALT    ($0080)
+00001AEF: 82                 CALT    ($0084)
+00001AF0: 82                 CALT    ($0084)
+00001AF1: 8E                 CALT    ($009C)
+00001AF2: 9C                 CALT    ($00B8)
+00001AF3: AA                 EI      
+00001AF4: B0                 PUSH    VA
+00001AF5: BA                 DI      
+;
+00001AF6: 03                 DCX     SP
+00001AF7: 00                 NOP    
+; 
+00001AF8: 13                 DCX     BC
+00001AF9: 11                 EXX     
+00001AFA: 13                 DCX     BC
+00001AFB: 14 1A 00           LXI     BC,$001A
+00001AFE: 00                 NOP     
+00001AFF: 31                 BLOCK   
+00001B00: 3E                 STAX    (DE-)
+00001B01: 4F 63              JRE     $1A66
+00001B03: 6E 7A              MVI     H,$7A
+00001B05: 87                 CALT    ($008E)
+00001B06: 92                 CALT    ($00A4)
+00001B07: 9B                 CALT    ($00B6)
+00001B08: A3                 POP     HL
+00001B09: AB B1              LDAX    (DE+$B1)
+00001B0B: B6                 DMOV    DE,EA
+00001B0C: BB C1              STAX    (DE+$C1)
+00001B0E: C6                 JR      $1B15
+00001B0F: CB                 JR      $1B1B
+00001B10: CF                 JR      $1B20
+00001B11: D4                 JR      $1B26
+00001B12: DC                 JR      $1B2F
+00001B13: E3                 JR      $1AF7
+00001B14: EE                 JR      $1B03
+00001B15: FA                 JR      $1B10
+; L1B16 1x24
+00001B16: 0D                 MOV     A,E
+00001B17: 13                 DCX     BC
+00001B18: 18                 MOV     EAH,A
+00001B19: 1F                 MOV     L,A
+00001B1A: 28                 illegal 
+00001B1B: 2C                 LDAX    (DE+)
+00001B1C: 30 37              DCRW    VV:37
+00001B1E: 3D                 STAX    (HL+)
+00001B1F: 44 46 4B           LXI     EA,$4B46
+00001B22: 54 61 6B           JMP     $6B61
+00001B25: 7D 93              CALF    $0D93
+00001B27: A2                 POP     DE
+00001B28: B2                 PUSH    DE
+00001B29: C0                 JR      $1B2A
+00001B2A: C0                 JR      $1B2B
+00001B2B: C0                 JR      $1B2C
+00001B2C: C1                 JR      $1B2E
+00001B2D: C2                 JR      $1B30
+;
+00001B2E: 09                 MOV     A,EAL
+00001B2F: 1B                 MOV     C,A
+00001B30: 1B                 MOV     C,A
+00001B31: 1E                 MOV     H,A
+00001B32: 1F                 MOV     L,A
+00001B33: 21                 JB      
+00001B34: 22                 INX     DE
+00001B35: 22                 INX     DE
+00001B36: 23                 DCX     DE
+00001B37: 23                 DCX     DE
+00001B38: 28                 illegal 
+00001B39: 2C                 LDAX    (DE+)
+00001B3A: 2E                 LDAX    (DE-)
+00001B3B: 31                 BLOCK   
+00001B3C: 37 3B              LTI     A,$3B
+00001B3E: 3D                 STAX    (HL+)
+00001B3F: 3E                 STAX    (DE-)
+00001B40: 40 3E 38           CALL    $383E
+;
+00001B43: 2E                 LDAX    (DE-)
+00001B44: 28                 illegal 
+00001B45: 28                 illegal 
+00001B46: 24 57 5D           LXI     DE,$5D57
+00001B49: 63 6A              STAW    VV:6A
+00001B4B: 6E 72              MVI     H,$72
+00001B4D: 76 7A              SBI     A,$7A
+00001B4F: 7B 7C              CALF    $0B7C
+00001B51: 7D 7E              CALF    $0D7E
+00001B53: 7F 80              CALF    $0F80
+00001B55: 81                 CALT    ($0082)
+00001B56: 82                 CALT    ($0084)
+00001B57: 83                 CALT    ($0086)
+;
+00001B58: 84                 CALT    ($0088)
+00001B59: 85                 CALT    ($008A)
+00001B5A: 85                 CALT    ($008A)
+00001B5B: 87                 CALT    ($008E)
+00001B5C: 88                 CALT    ($0090)
+00001B5D: 89                 CALT    ($0092)
+00001B5E: 58 4B              BIT     0,VV:4B
+00001B60: 2C                 LDAX    (DE+)
+00001B61: 4B 0C              MVIX    HL,$0C
+00001B63: 28                 illegal 
+00001B64: 1E                 MOV     H,A
+00001B65: 46 FF              ADI     A,$FF
+00001B67: 1D                 MOV     E,A
+;
+00001B68: 17 06              ORI     A,$06
+00001B6A: 01 28              LDAW    VV:28
+00001B6C: 28                 illegal 
+00001B6D: 94                 CALT    ($00A8)
+;
+00001B6E: 40 21 16           CALL    $1621
+00001B71: 4E 00              JRE     $1B73
+00001B73: 68 
+;
+00001B74  55              MVI     V,$55
+00001B75: BF D4              STAX    (HL+$D4)
+;
+00001B77: 3C                 STAX    (DE+)
+00001B78: 32                 INX     HL
+00001B79: FF                 JR      $1B79
+00001B7A: 93                 CALT    ($00A6)
+00001B7B: 80                 CALT    ($0080)
+00001B7C: 6C 
+;
+00001B7D: 94              MVI     D,$94
+00001B7E: 01 05              LDAW    VV:05
+00001B80: 06                 illegal 
+00001B81: 80                 CALT    ($0080)
+00001B82: 80                 CALT    ($0080)
+00001B83: A9                 DCX     EA
+00001B84: 05 
+;
+00001B85: 14 00           ANIW    VV:14,$00
+;
+00001B87: 0A                 MOV     A,B
+00001B88: 1A                 MOV     B,A
+00001B89: 80                 CALT    ($0080)
+00001B8A: 23                 DCX     DE
+00001B8B: 56 00              ACI     A,$00
+00001B8D: 50                 EXH     
+00001B8E: 40 00 00           CALL    $0000
+00001B91: 23                 DCX     DE
+00001B92: BB 00              STAX    (DE+$00)
+00001B94: 01 02              LDAW    VV:02
+00001B96: 03                 DCX     SP
+00001B97: 04 05 00           LXI     SP,$0005
+00001B9A: 01 02              LDAW    VV:02
+00001B9C: 03                 DCX     SP
+00001B9D: 04 05 7C           LXI     SP,$7C05
+00001BA0: 38                 illegal 
+00001BA1: 94                 CALT    ($00A8)
+00001BA2: 1F                 MOV     L,A
+00001BA3: 68 1F              MVI     V,$1F
+00001BA5: 68 1F              MVI     V,$1F
+00001BA7: 68 1F              MVI     V,$1F
+00001BA9: 68 1F              MVI     V,$1F
+00001BAB: 68 1F              MVI     V,$1F
+00001BAD: 68 1F              MVI     V,$1F
+00001BAF: 68 1F              MVI     V,$1F
+00001BB1: 68 16              MVI     V,$16
+00001BB3: 1B                 MOV     C,A
+00001BB4: 16 1B              XRI     A,$1B
+00001BB6: 16 1B              XRI     A,$1B
+00001BB8: 16 1B              XRI     A,$1B
+00001BBA: 1F                 MOV     L,A
+00001BBB: 68 1F              MVI     V,$1F
+00001BBD: 68 1F              MVI     V,$1F
+00001BBF: 68 1F              MVI     V,$1F
+00001BC1: 68 1F              MVI     V,$1F
+00001BC3: 68 1F              MVI     V,$1F
+00001BC5: 68 1F              MVI     V,$1F
+00001BC7: 68 1F              MVI     V,$1F
+00001BC9: 68 16              MVI     V,$16
+00001BCB: 1B                 MOV     C,A
+00001BCC: 16 1B              XRI     A,$1B
+00001BCE: 16 1B              XRI     A,$1B
+00001BD0: 16 1B              XRI     A,$1B
+00001BD2: 1F                 MOV     L,A
+00001BD3: 68 1F              MVI     V,$1F
+00001BD5: 68 1F              MVI     V,$1F
+00001BD7: 68 1F              MVI     V,$1F
+00001BD9: 68 1F              MVI     V,$1F
+00001BDB: 68 1F              MVI     V,$1F
+00001BDD: 68 1F              MVI     V,$1F
+00001BDF: 68 1F              MVI     V,$1F
+00001BE1: 68 16              MVI     V,$16
+00001BE3: 1B                 MOV     C,A
+00001BE4: 16 1B              XRI     A,$1B
+00001BE6: 16 1B              XRI     A,$1B
+00001BE8: 16 1B              XRI     A,$1B
+00001BEA: 1F                 MOV     L,A
+00001BEB: 68 1F              MVI     V,$1F
+00001BED: 68 1F              MVI     V,$1F
+00001BEF: 68 1F              MVI     V,$1F
+00001BF1: 68 1F              MVI     V,$1F
+00001BF3: 68 1F              MVI     V,$1F
+00001BF5: 68 1F              MVI     V,$1F
+00001BF7: 68 1F              MVI     V,$1F
+00001BF9: 68 16              MVI     V,$16
+00001BFB: 1B                 MOV     C,A
+00001BFC: 16 1B              XRI     A,$1B
+00001BFE: 16 1B              XRI     A,$1B
+00001C00: 16 1B              XRI     A,$1B
+00001C02: 00                 NOP     
+00001C03: 31                 BLOCK   
+00001C04: 3E                 STAX    (DE-)
+00001C05: 4F 63              JRE     $1B6A
+00001C07: 6E 7A              MVI     H,$7A
+00001C09: 87                 CALT    ($008E)
+00001C0A: 92                 CALT    ($00A4)
+00001C0B: 9B                 CALT    ($00B6)
+00001C0C: A3                 POP     HL
+00001C0D: AB B1              LDAX    (DE+$B1)
+00001C0F: B6                 DMOV    DE,EA
+00001C10: BB C1              STAX    (DE+$C1)
+00001C12: C6                 JR      $1C19
+00001C13: CB                 JR      $1C1F
+00001C14: CF                 JR      $1C24
+00001C15: D4                 JR      $1C2A
+00001C16: DC                 JR      $1C33
+00001C17: E3                 JR      $1BFB
+00001C18: EE                 JR      $1C07
+00001C19: FA                 JR      $1C14
+00001C1A: 46 23              ADI     A,$23
+00001C1C: 18                 MOV     EAH,A
+00001C1D: 14 19 FE           LXI     BC,$FE19
+00001C20: E9                 JR      $1C0A
+00001C21: CB                 JR      $1C2D
+00001C22: B9                 RETS    
+00001C23: A6                 DMOV    EA,DE
+00001C24: A0                 POP     VA
+00001C25: 94                 CALT    ($00A8)
+00001C26: 85                 CALT    ($008A)
+00001C27: 73                 illegal 
+00001C28: 68 59              MVI     V,$59
+00001C2A: 4C 45              illegal 
+00001C2C: 3F                 STAX    (HL-)
+00001C2D: 3A                 STAX    (DE)
+00001C2E: 3A                 STAX    (DE)
+00001C2F: 3A                 STAX    (DE)
+00001C30: 3A                 STAX    (DE)
+00001C31: 3A                 STAX    (DE)
+00001C32: 01 01              LDAW    VV:01
+00001C34: 01 01              LDAW    VV:01
+00001C36: 01 00              LDAW    VV:00
+00001C38: 00                 NOP     
+00001C39: 00                 NOP     
+00001C3A: 00                 NOP     
+00001C3B: 00                 NOP     
+00001C3C: 00                 NOP     
+00001C3D: 00                 NOP     
+00001C3E: 00                 NOP     
+00001C3F: 00                 NOP     
+00001C40: 00                 NOP     
+00001C41: 00                 NOP     
+00001C42: 00                 NOP     
+00001C43: 00                 NOP     
+00001C44: 00                 NOP     
+00001C45: 00                 NOP     
+00001C46: 00                 NOP     
+00001C47: 00                 NOP     
+00001C48: 00                 NOP     
+00001C49: 00                 NOP     
+00001C4A: 80                 CALT    ($0080)
+00001C4B: 3B                 STAX    (HL)
+00001C4C: A2                 POP     DE
+00001C4D: 08                 MOV     A,EAH
+00001C4E: 08                 MOV     A,EAH
+00001C4F: 09                 MOV     A,EAL
+00001C50: 05 05 05           ANIW    VV:05,$05
+00001C53: 05 05 05           ANIW    VV:05,$05
+00001C56: 05 05 05           ANIW    VV:05,$05
+00001C59: 05 05 05           ANIW    VV:05,$05
+00001C5C: 13                 DCX     BC
+00001C5D: 16 16              XRI     A,$16
+00001C5F: 13                 DCX     BC
+00001C60: 13                 DCX     BC
+00001C61: 13                 DCX     BC
+00001C62: 13                 DCX     BC
+00001C63: 13                 DCX     BC
+00001C64: 13                 DCX     BC
+00001C65: 13                 DCX     BC
+00001C66: 13                 DCX     BC
+00001C67: 13                 DCX     BC
+00001C68: 13                 DCX     BC
+00001C69: 13                 DCX     BC
+00001C6A: 13                 DCX     BC
+00001C6B: 13                 DCX     BC
+00001C6C: 22                 INX     DE
+00001C6D: 24 24 27           LXI     DE,$2724
+00001C70: 27 2B              GTI     A,$2B
+00001C72: 2B                 LDAX    (HL)
+00001C73: 2B                 LDAX    (HL)
+00001C74: 2B                 LDAX    (HL)
+00001C75: 2B                 LDAX    (HL)
+00001C76: 2F                 LDAX    (HL-)
+00001C77: 33                 DCX     HL
+00001C78: 33                 DCX     HL
+00001C79: 35 35 31           LTIW    VV:35,$31
+00001C7C: 2D                 LDAX    (HL+)
+00001C7D: 30 30              DCRW    VV:30
+00001C7F: 33                 DCX     HL
+00001C80: 37 39              LTI     A,$39
+00001C82: 3B                 STAX    (HL)
+00001C83: 39                 STAX    (BC)
+00001C84: 3B                 STAX    (HL)
+00001C85: 3B                 STAX    (HL)
+00001C86: 41                 INR     A
+00001C87: 47 47              ONI     A,$47
+00001C89: 49 4B              MVIX    BC,$4B
+00001C8B: 47 3F              ONI     A,$3F
+00001C8D: 42                 INR     B
+00001C8E: 42                 INR     B
+00001C8F: 43                 INR     C
+00001C90: 48 4C              SKIT    OV
+00001C92: 4C 4E              illegal 
+00001C94: 4E 4E              JRE     $1CE4
+00001C96: 52                 DCR     B
+00001C97: 58 5A              BIT     0,VV:5A
+00001C99: 5B 62              BIT     3,VV:62
+00001C9B: 60 64              SUB     D,A
+00001C9D: 68 68              MVI     V,$68
+00001C9F: 6C 6C              MVI     D,$6C
+00001CA1: 70 70              illegal 
+00001CA3: 74 74 74           SBI     D,$74
+00001CA6: 78 7E              CALF    $087E
+00001CA8: 80                 CALT    ($0080)
+00001CA9: 86                 CALT    ($008C)
+00001CAA: 8E                 CALT    ($009C)
+00001CAB: 88                 CALT    ($0090)
+00001CAC: 9A                 CALT    ($00B4)
+00001CAD: 9C                 CALT    ($00B8)
+00001CAE: 9C                 CALT    ($00B8)
+00001CAF: 9C                 CALT    ($00B8)
+00001CB0: 9C                 CALT    ($00B8)
+00001CB1: A0                 POP     VA
+00001CB2: A2                 POP     DE
+00001CB3: A6                 DMOV    EA,DE
+00001CB4: A4                 POP     EA
+00001CB5: A4                 POP     EA
+00001CB6: A8                 INX     EA
+00001CB7: B0                 PUSH    VA
+00001CB8: B2                 PUSH    DE
+00001CB9: B6                 DMOV    DE,EA
+00001CBA: C2                 JR      $1CBD
+00001CBB: BA                 DI      
+00001CBC: A2                 POP     DE
+00001CBD: AE                 LDAX    (HL+EA)
+00001CBE: AE                 LDAX    (HL+EA)
+00001CBF: AE                 LDAX    (HL+EA)
+00001CC0: AE                 LDAX    (HL+EA)
+00001CC1: AE                 LDAX    (HL+EA)
+00001CC2: B4                 PUSH    EA
+00001CC3: B8                 RET     
+00001CC4: C2                 JR      $1CC7
+00001CC5: C4                 JR      $1CCA
+00001CC6: CA                 JR      $1CD1
+00001CC7: D6                 JR      $1CDE
+00001CC8: D6                 JR      $1CDF
+00001CC9: E4                 JR      $1CAE
+00001CCA: FE                 JR      $1CC9
+00001CCB: E4                 JR      $1CB0
+00001CCC: 70 06              illegal 
+00001CCE: 80                 CALT    ($0080)
+00001CCF: 27 9C              GTI     A,$9C
+00001CD1: 07 80              ANI     A,$80
+00001CD3: DA                 JR      $1CEE
+00001CD4: E0                 JR      $1CB5
+00001CD5: 09                 MOV     A,EAL
+00001CD6: 80                 CALT    ($0080)
+00001CD7: 70 1E 0B 80        SBCD    $800B
+00001CDB: CC                 JR      $1CE8
+00001CDC: 64 0D 80           ANI     PF,$80
+00001CDF: 70 BA              LTAX    (DE)
+00001CE1: 0F                 MOV     A,L
+00001CE2: 80                 CALT    ($0080)
+00001CE3: 6D FA              MVI     E,$FA
+00001CE5: 10                 EXA     
+00001CE6: 80                 CALT    ($0080)
+00001CE7: CC                 JR      $1CF4
+00001CE8: 40 13 80           CALL    $8013
+00001CEB: 70 96              XRAX    (DE-)
+00001CED: 15 80 6D           ORIW    VV:80,$6D
+00001CF0: EE                 JR      $1CDF
+00001CF1: 17 80              ORI     A,$80
+00001CF3: 6D 5E              MVI     E,$5E
+00001CF5: 1B                 MOV     C,A
+00001CF6: 80                 CALT    ($0080)
+00001CF7: 4A FA              MVIX    DE,$FA
+00001CF9: 1F                 MOV     L,A
+00001CFA: 80                 CALT    ($0080)
+00001CFB: 37 D8              LTI     A,$D8
+00001CFD: 26 80              ADINC   A,$80
+00001CFF: 25 5A 33           GTIW    VV:5A,$33
+00001D02: 80                 CALT    ($0080)
+00001D03: 14 D8 3B           LXI     BC,$3BD8
+00001D06: 80                 CALT    ($0080)
+00001D07: 1E                 MOV     H,A
+00001D08: 12                 INX     BC
+00001D09: 7F 40              CALF    $0F40
+00001D0B: 3C                 STAX    (DE+)
+00001D0C: 00                 NOP     
+00001D0D: 30 51              DCRW    VV:51
+00001D0F: 7C 94              CALF    $0C94
+00001D11: AC                 LDAX    (HL+A)
+00001D12: C3                 JR      $1D16
+00001D13: EE                 JR      $1D02
+00001D14: 26 26              ADINC   A,$26
+00001D16: 2C                 LDAX    (DE+)
+00001D17: 34 3C 4C           LXI     HL,$4C3C
+00001D1A: 5F BD              BIT     7,VV:BD
+00001D1C: 00                 NOP     
+00001D1D: 0C                 MOV     A,D
+00001D1E: 0C                 MOV     A,D
+00001D1F: 15 2B 35           ORIW    VV:2B,$35
+00001D22: 8C                 CALT    ($0098)
+00001D23: 00                 NOP     
+00001D24: 00                 NOP     
+00001D25: 3F                 STAX    (HL-)
+00001D26: 50                 EXH     
+00001D27: 94                 CALT    ($00A8)
+00001D28: C2                 JR      $1D2B
+00001D29: D5                 JR      $1D3F
+00001D2A: E4                 JR      $1D0F
+00001D2B: EE                 JR      $1D1A
+00001D2C: 78 81              CALF    $0881
+00001D2E: 86                 CALT    ($008C)
+00001D2F: 99                 CALT    ($00B2)
+00001D30: A6                 DMOV    EA,DE
+00001D31: AB AF              LDAX    (DE+$AF)
+00001D33: B0                 PUSH    VA
+00001D34: 03                 DCX     SP
+00001D35: 12                 INX     BC
+00001D36: 11                 EXX     
+00001D37: 12                 INX     BC
+00001D38: 10                 EXA     
+00001D39: 11                 EXX     
+00001D3A: 06                 illegal 
+00001D3B: 00                 NOP     
+00001D3C: 00                 NOP     
+00001D3D: 26 31              ADINC   A,$31
+00001D3F: 3E                 STAX    (DE-)
+00001D40: 4F 52              JRE     $1C94
+00001D42: 65 68 7A           NEIW    VV:68,$7A
+00001D45: 85                 CALT    ($008A)
+00001D46: 8B                 CALT    ($0096)
+00001D47: 92                 CALT    ($00A4)
+00001D48: A6                 DMOV    EA,DE
+00001D49: AB B2              LDAX    (DE+$B2)
+00001D4B: B5                 DMOV    BC,EA
+00001D4C: BC                 STAX    (HL+A)
+00001D4D: C1                 JR      $1D4F
+00001D4E: C9                 JR      $1D58
+00001D4F: CE                 JR      $1D5E
+00001D50: D4                 JR      $1D65
+00001D51: DC                 JR      $1D6E
+00001D52: E3                 JR      $1D36
+00001D53: EE                 JR      $1D42
+00001D54: 0A                 MOV     A,B
+00001D55: 0C                 MOV     A,D
+00001D56: 11                 EXX     
+00001D57: 16 1E              XRI     A,$1E
+00001D59: 20 2B              INRW    VV:2B
+00001D5B: 2D                 LDAX    (HL+)
+00001D5C: 3C                 STAX    (DE+)
+00001D5D: 44 49 4E           LXI     EA,$4E49
+00001D60: 6A 71              MVI     B,$71
+00001D62: 7F 8C              CALF    $0F8C
+00001D64: A1                 POP     BC
+00001D65: B0                 PUSH    VA
+00001D66: BF C0              STAX    (HL+$C0)
+00001D68: C1                 JR      $1D6A
+00001D69: C1                 JR      $1D6B
+00001D6A: C1                 JR      $1D6C
+00001D6B: C1                 JR      $1D6D
+00001D6C: 09                 MOV     A,EAL
+00001D6D: 09                 MOV     A,EAL
+00001D6E: 18                 MOV     EAH,A
+00001D6F: 19                 MOV     EAL,A
+00001D70: 1B                 MOV     C,A
+00001D71: 0E                 MOV     A,H
+00001D72: 0F                 MOV     A,L
+00001D73: 1B                 MOV     C,A
+00001D74: 1D                 MOV     E,A
+00001D75: 1E                 MOV     H,A
+00001D76: 1E                 MOV     H,A
+00001D77: 1F                 MOV     L,A
+00001D78: 22                 INX     DE
+00001D79: 23                 DCX     DE
+00001D7A: 25 26 29           GTIW    VV:26,$29
+00001D7D: 2A                 LDAX    (DE)
+00001D7E: 29                 LDAX    (BC)
+00001D7F: 29                 LDAX    (BC)
+00001D80: 28                 illegal 
+00001D81: 25 22 1D           GTIW    VV:22,$1D
+00001D84: 24 61 8C           LXI     DE,$8C61
+00001D87: C6                 JR      $1D8E
+00001D88: D4                 JR      $1D9D
+00001D89: 64 64              illegal 
+00001D8B: B8                 RET     
+00001D8C: BE                 STAX    (HL+EA)
+00001D8D: BF C0              STAX    (HL+$C0)
+00001D8F: C2                 JR      $1D92
+00001D90: C5                 JR      $1D96
+00001D91: C6                 JR      $1D98
+00001D92: C7                 JR      $1D9A
+00001D93: C8                 JR      $1D9C
+00001D94: C9                 JR      $1D9E
+00001D95: CA                 JR      $1DA0
+00001D96: CC                 JR      $1DA3
+00001D97: CD                 JR      $1DA5
+00001D98: CE                 JR      $1DA7
+00001D99: D0                 JR      $1DAA
+00001D9A: D2                 JR      $1DAD
+00001D9B: D5                 JR      $1DB1
+00001D9C: 3D                 STAX    (HL+)
+00001D9D: 4B 2C              MVIX    HL,$2C
+00001D9F: 30 0C              DCRW    VV:0C
+00001DA1: 28                 illegal 
+00001DA2: 1E                 MOV     H,A
+00001DA3: 46 FF              ADI     A,$FF
+00001DA5: 1D                 MOV     E,A
+00001DA6: 17 06              ORI     A,$06
+00001DA8: 01 16              LDAW    VV:16
+00001DAA: 16 8D              XRI     A,$8D
+00001DAC: 53                 DCR     C
+00001DAD: 1D                 MOV     E,A
+00001DAE: 0D                 MOV     A,E
+00001DAF: 3C                 STAX    (DE+)
+00001DB0: 2F                 LDAX    (HL-)
+00001DB1: 2C                 LDAX    (DE+)
+00001DB2: 55 BF D4           OFFIW   VV:BF,$D4
+00001DB5: 3C                 STAX    (DE+)
+00001DB6: 32                 INX     HL
+00001DB7: FF                 JR      $1DB7
+00001DB8: D3                 JR      $1DCC
+00001DB9: 80                 CALT    ($0080)
+00001DBA: 6C 32              MVI     D,$32
+00001DBC: 01 05              LDAW    VV:05
+00001DBE: 06                 illegal 
+00001DBF: 80                 CALT    ($0080)
+00001DC0: 80                 CALT    ($0080)
+00001DC1: A9                 DCX     EA
+00001DC2: 05 14 00           ANIW    VV:14,$00
+00001DC5: 0A                 MOV     A,B
+00001DC6: 1A                 MOV     B,A
+00001DC7: 80                 CALT    ($0080)
+00001DC8: 23                 DCX     DE
+00001DC9: 1E                 MOV     H,A
+00001DCA: 00                 NOP     
+00001DCB: 50                 EXH     
+00001DCC: 40 00 00           CALL    $0000
+00001DCF: 23                 DCX     DE
+00001DD0: BB F4              STAX    (DE+$F4)
+00001DD2: 2D                 LDAX    (HL+)
+00001DD3: 40 1F 52           CALL    $521F
+00001DD6: 16 00              XRI     A,$00
+00001DD8: 27 00              GTI     A,$00
+00001DDA: 48 00              illegal 
+00001DDC: 5D 66              BIT     5,VV:66
+00001DDE: 40 A0 68           CALL    $68A0
+00001DE1: 1F                 MOV     L,A
+00001DE2: 06                 illegal 
+00001DE3: 0F                 MOV     A,L
+00001DE4: 06                 illegal 
+00001DE5: 0F                 MOV     A,L
+00001DE6: 68 1F              MVI     V,$1F
+00001DE8: 68 1F              MVI     V,$1F
+00001DEA: 06                 illegal 
+00001DEB: 0F                 MOV     A,L
+00001DEC: 06                 illegal 
+00001DED: 0F                 MOV     A,L
+00001DEE: 68 1F              MVI     V,$1F
+00001DF0: 25 2C 07           GTIW    VV:2C,$07
+00001DF3: 0B                 MOV     A,C
+00001DF4: 07 0B              ANI     A,$0B
+00001DF6: 16 1B              XRI     A,$1B
+00001DF8: 68 1F              MVI     V,$1F
+00001DFA: 68 1F              MVI     V,$1F
+00001DFC: 68 1F              MVI     V,$1F
+00001DFE: 68 1F              MVI     V,$1F
+00001E00: 68 1F              MVI     V,$1F
+00001E02: 68 1F              MVI     V,$1F
+00001E04: 68 1F              MVI     V,$1F
+00001E06: 68 1F              MVI     V,$1F
+00001E08: 25 2C 16           GTIW    VV:2C,$16
+00001E0B: 1B                 MOV     C,A
+00001E0C: 16 1B              XRI     A,$1B
+00001E0E: 16 1B              XRI     A,$1B
+00001E10: 68 1F              MVI     V,$1F
+00001E12: 68 1F              MVI     V,$1F
+00001E14: 68 1F              MVI     V,$1F
+00001E16: 68 1F              MVI     V,$1F
+00001E18: 68 1F              MVI     V,$1F
+00001E1A: 68 1F              MVI     V,$1F
+00001E1C: 68 1F              MVI     V,$1F
+00001E1E: 68 1F              MVI     V,$1F
+00001E20: 1E                 MOV     H,A
+00001E21: 25 1E 25           GTIW    VV:1E,$25
+00001E24: 1E                 MOV     H,A
+00001E25: 25 1E 25           GTIW    VV:1E,$25
+00001E28: 68 1F              MVI     V,$1F
+00001E2A: 68 1F              MVI     V,$1F
+00001E2C: 68 1F              MVI     V,$1F
+00001E2E: 68 1F              MVI     V,$1F
+00001E30: 68 1F              MVI     V,$1F
+00001E32: 68 1F              MVI     V,$1F
+00001E34: 68 1F              MVI     V,$1F
+00001E36: 68 1F              MVI     V,$1F
+00001E38: 1E                 MOV     H,A
+00001E39: 25 1E 25           GTIW    VV:1E,$25
+00001E3C: 1E                 MOV     H,A
+00001E3D: 25 1E 25           GTIW    VV:1E,$25
+00001E40: 00                 NOP     
+00001E41: 26 31              ADINC   A,$31
+00001E43: 3E                 STAX    (DE-)
+00001E44: 4F 52              JRE     $1D98
+00001E46: 65 68 7A           NEIW    VV:68,$7A
+00001E49: 85                 CALT    ($008A)
+00001E4A: 8B                 CALT    ($0096)
+00001E4B: 92                 CALT    ($00A4)
+00001E4C: A6                 DMOV    EA,DE
+00001E4D: AB B2              LDAX    (DE+$B2)
+00001E4F: B5                 DMOV    BC,EA
+00001E50: BC                 STAX    (HL+A)
+00001E51: C1                 JR      $1E53
+00001E52: C9                 JR      $1E5C
+00001E53: CE                 JR      $1E62
+00001E54: D4                 JR      $1E69
+00001E55: DC                 JR      $1E72
+00001E56: E3                 JR      $1E3A
+00001E57: EE                 JR      $1E46
+00001E58: 5D FA              BIT     5,VV:FA
+00001E5A: CD                 JR      $1E68
+00001E5B: 97                 CALT    ($00AE)
+00001E5C: 54 54 11           JMP     $1154
+00001E5F: 0A                 MOV     A,B
+00001E60: DE                 JR      $1E7F
+00001E61: C3                 JR      $1E65
+00001E62: B8                 RET    
+00001E63: A6                 DMOV    EA,DE
+00001E64: 7D 77              CALF    $0D77
+00001E66: 69 60              MVI     A,$60
+00001E68: 53                 DCR     C
+00001E69: 4C 46              illegal 
+00001E6B: 46 46              ADI     A,$46
+00001E6D: 45 46 46           ONIW    VV:46,$46
+00001E70: 02                 INX     SP
+00001E71: 01 01              LDAW    VV:01
+00001E73: 01 01              LDAW    VV:01
+00001E75: 01 01              LDAW    VV:01
+00001E77: 01 00              LDAW    VV:00
+00001E79: 00                 NOP     
+00001E7A: 00                 NOP     
+00001E7B: 00                 NOP     
+00001E7C: 00                 NOP     
+00001E7D: 00                 NOP     
+00001E7E: 00                 NOP     
+00001E7F: 00                 NOP     
+00001E80: 00                 NOP     
+00001E81: 00                 NOP     
+00001E82: 00                 NOP     
+00001E83: 00                 NOP     
+00001E84: 00                 NOP     
+00001E85: 00                 NOP     
+00001E86: 00                 NOP     
+00001E87: 00                 NOP 
+;    
+00001E88: FILL  FF                 JR      $1E88
+;
