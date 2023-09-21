@@ -8,7 +8,7 @@ RAM:0000 ; +--------------------------------------------------------------------
 RAM:0000 ;
 RAM:0000 ; Input MD5   : 43EF13D63448E9FFC48EAAF5A493AD06
 RAM:0000
-RAM:0000 ; last	updated: 20th September	2023
+RAM:0000 ; last	updated: 21st September	2023
 RAM:0000 ; E clock = 2MHz
 RAM:0000 ; Timers: TCNT1=E/4=2us:IGN,INJ,CPS
 RAM:0000 ;	   TCNT2 = E/8=4us:
@@ -25,6 +25,7 @@ RAM:0000 ; Segment type: Pure data
 RAM:0000		 ; segment RAM
 RAM:0000 FCodes3:	 fcb $3F		 ; ...
 RAM:0001 FCodes2:	 fcb $3F		 ; ...
+RAM:0002
 RAM:0002 ;FCodes1:
 RAM:0002 ;bit7
 RAM:0002 ;bit6 - INJ
@@ -35,6 +36,7 @@ RAM:0002 ;bit2 - IFS
 RAM:0002 ;bit1 - MAPL
 RAM:0002 ;bit0 - MAPH
 RAM:0002 FCodes1:	 fcb $3F		 ; ...
+RAM:0003
 RAM:0003 ;FCodes0:
 RAM:0003 ;bit7 - IATH
 RAM:0003 ;bit6 - VSS
@@ -45,6 +47,8 @@ RAM:0003 ;bit2 - WTSL
 RAM:0003 ;bit1 - WTSH
 RAM:0003 ;bit0 - O2S
 RAM:0003 FCodes0:	 fcb $3F		 ; ...
+RAM:0004
+RAM:0004
 RAM:0004 status_4:	 fcb $3F		 ; ...
 RAM:0004					 ; this	is a 16-byte buffer??
 RAM:0005		 fcb $3F ; ?
@@ -86,6 +90,7 @@ RAM:0020 ;bit2 - O2H
 RAM:0020 ;bit1 - PTC
 RAM:0020 ;bit0 - PGC (tank pressure control NF)
 RAM:0020 SR_DATAOUT:	 fcb $3F		 ; ...
+RAM:0021
 RAM:0021 ;SCI_STATUS_21
 RAM:0021 ;bit7 - SCI active?
 RAM:0021 ;bit6 - cleared when header sent
@@ -96,11 +101,13 @@ RAM:0021 ;bit2
 RAM:0021 ;bit1
 RAM:0021 ;bit0
 RAM:0021 SCI_STATUS_21:	 fcb $3F		 ; ...
+RAM:0022
 RAM:0022 ;Controls_22:
 RAM:0022 ; bit7	- IAC cal?
 RAM:0022 ; bit6	- Idle Control
 RAM:0022 ; bit4	- fixed	spark?
 RAM:0022 Ctrls_Status_22:fcb $3F		 ; ...
+RAM:0023
 RAM:0023 ;STATUS_23 - Internal Status
 RAM:0023 ;cleared in SCI ISR
 RAM:0023 ;bit7
@@ -112,11 +119,13 @@ RAM:0023 ;bit2 - 1 if EGR control
 RAM:0023 ;bit1 - 1 if EGR control
 RAM:0023 ;bit0
 RAM:0023 STATUS_23:	 fcb $3F		 ; ...
+RAM:0024
 RAM:0024 ;OBD Status Register1
 RAM:0024 OBD_STATUS_24:	 fcb $3F		 ; ...
 RAM:0025
 RAM:0025 ;OBD Status Register2
 RAM:0025 OBD_STATUS_25:	 fcb $3F		 ; ...
+RAM:0026
 RAM:0026 ;STATUS_26 - Internal Status
 RAM:0026 ;bit7 new CPS_COUNT?
 RAM:0026 ;bit6 WTS>-25C	or 2 shot injection or just pulse pending???
@@ -127,6 +136,7 @@ RAM:0026 ;bit2
 RAM:0026 ;bit1
 RAM:0026 ;bit0 - 1=next	CPS falling edge
 RAM:0026 STATUS_26:	 fcb $3F		 ; ...
+RAM:0027
 RAM:0027 ;STATUS_27 - Reset to 30h at start
 RAM:0027 ;bit7
 RAM:0027 ;bit6 maybe PN/RDL
@@ -137,6 +147,7 @@ RAM:0027 ;bit2 1 = IFS fuel cut
 RAM:0027 ;bit1 Fuel Cut	(RPM limit)
 RAM:0027 ;bit0
 RAM:0027 STATUS_27:	 fcb $3F		 ; ...
+RAM:0028
 RAM:0028 ;STATUS_28 - Internal Status
 RAM:0028 ;bit7 RPM 6500?
 RAM:0028 ;bit6 WTS>30C
@@ -147,6 +158,7 @@ RAM:0028 ;bit2 WTS>35C
 RAM:0028 ;bit1 WTS>20C
 RAM:0028 ;bit0 1=O2 Rich
 RAM:0028 STATUS_28:	 fcb $3F		 ; ...
+RAM:0029
 RAM:0029 ;STATUS_29 - Internal Status
 RAM:0029 ;bit7 O2 sensor fault?
 RAM:0029 ;bit6 = Status2,bit0
@@ -157,6 +169,7 @@ RAM:0029 ;bit2 toggled @
 RAM:0029 ;bit1 1=IAT>-12C?
 RAM:0029 ;bit0 1=WTS>70C
 RAM:0029 Status_29:	 fcb $3F		 ; ...
+RAM:002A
 RAM:002A ;STATUS_2A - Internal Status
 RAM:002A ;bit7
 RAM:002A ;bit6
@@ -167,6 +180,7 @@ RAM:002A ;bit2 - 1=starter engaged
 RAM:002A ;bit1
 RAM:002A ;bit0 - 1=Baro<910mB
 RAM:002A Status_2A:	 fcb $3F		 ; ...
+RAM:002B
 RAM:002B ;STATUS_2B - Elec Load	Event flags
 RAM:002B ;bit7 = 1 = AC	switch ON
 RAM:002B ;bit6 =
@@ -177,6 +191,7 @@ RAM:002B ;bit2 =
 RAM:002B ;bit1 = 0=PN, 1=RDL
 RAM:002B ;bit0 = 1 = RPM>500
 RAM:002B Status_2B:	 fcb $3F		 ; ...
+RAM:002C
 RAM:002C ;IGN_STATUS_2C
 RAM:002C ;bit7 - Electric Loads	On?
 RAM:002C ;bit6 - related to rad	fan
@@ -187,7 +202,7 @@ RAM:002C ;bit2 -
 RAM:002C ;bit1 -
 RAM:002C ;bit0 -
 RAM:002C IGN_STATUS_2C:	 fcb $3F		 ; ...
-RAM:002D ;
+RAM:002D
 RAM:002D ; Status_2D:
 RAM:002D ; Status flags	used in	set_byte_16C
 RAM:002D ;bit7 -
@@ -199,6 +214,7 @@ RAM:002D ;bit2 - 1=WTS>81C, 0=WTS<78C
 RAM:002D ;bit1 - 1=IAT>21C, 0=IAT<18C
 RAM:002D ;bit0 -
 RAM:002D Status_2D:	 fcb $3F		 ; ...
+RAM:002E
 RAM:002E ;STATUS_2E
 RAM:002E ;bit7 -
 RAM:002E ;bit6
@@ -209,6 +225,7 @@ RAM:002E ;bit2 -
 RAM:002E ;bit1 - One of	bit0 is	not true
 RAM:002E ;bit0 - Idle, BattV>12V, WTS>-20, IAT>-20
 RAM:002E ISC_STATUS_2E:	 fcb $3F		 ; ...
+RAM:002F
 RAM:002F ;STATUS_2F
 RAM:002F ;bit7 - MAP<600mB
 RAM:002F ;bit6 - RPM>3000
@@ -219,6 +236,8 @@ RAM:002F ;bit2 - (RPM/VSS?)<44
 RAM:002F ;bit1 -
 RAM:002F ;bit0 - 1 if SDL active and test sw & DN =?
 RAM:002F SL_Status_2F:	 fcb $3F		 ; ...
+RAM:0030
+RAM:0030 ;
 RAM:0030 EGR_STATUS_30:	 fcb $3F		 ; ...
 RAM:0030					 ; EGR?
 RAM:0031 ;PTC_STATUS_31
@@ -231,6 +250,7 @@ RAM:0031 ;bit2 - WTS>80C
 RAM:0031 ;bit1 - RPM>800RPM
 RAM:0031 ;bit0 - BATTV>10V
 RAM:0031 PTC_STATUS_31:	 fcb $3F		 ; ...
+RAM:0032
 RAM:0032 ;O2H_STATUS_32
 RAM:0032 ;bit7 -
 RAM:0032 ;bit6 -
@@ -241,7 +261,10 @@ RAM:0032 ;bit2 -
 RAM:0032 ;bit1 - MAP2>935mB
 RAM:0032 ;bit0 - RPM>2000
 RAM:0032 O2H_STATUS_32:	 fcb $3F		 ; ...
+RAM:0033
+RAM:0033 ;
 RAM:0033 unk_33:	 fcb $3F ; ?
+RAM:0034
 RAM:0034 ;EVAP_STATUS_34
 RAM:0034 ;bit7 -
 RAM:0034 ;bit6 -
@@ -263,6 +286,7 @@ RAM:0036 ;bit2 - RPM<6000
 RAM:0036 ;bit1 - RPM>650
 RAM:0036 ;bit0 - WTS>110C
 RAM:0036 ACO_STATUS_36:	 fcb $3F		 ; ...
+RAM:0037
 RAM:0037 ;RAD_FAN_STAT_37
 RAM:0037 ;bit7 - 1=Rad fan ON
 RAM:0037 ;bit6 -
@@ -273,6 +297,7 @@ RAM:0037 ;bit2 -
 RAM:0037 ;bit1 -
 RAM:0037 ;bit0 -
 RAM:0037 RAD_FAN_STAT_37:fcb $3F		 ; ...
+RAM:0038
 RAM:0038 ;STATUS_38
 RAM:0038 ;bit7 - IGP2 correction needed
 RAM:0038 ;bit6 -
@@ -283,6 +308,7 @@ RAM:0038 ;bit2 -
 RAM:0038 ;bit1 -
 RAM:0038 ;bit0 -
 RAM:0038 STATUS_38:	 fcb $3F		 ; ...
+RAM:0039
 RAM:0039 ;STATUS_39
 RAM:0039 ;bit7 -
 RAM:0039 ;bit6 -
@@ -293,6 +319,7 @@ RAM:0039 ;bit2 -
 RAM:0039 ;bit1 -
 RAM:0039 ;bit0 - 1=Diag	Tst Sw active
 RAM:0039 Status_39:	 fcb $3F		 ; ...
+RAM:003A
 RAM:003A ;CONFIG_3A
 RAM:003A ; bits3-0 are config but not read.
 RAM:003A ;bit7 - 1= auto trans
@@ -304,6 +331,8 @@ RAM:003A ;bit2 - CFG2
 RAM:003A ;bit1 - CFG1
 RAM:003A ;bit0 - CFG0
 RAM:003A CONFIG_3A:	 fcb $3F		 ; ...
+RAM:003B
+RAM:003B
 RAM:003B CNT_4ms:	 fcb $3F		 ; ...
 RAM:003C ML_Tick_4_1ms:	 fcb $3F		 ; ...
 RAM:003C					 ; counter ???
@@ -57320,7 +57349,7 @@ ROM:F0B9		 staa	 O2S_V
 ROM:F0BB		 cmpa	 #$1C		 ; O2S - 550mV
 ROM:F0BD		 bcs	 O2_Lean	 ; bra if O2S <	550mV
 ROM:F0BF
-ROM:F0BF O2_Rich:				 ; =13h
+ROM:F0BF O2_Rich:				 ; timer value for a closed loop function
 ROM:F0BF		 ldab	 O2S_C7D7
 ROM:F0C2		 stab	 O2S_CNT_147	 ; closed loop related
 ROM:F0C5		 brclr	 STATUS_28 1 loc_F0D0 ;	bra if O2 = lean
@@ -57329,7 +57358,7 @@ ROM:F0CD		 bset	 Status_29 $20 ; ' ' ; set O2Sensor activated
 ROM:F0D0
 ROM:F0D0 loc_F0D0:				 ; ...
 ROM:F0D0		 bset	 STATUS_28 1	 ; set O2 = rich mixture
-ROM:F0D3		 bra	 O2S_F0EA	 ; 450mV ??????
+ROM:F0D3		 bra	 O2S_F0EA
 ROM:F0D5 ; ---------------------------------------------------------------------------
 ROM:F0D5
 ROM:F0D5 O2_Lean:				 ; ...
@@ -57340,7 +57369,7 @@ ROM:F0DF		 stab	 O2S_CNT_147	 ; closed loop related
 ROM:F0E2
 ROM:F0E2 loc_F0E2:				 ; ...
 ROM:F0E2		 ldab	 O2S_CNT_147	 ; closed loop related
-ROM:F0E5		 bne	 O2S_F0EA	 ; 450mV ??????
+ROM:F0E5		 bne	 O2S_F0EA
 ROM:F0E7		 bclr	 Status_29 $20 ; ' ' ; set O2S inactive
 ROM:F0EA
 ROM:F0EA O2S_F0EA:				 ; ...
