@@ -51754,13 +51754,13 @@ ROM:D13F		 cmpa	 0,x		 ; byte_157 - LUT value
 ROM:D141		 bcs	 locret_D147
 ROM:D143
 ROM:D143 loc_D143:				 ; ...
-ROM:D143		 brclr	 STATUS_23 4 loc_D148 ;	bra if no EGR control?
+ROM:D143		 brclr	 STATUS_23 4 do_LTFT? ;	bra if no EGR control?
 ROM:D147
 ROM:D147 locret_D147:				 ; ...
 ROM:D147		 rts
 ROM:D148 ; ---------------------------------------------------------------------------
 ROM:D148
-ROM:D148 loc_D148:				 ; ...
+ROM:D148 do_LTFT?:				 ; ...
 ROM:D148		 ldx	 #4
 ROM:D14B		 abx
 ROM:D14C		 ldab	 #1
@@ -51812,13 +51812,13 @@ ROM:D18C		 ldx	 #$D0F7
 ROM:D18F		 jsr	 TABLE_LU_1x2
 ROM:D192		 pulx
 ROM:D193		 cmpa	 0,x
-ROM:D195		 bne	 loc_D198
+ROM:D195		 bne	 calc_LTFT?
 ROM:D197
 ROM:D197 locret_D197:				 ; ...
 ROM:D197		 rts
 ROM:D198 ; ---------------------------------------------------------------------------
 ROM:D198
-ROM:D198 loc_D198:				 ; ...
+ROM:D198 calc_LTFT?:				 ; ...
 ROM:D198		 pshx
 ROM:D199		 psha
 ROM:D19A		 ldd	 new_LTFT_14
