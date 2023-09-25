@@ -8,7 +8,7 @@ RAM:0000 ; +--------------------------------------------------------------------
 RAM:0000 ;
 RAM:0000 ; Input MD5   : 43EF13D63448E9FFC48EAAF5A493AD06
 RAM:0000
-RAM:0000 ; last	updated: 21st September	2023
+RAM:0000 ; last	updated: 25th September	2023
 RAM:0000 ; E clock = 2MHz
 RAM:0000 ; Timers: TCNT1=E/4=2us:IGN,INJ,CPS
 RAM:0000 ;	   TCNT2 = E/8=4us:
@@ -219,7 +219,7 @@ RAM:002E ;STATUS_2E
 RAM:002E ;bit7 -
 RAM:002E ;bit6
 RAM:002E ;bit5 - VSS>1.25MPH?
-RAM:002E ;bit4 - RPM<600?
+RAM:002E ;bit4 - RPM<target
 RAM:002E ;bit3 -
 RAM:002E ;bit2 -
 RAM:002E ;bit1 - One of	bit0 is	not true
@@ -302,14 +302,14 @@ RAM:0038 ;STATUS_38
 RAM:0038 ;bit7 - IGP2 correction needed
 RAM:0038 ;bit6 -
 RAM:0038 ;bit5 -
-RAM:0038 ;bit4 - O2S Fault high?
+RAM:0038 ;bit4 - 1 = memory self test active
 RAM:0038 ;bit3 -
 RAM:0038 ;bit2 -
 RAM:0038 ;bit1 -
 RAM:0038 ;bit0 -
 RAM:0038 STATUS_38:	 fcb $3F		 ; ...
 RAM:0039
-RAM:0039 ;STATUS_39
+RAM:0039 ;DIAG_STAT_39
 RAM:0039 ;bit7 -
 RAM:0039 ;bit6 -
 RAM:0039 ;bit5 -
@@ -318,7 +318,7 @@ RAM:0039 ;bit3 - Test SW & DN =	?
 RAM:0039 ;bit2 -
 RAM:0039 ;bit1 -
 RAM:0039 ;bit0 - 1=Diag	Tst Sw active
-RAM:0039 Status_39:	 fcb $3F		 ; ...
+RAM:0039 Diag_Stat_39:	 fcb $3F		 ; ...
 RAM:003A
 RAM:003A ;CONFIG_3A
 RAM:003A ; bits3-0 are config but not read.
@@ -576,21 +576,21 @@ RAM:00F7 VSS:		 fcb $3F		 ; ...
 RAM:00F7					 ; VSS=kmh
 RAM:00F8 RPM_VSS_F8:	 fcb $3F		 ; ...
 RAM:00F8					 ; RPM/(200*VSS)
-RAM:00F9 ISC_F9:	 fcb $3F		 ; ...
+RAM:00F9 ISC_OC_PW:	 fcb $3F		 ; ...
 RAM:00FA		 fcb $3F ; ?
 RAM:00FB ISC_Last_F9:	 fcb $3F		 ; ...
 RAM:00FB					 ; a copy of ISCTargetPos
 RAM:00FC		 fcb $3F ; ?
 RAM:00FD WTS_BARO_FD?:	 fcb $3F		 ; ...
 RAM:00FE		 fcb $3F ; ?
-RAM:00FF ISC_FF:	 fcb $3F		 ; ...
+RAM:00FF ISC_WTS_FF:	 fcb $3F		 ; ...
 RAM:0100		 fcb $3F ; ?
 RAM:0101 ISC_101:	 fdb $3F3F		 ; ...
 RAM:0103 ISC_103:	 fdb $3F3F		 ; ...
 RAM:0105 ISC_IAT_CORR:	 fdb $3F3F		 ; ...
 RAM:0107 ISC_PS_CORR:	 fdb $3F3F		 ; ...
 RAM:0109 ISC_RFAN_CORR:	 fdb $3F3F		 ; ...
-RAM:010B word_10B:	 fdb $3F3F		 ; ...
+RAM:010B ISC_POS_10B:	 fdb $3F3F		 ; ...
 RAM:010D word_10D:	 fdb $3F3F		 ; ...
 RAM:010F ISC_Last_Pos:	 fdb $3F3F		 ; ...
 RAM:010F					 ; last	IAC position
@@ -611,7 +611,7 @@ RAM:011D ISC_Cnt_11D:	 fdb $3F3F		 ; ...
 RAM:011F CNT_11F:	 fcb $3F		 ; ...
 RAM:0120 CNT_120:	 fcb $3F		 ; ...
 RAM:0121 CNT_121:	 fcb $3F		 ; ...
-RAM:0122 byte_122:	 fcb $3F		 ; ...
+RAM:0122 ISC_CNT_122:	 fcb $3F		 ; ...
 RAM:0123 ISCCount123:	 fcb $3F		 ; ...
 RAM:0124 ISC_Cnt_124:	 fcb $3F		 ; ...
 RAM:0125 WTS_SH_125:	 fcb $3F		 ; ...
@@ -49398,7 +49398,7 @@ ROM:C288 TIDLE_v_WTS_6:	 fcb   0
 ROM:C289		 fcb $C0 ; À
 ROM:C28A		 fcb   8
 ROM:C28B		 fcb $F0,$E0,$C0,$B8,$7C,$5A,$4C; 0
-ROM:C292 X_C292:	 fcb   0
+ROM:C292 X_C292_ISC:	 fcb   0
 ROM:C293		 fcb $60 ; `
 ROM:C294		 fcb $40 ; @
 ROM:C295		 fdb $8400,$8400,$8400,$8400,$8400,$8380,$8300,$8280; 0
@@ -49446,7 +49446,8 @@ ROM:C365 X_C365_WTS:	 fcb   0		 ; min -40C
 ROM:C366		 fcb $C0 ; À		 ; max 80C
 ROM:C367		 fcb   8
 ROM:C368		 fdb $418,$418,$418,$418,$418,$312,$20C; 0
-ROM:C376 where is this called from?
+ROM:C376 ISC Pulse Width  v ISC	target error
+ROM:C376 referenced as X_C373 (no header)
 ROM:C376 X_C376:	 fdb $9A00,$9A00,$9A00,$9A00,$9731,$9388,$905B,$8CB2,$89C4,$8753; 0
 ROM:C376		 fdb $855F,$8307,$8000,$7E00,$7CB5,$7B9B,$7A50,$79E6,$79E6; 10
 ROM:C39C X_C39C:	 fcb   0
@@ -50012,8 +50013,8 @@ ROM:C8B7 word_C8B7:	 fdb $16F		 ; ...
 ROM:C8B7					 ; value for ISC_PS_CORR
 ROM:C8B9 word_C8B9:	 fdb $40		 ; ...
 ROM:C8B9					 ; decrement value for a counter WTS_BARO_FD?
-ROM:C8BB X_C8BB:	 fdb $20C		 ; ISC related MT
-ROM:C8BD X_C8BD:	 fdb $20C		 ; ISC related auto
+ROM:C8BB X_C8BB_ISC_MT:	 fdb $20C		 ; ISC related MT
+ROM:C8BD X_C8BD_ISC_AT:	 fdb $20C		 ; ISC related auto
 ROM:C8BF byte_C8BF:	 fcb $1E		 ; ...
 ROM:C8BF					 ; init	value for  byte_16 MT
 ROM:C8C0		 fcb $1B
@@ -50778,7 +50779,7 @@ ROM:CC0A		 ldd	 INJ_PW		 ; inj pw * 2us	(one shot or shot one of two)
 ROM:CC0C		 jsr	 Mult?
 ROM:CC0F		 lsld
 ROM:CC10		 std	 INJ_PW		 ; comes here during cranking
-ROM:CC12		 brset	 STATUS_38 $10 loc_CC62	; bra if O2S fail
+ROM:CC12		 brset	 STATUS_38 $10 loc_CC62	; bra if memory	test active
 ROM:CC16
 ROM:CC16 CL_CORR?:				 ; Closed Loop correction?
 ROM:CC16		 ldd	 CPS_CNT_div256
@@ -51219,7 +51220,7 @@ ROM:CE1E ; =============== S U B R O U T I N E =================================
 ROM:CE1E
 ROM:CE1E
 ROM:CE1E WTS_FLT_CLR_A4_AD:			 ; ...
-ROM:CE1E		 brclr	 STATUS_38 $10 SET_WTS_A4 ; bra	if no WTS error
+ROM:CE1E		 brclr	 STATUS_38 $10 SET_WTS_A4 ; bra	if memory test inactive
 ROM:CE22 if WTS	fault clear A4 and AD
 ROM:CE22		 clra
 ROM:CE23		 clrb
@@ -52369,7 +52370,7 @@ ROM:D489		 idiv			 ; X.D = n(dTPSA)/20
 ROM:D48A		 xgdx			 ; remainder ->	x
 ROM:D48B		 coma
 ROM:D48C		 negb
-ROM:D48D		 sbca	 #ISC_FF	 ; D = 2's comp (back to signed integer)
+ROM:D48D		 sbca	 #ISC_WTS_FF	 ; D = 2's comp (back to signed integer)
 ROM:D48F
 ROM:D48F loc_D48F:				 ; ...
 ROM:D48F		 addd	 TPSA_78
@@ -52800,7 +52801,7 @@ ROM:D6D6		 decb
 ROM:D6D7		 stab	 COUNT_163	 ; decrement counter
 ROM:D6DA		 bne	 locret_D6FB	 ; exit	if COUNT_163 has not timed out
 ROM:D6DC		 ldaa	 TPSV_8_2ms	 ; a = TPS Volts
-ROM:D6DE		 suba	 word_10B	 ; TPSV	- 63
+ROM:D6DE		 suba	 ISC_POS_10B	 ; TPSV	- 63
 ROM:D6E1		 bcc	 loc_D6E4	 ; bra if TPSV>63
 ROM:D6E3		 clra			 ; else	set TPSV minimum to 63
 ROM:D6E4
@@ -54020,7 +54021,7 @@ ROM:DD19
 ROM:DD19
 ROM:DD19 do_DutyOutput:				 ; ...
 ROM:DD19		 brset	 SCI_STATUS_21 $80 do_SL ; '' ; diag socket disabled if SDL active
-ROM:DD1D		 brclr	 Status_39 4 do_ISC_DC ; bra if	test sw	& Diag = ?
+ROM:DD1D		 brclr	 Diag_Stat_39 4	do_ISC_DC ; bra	if test	sw & Diag = ?
 ROM:DD21		 bset	 SL_Status_2F 1
 ROM:DD24		 ldaa	 PWEN		 ; PWEN	PWM Timer Enable
 ROM:DD27		 oraa	 #4
@@ -54057,7 +54058,7 @@ ROM:DD52		 bra	 loc_DD85	 ; bra if manual trans
 ROM:DD54 ; ---------------------------------------------------------------------------
 ROM:DD54
 ROM:DD54 do_ISC_DC:				 ; ...
-ROM:DD54		 brclr	 Status_39 1 do_SL ; bra if diag tst sw	inactive
+ROM:DD54		 brclr	 Diag_Stat_39 1	do_SL ;	bra if diag tst	sw inactive
 ROM:DD58		 bset	 SL_Status_2F 1	 ; set diag_tst_sw active?
 ROM:DD5B		 ldaa	 PWEN		 ; PWEN	PWM Timer Enable
 ROM:DD5E		 oraa	 #4
@@ -54068,6 +54069,8 @@ ROM:DD68		 mul
 ROM:DD69		 staa	 PWDTY3		 ; output ISC duty check
 ROM:DD6C		 bra	 loc_DD85	 ; bra if manual trans
 ROM:DD6E ; ---------------------------------------------------------------------------
+ROM:DD6E do_SL:
+ROM:DD6E Check the conditions that set or clear	the status bits	for the	shift light.
 ROM:DD6E
 ROM:DD6E do_SL:					 ; ...
 ROM:DD6E		 brclr	 SL_Status_2F 1	loc_DD7D ; disable PWM on PW3 (shift light)
@@ -54082,14 +54085,14 @@ ROM:DD80		 anda	 #$FB ;	'û'
 ROM:DD82		 staa	 PWEN		 ; PWEN	PWM Timer Enable
 ROM:DD85
 ROM:DD85 loc_DD85:				 ; ...
-ROM:DD85		 brclr	 CONFIG_3A $80 loc_DD92	; '' ; bra if manual trans
+ROM:DD85		 brclr	 CONFIG_3A $80 MAP_DD92	; '' ; bra if manual trans
 ROM:DD89		 ldaa	 PORTH		 ; PORTH I_O Port H
 ROM:DD8C		 anda	 #$FB ;	'û'      ; clear shift light
 ROM:DD8E		 staa	 PORTH		 ; PORTH I_O Port H
 ROM:DD91		 rts
 ROM:DD92 ; ---------------------------------------------------------------------------
 ROM:DD92
-ROM:DD92 loc_DD92:				 ; ...
+ROM:DD92 MAP_DD92:				 ; ...
 ROM:DD92		 ldaa	 MAP_16b_AV	 ; =MAP/5.03 - changes with MAP	maybe because of MAP fault code??
 ROM:DD94		 ldab	 byte_C8DF	 ; =600mB
 ROM:DD97		 cba			 ; (MAP-600mB)
@@ -54099,10 +54102,10 @@ ROM:DD9D
 ROM:DD9D loc_DD9D:				 ; ...
 ROM:DD9D		 subb	 #6		 ; B=560mB
 ROM:DD9F		 cba			 ; (MAP-560mB)
-ROM:DDA0		 bcc	 loc_DDA5	 ; bra if MAP>560mB
+ROM:DDA0		 bcc	 RPM_DDA5	 ; bra if MAP>560mB
 ROM:DDA2		 bclr	 SL_Status_2F $80 ; '' ; clear status if MAP dropped below 560mB
 ROM:DDA5
-ROM:DDA5 loc_DDA5:				 ; ...
+ROM:DDA5 RPM_DDA5:				 ; ...
 ROM:DDA5		 ldaa	 RPMdiv50	 ; RPMdiv50 is a byte, as a double it is RPM/5.12
 ROM:DDA7		 ldab	 byte_C8E1	 ; 3000RPM
 ROM:DDAA		 cba			 ; RPM-3000
@@ -54112,10 +54115,10 @@ ROM:DDB0
 ROM:DDB0 loc_DDB0:				 ; ...
 ROM:DDB0		 subb	 byte_C8E2	 ; 2950RPM
 ROM:DDB3		 cba			 ; RPM-2950
-ROM:DDB4		 bcc	 loc_DDB9	 ; 1800RPM
+ROM:DDB4		 bcc	 RPM_DDB9	 ; 1800RPM
 ROM:DDB6		 bclr	 SL_Status_2F $40 ; '@' ; RPM<2950
 ROM:DDB9
-ROM:DDB9 loc_DDB9:				 ; ...
+ROM:DDB9 RPM_DDB9:				 ; ...
 ROM:DDB9		 ldab	 byte_C8E0	 ; 1800RPM
 ROM:DDBC		 cba			 ; RPM-1800
 ROM:DDBD		 bcs	 loc_DDC2	 ; 1750RPM
@@ -54124,17 +54127,17 @@ ROM:DDC2
 ROM:DDC2 loc_DDC2:				 ; ...
 ROM:DDC2		 subb	 byte_C8E2	 ; 1750RPM
 ROM:DDC5		 cba			 ; RPM-1750
-ROM:DDC6		 bcc	 loc_DDCB
+ROM:DDC6		 bcc	 VSS_DDCB
 ROM:DDC8		 bclr	 SL_Status_2F $20 ; ' ' ; RPM<1750
 ROM:DDCB
-ROM:DDCB loc_DDCB:				 ; ...
+ROM:DDCB VSS_DDCB:				 ; ...
 ROM:DDCB		 ldaa	 VSS		 ; VSS=kmh
 ROM:DDCD		 ldab	 byte_C8DD	 ; VSS_8_7MPH
 ROM:DDD0		 cba			 ; VSS-8.7mph
-ROM:DDD1		 bcs	 loc_DDD6	 ; 3.1MPH
+ROM:DDD1		 bcs	 VSS_DDD6	 ; 3.1MPH
 ROM:DDD3		 bset	 SL_Status_2F $10 ; VSS>8.7mph
 ROM:DDD6
-ROM:DDD6 loc_DDD6:				 ; ...
+ROM:DDD6 VSS_DDD6:				 ; ...
 ROM:DDD6		 ldab	 byte_C8DC	 ; 3.1MPH
 ROM:DDD9		 cba			 ; VSS-3.1MPH
 ROM:DDDA		 bcs	 loc_DDDF	 ; 1.9MPH
@@ -54156,10 +54159,10 @@ ROM:DDF2
 ROM:DDF2 loc_DDF2:				 ; ...
 ROM:DDF2		 subb	 #2		 ; B=42
 ROM:DDF4		 cba			 ; (RPM/VSS)-42
-ROM:DDF5		 bcc	 loc_DDFA	 ; bra if (RPM/VSS)>42
+ROM:DDF5		 bcc	 Clr_SL_DDFA	 ; bra if (RPM/VSS)>42
 ROM:DDF7		 bclr	 SL_Status_2F 4	 ; clear status	if (RPM/VSS)<42
 ROM:DDFA
-ROM:DDFA loc_DDFA:				 ; ...
+ROM:DDFA Clr_SL_DDFA:				 ; ...
 ROM:DDFA		 brclr	 STATUS_27 $20 do_SHIFT_LIGHT ;	' ' ; bra if rpm>500
 ROM:DDFE		 brset	 SL_Status_2F 1	locret_DE0A
 ROM:DE02		 ldaa	 PORTH		 ; PORTH I_O Port H
@@ -54169,6 +54172,8 @@ ROM:DE0A
 ROM:DE0A locret_DE0A:				 ; ...
 ROM:DE0A		 rts
 ROM:DE0B ; ---------------------------------------------------------------------------
+ROM:DE0B do_SHIFT_LIGHT:
+ROM:DE0B Test the status flags and set ot clear	the shift light
 ROM:DE0B
 ROM:DE0B do_SHIFT_LIGHT:			 ; ...
 ROM:DE0B		 brclr	 SL_Status_2F 8	loc_DE4C ; bra if rpm>3mph
@@ -55127,7 +55132,7 @@ ROM:E3E9 clear_ISC_F9:				 ; ...
 ROM:E3E9		 sei
 ROM:E3EA		 clra
 ROM:E3EB		 clrb
-ROM:E3EC		 std	 ISC_F9
+ROM:E3EC		 std	 ISC_OC_PW	 ; set ISC PW to 0
 ROM:E3EE		 cli
 ROM:E3EF		 rts
 ROM:E3EF ; End of function clear_ISC_F9
@@ -55136,30 +55141,30 @@ ROM:E3F0
 ROM:E3F0 ; =============== S U B R O U T I N E =======================================
 ROM:E3F0
 ROM:E3F0
-ROM:E3F0 sub_E3F0:				 ; ...
+ROM:E3F0 calc_ISC_Cnt_11A:			 ; ...
 ROM:E3F0		 brclr	 STATUS_27 $10 locret_E413 ; exit if idle switch OFF
 ROM:E3F4		 ldaa	 WTS_127	 ; this	is a copy of WTS_CNT_151
 ROM:E3F7		 lsra
 ROM:E3F8		 brclr	 Status_2B 2 loc_E405 ;	bra if auto in RDL
 ROM:E3FC		 adda	 byte_C88B	 ; offset for WTS_127 if auto in PN
-ROM:E3FF		 bcc	 loc_E40C
+ROM:E3FF		 bcc	 setCount
 ROM:E401		 ldaa	 #$FF
-ROM:E403		 bra	 loc_E40C
+ROM:E403		 bra	 setCount
 ROM:E405 ; ---------------------------------------------------------------------------
 ROM:E405
 ROM:E405 loc_E405:				 ; ...
 ROM:E405		 adda	 byte_C88C	 ; offset for WTS_127 if auto in RDL
-ROM:E408		 bcc	 loc_E40C
+ROM:E408		 bcc	 setCount
 ROM:E40A		 ldaa	 #$FF
 ROM:E40C
-ROM:E40C loc_E40C:				 ; ...
+ROM:E40C setCount:				 ; ...
 ROM:E40C		 staa	 count_11A+1	 ; related to ISC
 ROM:E40F		 clra
 ROM:E410		 staa	 count_11A	 ; related to ISC
 ROM:E413
 ROM:E413 locret_E413:				 ; ...
 ROM:E413		 rts
-ROM:E413 ; End of function sub_E3F0
+ROM:E413 ; End of function calc_ISC_Cnt_11A
 ROM:E413
 ROM:E414
 ROM:E414 ; =============== S U B R O U T I N E =======================================
@@ -55350,15 +55355,17 @@ ROM:E538		 clra
 ROM:E539		 clrb
 ROM:E53A		 std	 ISC_PS_CORR
 ROM:E53D		 ldd	 ISC_103
-ROM:E540		 addd	 word_C8AB	 ; alt.	value added to ISC_103
+ROM:E540		 addd	 word_C8AB	 ; add correction to ISC_103
 ROM:E543		 std	 ISC_103
-ROM:E546		 ldab	 byte_C894	 ; alt.	value for count_11A
+ROM:E546		 ldab	 byte_C894	 ; value for 11A
+ROM:E549
+ROM:E549 copy B	to 11A,	if 11B=0 then 11B = 11A
 ROM:E549
 ROM:E549 loc_E549:				 ; ...
 ROM:E549		 stab	 count_11A	 ; related to ISC
 ROM:E54C		 ldaa	 count_11A+1	 ; related to ISC
-ROM:E54F		 beq	 locret_E554
-ROM:E551		 stab	 count_11A+1	 ; related to ISC
+ROM:E54F		 beq	 locret_E554	 ; bra if 11B =	0
+ROM:E551		 stab	 count_11A+1	 ; else	11B = 11A
 ROM:E554
 ROM:E554 locret_E554:				 ; ...
 ROM:E554		 rts
@@ -55500,7 +55507,9 @@ ROM:E61B		 abx
 ROM:E61C		 ldaa	 WTS_LIN
 ROM:E61E		 jsr	 TABLE_LU_2D	 ; (WTS) table look up with max	and min
 ROM:E621		 brclr	 Ctrls_Status_22 $40 loc_E628 ;	'@' ; are we controlled by SDL command?
-ROM:E625		 ldaa	 Control_T_Idle	 ; yes,	load command value
+ROM:E625
+ROM:E625 SDLControl:				 ; yes,	load command value
+ROM:E625		 ldaa	 Control_T_Idle
 ROM:E628
 ROM:E628 loc_E628:				 ; ...
 ROM:E628		 staa	 TIDLE_RPM	 ; store calculated value or command value
@@ -55508,23 +55517,25 @@ ROM:E62B		 brset	 STATUS_27 $20 loc_E63D	; ' ' ; bra if rpm<500
 ROM:E62F		 lsra
 ROM:E630		 lsra
 ROM:E631		 lsra
-ROM:E632		 adda	 #$C
-ROM:E634		 cmpa	 RPMdiv50	 ; 600-RPMH
-ROM:E636		 bhi	 loc_E640	 ; bra if RPMH<600
-ROM:E638		 bset	 ISC_STATUS_2E $10 ; set status	rpm<600
+ROM:E632		 adda	 #$C		 ; = (TIDLE_RPM/8) + 600rpm
+ROM:E634		 cmpa	 RPMdiv50	 ; target Idle - RPM
+ROM:E636		 bhi	 loc_E640	 ; bra if target>RPM
+ROM:E638		 bset	 ISC_STATUS_2E $10 ; setRPM<target
 ROM:E63B		 bra	 loc_E640	 ; bra if idle switch ON
 ROM:E63D ; ---------------------------------------------------------------------------
 ROM:E63D
 ROM:E63D loc_E63D:				 ; ...
-ROM:E63D		 bclr	 ISC_STATUS_2E $10 ; clear status rpm<600
+ROM:E63D		 bclr	 ISC_STATUS_2E $10 ; clear rpm<target
 ROM:E640
 ROM:E640 loc_E640:				 ; ...
 ROM:E640		 brset	 STATUS_27 $10 loc_E654	; bra if idle switch ON
+ROM:E644
+ROM:E644 reset stuff if	idle sw	inactive
 ROM:E644		 bclr	 ISC_STATUS_2E $28 ; '('
 ROM:E647		 clra
 ROM:E648		 clrb
 ROM:E649		 std	 count_11A	 ; related to ISC
-ROM:E64C		 std	 ISC_FF
+ROM:E64C		 std	 ISC_WTS_FF
 ROM:E64E		 std	 ISC_Cnt_11D
 ROM:E651		 jmp	 loc_E6A5
 ROM:E654 ; ---------------------------------------------------------------------------
@@ -55571,14 +55582,14 @@ ROM:E690		 ldx	 #$C365		 ; load	if manual
 ROM:E693
 ROM:E693 loc_E693:				 ; ...
 ROM:E693		 jsr	 TABLE_LU_16bit
-ROM:E696		 std	 ISC_FF
+ROM:E696		 std	 ISC_WTS_FF
 ROM:E698 calc_byte_122
 ROM:E698		 ldaa	 byte_C8D2	 ; =1h
 ROM:E69B		 brset	 CONFIG_3A $80 loc_E6A2	; '' ; bra if auto trans
 ROM:E69F		 ldaa	 byte_C8D3	 ; =1h if manual
 ROM:E6A2
 ROM:E6A2 loc_E6A2:				 ; ...
-ROM:E6A2		 staa	 byte_122
+ROM:E6A2		 staa	 ISC_CNT_122
 ROM:E6A5
 ROM:E6A5 loc_E6A5:				 ; ...
 ROM:E6A5		 ldx	 TimeFromStart	 ; get TimeFromStart
@@ -55644,21 +55655,24 @@ ROM:E70E
 ROM:E70E loc_E70E:				 ; ...
 ROM:E70E		 std	 ISC_IAT_CORR
 ROM:E711		 ldx	 #$C2E4		 ; load	if auto
-ROM:E714		 brclr	 CONFIG_3A $80 MT_E722 ; '' ; bra if manual trans
+ROM:E714		 brclr	 CONFIG_3A $80 anyTrans_E722 ; '' ; bra if manual trans
 ROM:E718
 ROM:E718 AT_E718:				 ; load	if auto
 ROM:E718		 ldx	 #$C2C7
-ROM:E71B		 brclr	 Status_2B 2 MT_E722 ; bra if auto in RDL
+ROM:E71B		 brclr	 Status_2B 2 anyTrans_E722 ; bra if auto in RDL
 ROM:E71F		 ldx	 #$C301
+ROM:E722 MT_E722:
+ROM:E722 calculate a WTS correction and	then
+ROM:E722 sum the ISC corrections and add to ISC_113
 ROM:E722
-ROM:E722 MT_E722:				 ; ...
+ROM:E722 anyTrans_E722:				 ; ...
 ROM:E722		 ldaa	 WTS_LIN
 ROM:E724		 jsr	 TABLE_LU_16bit
 ROM:E727		 addd	 ISC_IAT_CORR
 ROM:E72A		 addd	 ISC_PS_CORR
 ROM:E72D		 addd	 ISC_RFAN_CORR
 ROM:E730		 addd	 WTS_BARO_FD?
-ROM:E732		 addd	 ISC_FF
+ROM:E732		 addd	 ISC_WTS_FF
 ROM:E734		 ldx	 ISC_113
 ROM:E737		 addd	 0,x
 ROM:E739		 xgdx
@@ -55695,14 +55709,15 @@ ROM:E764 AT_MT_E764:				 ; ...
 ROM:E764		 brclr	 ISC_STATUS_2E $80 loc_E7B1 ; ''
 ROM:E768		 pshb
 ROM:E769		 psha
-ROM:E76A		 subd	 word_10B
+ROM:E76A		 subd	 ISC_POS_10B
 ROM:E76D		 bcs	 loc_E78E
 ROM:E76F		 cpd	 word_C8CD	 ; =659
 ROM:E773		 pula
 ROM:E774		 pulb
 ROM:E775		 bcs	 loc_E7B1
-ROM:E777		 ldd	 word_10B
+ROM:E777		 ldd	 ISC_POS_10B
 ROM:E77A		 addd	 word_C8CD	 ; =659
+ROM:E77D Update	ISC_103
 ROM:E77D		 std	 ISC_103
 ROM:E780		 pshb
 ROM:E781		 psha
@@ -55724,7 +55739,7 @@ ROM:E792		 cpd	 word_C8CD	 ; ISC related
 ROM:E796		 pula
 ROM:E797		 pulb
 ROM:E798		 bcs	 loc_E7B1
-ROM:E79A		 ldd	 word_10B
+ROM:E79A		 ldd	 ISC_POS_10B
 ROM:E79D		 subd	 word_C8CD	 ; ISC related
 ROM:E7A0		 bcc	 loc_E7A4
 ROM:E7A2		 clra
@@ -55742,7 +55757,7 @@ ROM:E7AF		 pula
 ROM:E7B0		 pulb
 ROM:E7B1
 ROM:E7B1 loc_E7B1:				 ; ...
-ROM:E7B1		 std	 word_10B
+ROM:E7B1		 std	 ISC_POS_10B
 ROM:E7B4		 brclr	 STATUS_27 $10 loc_E7BB	; bra if idle switch OFF
 ROM:E7B8		 std	 word_10D
 ROM:E7BB
@@ -55757,12 +55772,12 @@ ROM:E7CC		 ldaa	 WTS_LIN
 ROM:E7CE		 staa	 WTS_SH_125
 ROM:E7D1		 brclr	 STATUS_27 $10 Timers_E7E8 ; bra if idle switch	OFF
 ROM:E7D5		 ldd	 ISC_Target_Pos
-ROM:E7D7		 cpd	 word_10B
+ROM:E7D7		 cpd	 ISC_POS_10B
 ROM:E7DB		 bcc	 Timers_E7E8
 ROM:E7DD		 ldaa	 WTS_LIN
 ROM:E7DF		 ldx	 #$C22F
 ROM:E7E2		 jsr	 TABLE_LU_16bit
-ROM:E7E5		 jmp	 loc_EA02
+ROM:E7E5		 jmp	 loc_EA02	 ; test	zero
 ROM:E7E8 ; ---------------------------------------------------------------------------
 ROM:E7E8 ; Update some timers
 ROM:E7E8
@@ -55833,16 +55848,16 @@ ROM:E84E		 ldx	 ISC_113
 ROM:E851		 cmpa	 0,x
 ROM:E853		 bcc	 loc_E85B
 ROM:E855		 ldd	 word_C87B	 ; related to ISC
-ROM:E858		 jmp	 loc_EA02
+ROM:E858		 jmp	 loc_EA02	 ; test	zero
 ROM:E85B ; ---------------------------------------------------------------------------
 ROM:E85B
 ROM:E85B loc_E85B:				 ; ...
 ROM:E85B		 brset	 ISC_STATUS_2E $40 loc_E883 ; '@'
-ROM:E85F		 ldab	 word_10B
+ROM:E85F		 ldab	 ISC_POS_10B
 ROM:E862		 addb	 byte_C871	 ; used	when determining if we have reached ISC_Target_Pos
 ROM:E865		 cba
 ROM:E866		 bcs	 loc_E883
-ROM:E868		 ldab	 word_10B
+ROM:E868		 ldab	 ISC_POS_10B
 ROM:E86B		 addb	 #2
 ROM:E86D		 ldaa	 ISC_TPOS_T1
 ROM:E870		 cba
@@ -55853,7 +55868,7 @@ ROM:E879		 brset	 CONFIG_3A $80 loc_E880	; '' ; bra if auto trans
 ROM:E87D		 ldd	 word_C875	 ; 836Bh if manual
 ROM:E880
 ROM:E880 loc_E880:				 ; ...
-ROM:E880		 jmp	 loc_EA02
+ROM:E880		 jmp	 loc_EA02	 ; test	zero
 ROM:E883 ; ---------------------------------------------------------------------------
 ROM:E883
 ROM:E883 loc_E883:				 ; ...
@@ -55862,7 +55877,7 @@ ROM:E885		 cmpa	 ISC_Cnt_124
 ROM:E888		 bne	 locret_E893
 ROM:E88A		 inc	 ISC_Cnt_124
 ROM:E88D		 ldd	 word_C87D	 ; related to ISC
-ROM:E890		 jmp	 loc_EA02
+ROM:E890		 jmp	 loc_EA02	 ; test	zero
 ROM:E893 ; ---------------------------------------------------------------------------
 ROM:E893
 ROM:E893 locret_E893:				 ; ...
@@ -55886,7 +55901,7 @@ ROM:E8B5		 brset	 CONFIG_3A $80 loc_E8BC	; '' ; bra if auto trans
 ROM:E8B9		 ldd	 word_C879	 ; 7C95h if manual
 ROM:E8BC
 ROM:E8BC loc_E8BC:				 ; ...
-ROM:E8BC		 jmp	 loc_EA02
+ROM:E8BC		 jmp	 loc_EA02	 ; test	zero
 ROM:E8BF ; ---------------------------------------------------------------------------
 ROM:E8BF
 ROM:E8BF loc_E8BF:				 ; ...
@@ -55896,10 +55911,10 @@ ROM:E8C6 ; ---------------------------------------------------------------------
 ROM:E8C6
 ROM:E8C6 loc_E8C6:				 ; ...
 ROM:E8C6		 bclr	 ISC_STATUS_2E 8
-ROM:E8C9		 clra
+ROM:E8C9		 clra			 ; clear 11D and FF
 ROM:E8CA		 clrb
 ROM:E8CB		 std	 ISC_Cnt_11D
-ROM:E8CE		 std	 ISC_FF
+ROM:E8CE		 std	 ISC_WTS_FF
 ROM:E8D0		 ldab	 #$4C ;	'L'
 ROM:E8D2		 ldaa	 Status_2B
 ROM:E8D4		 bita	 #$A0 ;	' '      ; test AC and PS Pump
@@ -55982,6 +55997,8 @@ ROM:E952
 ROM:E952 locret_E952:				 ; ...
 ROM:E952		 rts
 ROM:E953 ; ---------------------------------------------------------------------------
+ROM:E953 ISC_E953:
+ROM:E953 Called	when CNT11F and	CNT_120	timeout
 ROM:E953
 ROM:E953 ISC_E953:				 ; ...
 ROM:E953		 ldaa	 RPM_AV_99	 ; Weighted average of RPM used	for TIDLE calcs
@@ -55989,16 +56006,16 @@ ROM:E953					 ; RPM = 6.25x +400
 ROM:E955		 suba	 TIDLE_RPM	 ; a = RPM - TIDLE_RPM
 ROM:E958		 bcc	 loc_E960	 ; bra if RPM>TIDLE_RPM
 ROM:E95A		 adda	 #$30 ;	'0'      ; error + 700rpm?
-ROM:E95C		 bcs	 loc_E962	 ; bra if error?
+ROM:E95C		 bcs	 loc_E962	 ; bra if error>D0h?
 ROM:E95E		 ldaa	 #$D0 ;	'Ч
 ROM:E960
 ROM:E960 loc_E960:				 ; ...
-ROM:E960		 adda	 #$30 ;	'0'
+ROM:E960		 adda	 #$30 ;	'0'      ; add 700rpm
 ROM:E962
 ROM:E962 loc_E962:				 ; ...
 ROM:E962		 ldx	 #$C292
 ROM:E965		 jsr	 TABLE_LU_16bit
-ROM:E968		 jmp	 loc_EA02
+ROM:E968		 jmp	 loc_EA02	 ; test	zero
 ROM:E96B ; ---------------------------------------------------------------------------
 ROM:E96B
 ROM:E96B loc_E96B:				 ; ...
@@ -56033,7 +56050,7 @@ ROM:E99A
 ROM:E99A loc_E99A:				 ; ...
 ROM:E99A		 cmpb	 byte_C8D7	 ; =30h
 ROM:E99D		 bcc	 clr_cnt_11D
-ROM:E99F		 ldaa	 word_10B
+ROM:E99F		 ldaa	 ISC_POS_10B
 ROM:E9A2		 suba	 ISC_Target_Pos
 ROM:E9A4		 bcc	 loc_E9A7	 ; =6
 ROM:E9A6		 nega
@@ -56052,9 +56069,9 @@ ROM:E9B5		 clrb
 ROM:E9B6		 std	 ISC_Cnt_11D
 ROM:E9B9
 ROM:E9B9 loc_E9B9:				 ; ...
-ROM:E9B9		 ldd	 ISC_FF
+ROM:E9B9		 ldd	 ISC_WTS_FF
 ROM:E9BB		 beq	 loc_E9E1
-ROM:E9BD		 dec	 byte_122
+ROM:E9BD		 dec	 ISC_CNT_122
 ROM:E9C0		 bne	 loc_E9E1
 ROM:E9C2		 ldx	 #$C8BB		 ; 20Ch	if manual
 ROM:E9C5		 brset	 CONFIG_3A $80 loc_E9CC	; '' ; bra if auto trans
@@ -56067,18 +56084,18 @@ ROM:E9D0		 clra
 ROM:E9D1		 clrb
 ROM:E9D2
 ROM:E9D2 loc_E9D2:				 ; ...
-ROM:E9D2		 std	 ISC_FF
+ROM:E9D2		 std	 ISC_WTS_FF
 ROM:E9D4		 ldaa	 byte_C8D2	 ; 1h if auto
 ROM:E9D7		 brset	 CONFIG_3A $80 loc_E9DE	; '' ; bra if auto trans
 ROM:E9DB		 ldaa	 byte_C8D3	 ; 1h if manual
 ROM:E9DE
 ROM:E9DE loc_E9DE:				 ; ...
-ROM:E9DE		 staa	 byte_122
+ROM:E9DE		 staa	 ISC_CNT_122
 ROM:E9E1
 ROM:E9E1 loc_E9E1:				 ; ...
 ROM:E9E1		 ldd	 ISC_Target_Pos
-ROM:E9E3		 subd	 word_10B
-ROM:E9E6		 bcc	 loc_E9F0
+ROM:E9E3		 subd	 ISC_POS_10B	 ; D= (target-10B)
+ROM:E9E6		 bcc	 loc_E9F0	 ; bra if ISC target > 10B
 ROM:E9E8		 addd	 #$C00
 ROM:E9EB		 bcs	 loc_E9F3
 ROM:E9ED		 ldd	 #$F400
@@ -56092,15 +56109,15 @@ ROM:E9F7		 bls	 loc_E9FC
 ROM:E9F9		 ldd	 #$1200
 ROM:E9FC
 ROM:E9FC loc_E9FC:				 ; ...
-ROM:E9FC		 ldx	 #$C373
+ROM:E9FC		 ldx	 #$C373		 ; ISC Pulse Width
 ROM:E9FF		 jsr	 Table_LU_F495
 ROM:EA02
 ROM:EA02 loc_EA02:				 ; ...
-ROM:EA02		 subd	 #$8000
-ROM:EA05		 bne	 loc_EA2A
+ROM:EA02		 subd	 #$8000		 ; test	zero
+ROM:EA05		 bne	 if_not_zero_EA2A
 ROM:EA07
-ROM:EA07 loc_EA07:				 ; ...
-ROM:EA07		 brset	 ISC_STATUS_2E $20 loc_EA20 ; ' '
+ROM:EA07 if_zero_EA07:				 ; ...
+ROM:EA07		 brset	 ISC_STATUS_2E $20 clr_ISC_PW_EA20 ; ' '
 ROM:EA0B		 ldaa	 byte_C883	 ; default for CNT_120,	other a	WTS LUT	is used
 ROM:EA0E		 ldx	 TimeFromStart	 ; get TimeFromStart
 ROM:EA10		 cpx	 word_C885	 ; TimefromStart - 1.31s
@@ -56112,18 +56129,18 @@ ROM:EA1D
 ROM:EA1D loc_EA1D:				 ; ...
 ROM:EA1D		 staa	 CNT_120
 ROM:EA20
-ROM:EA20 loc_EA20:				 ; ...
+ROM:EA20 clr_ISC_PW_EA20:			 ; ...
 ROM:EA20		 clra
 ROM:EA21		 clrb
-ROM:EA22		 std	 ISC_F9
+ROM:EA22		 std	 ISC_OC_PW
 ROM:EA24		 std	 ISC_Last_F9	 ; a copy of ISCTargetPos
 ROM:EA26		 staa	 ISCCount123
 ROM:EA29		 rts
 ROM:EA2A ; ---------------------------------------------------------------------------
 ROM:EA2A
-ROM:EA2A loc_EA2A:				 ; ...
+ROM:EA2A if_not_zero_EA2A:			 ; ...
 ROM:EA2A		 bcs	 loc_EA52
-ROM:EA2C		 std	 ISC_F9
+ROM:EA2C		 std	 ISC_OC_PW
 ROM:EA2E		 ldaa	 PORTJ		 ; PORTJ I_O Port J
 ROM:EA31		 bita	 #2
 ROM:EA33		 bne	 loc_EA40	 ; bra if idle switch OFF
@@ -56139,14 +56156,14 @@ ROM:EA47		 ldaa	 0,x
 ROM:EA49		 adda	 byte_C86F	 ; =1Fh
 ROM:EA4C		 cmpa	 ISC_Target_Pos
 ROM:EA4E		 bcc	 loc_EA6A
-ROM:EA50		 bra	 loc_EA20
+ROM:EA50		 bra	 clr_ISC_PW_EA20
 ROM:EA52 ; ---------------------------------------------------------------------------
 ROM:EA52
 ROM:EA52 loc_EA52:				 ; ...
 ROM:EA52		 coma
 ROM:EA53		 negb
 ROM:EA54		 sbca	 #$FF
-ROM:EA56		 std	 ISC_F9
+ROM:EA56		 std	 ISC_OC_PW
 ROM:EA58		 ldaa	 PORTJ		 ; PORTJ I_O Port J
 ROM:EA5B		 bita	 #2
 ROM:EA5D		 beq	 loc_EA6A
@@ -56196,20 +56213,20 @@ ROM:EA9F		 stab	 byte_18E
 ROM:EAA2		 ldab	 #5
 ROM:EAA4		 jsr	 TAB_LU_3D
 ROM:EAA7		 staa	 word_18C	 ; VE_18C is the value from the	VE table
-ROM:EAAA		 ldd	 ISC_F9
+ROM:EAAA		 ldd	 ISC_OC_PW
 ROM:EAAC		 ldx	 #$18C		 ; ptr to VE_18C
 ROM:EAAF		 jsr	 Mult?		 ; byte_F9*VE
 ROM:EAB2		 lsld			 ; (byte_F9*VE)*2
-ROM:EAB3		 std	 ISC_F9
+ROM:EAB3		 std	 ISC_OC_PW
 ROM:EAB5		 ldaa	 IAT_LIN
 ROM:EAB7		 ldx	 #$C225
 ROM:EABA		 jsr	 TABLE_LU_2D	 ; (IAT) table look up with max	and min
 ROM:EABD		 staa	 word_18C	 ; VE_18C is the value from the	VE table
 ROM:EAC0		 ldx	 #$18C
-ROM:EAC3		 ldd	 ISC_F9
+ROM:EAC3		 ldd	 ISC_OC_PW
 ROM:EAC5		 jsr	 Mult?
 ROM:EAC8		 lsld
-ROM:EAC9		 std	 ISC_F9		 ; to here
+ROM:EAC9		 std	 ISC_OC_PW	 ; to here
 ROM:EACB		 ldx	 byte_C86B	 ; comparison for ISC_F9
 ROM:EACE		 ldaa	 PORTJ		 ; PORTJ I_O Port J
 ROM:EAD1		 bita	 #2
@@ -56217,9 +56234,9 @@ ROM:EAD3		 bne	 loc_EAD8	 ; 128-byte_F9
 ROM:EAD5		 ldx	 byte_C86D	 ; =080h = 128
 ROM:EAD8
 ROM:EAD8 loc_EAD8:				 ; ...
-ROM:EAD8		 cpx	 ISC_F9		 ; 128-byte_F9
+ROM:EAD8		 cpx	 ISC_OC_PW	 ; 128-byte_F9
 ROM:EADA		 bcs	 loc_EADF	 ; bra if F9>128
-ROM:EADC		 jmp	 loc_EA07	 ;  else jump
+ROM:EADC		 jmp	 if_zero_EA07	 ;  else jump
 ROM:EADF ; ---------------------------------------------------------------------------
 ROM:EADF
 ROM:EADF loc_EADF:				 ; ...
@@ -56234,7 +56251,7 @@ ROM:EAF4
 ROM:EAF4 loc_EAF4:				 ; ...
 ROM:EAF4		 ldaa	 IAT_LIN
 ROM:EAF6		 jsr	 TABLE_LU_16bit
-ROM:EAF9		 cpd	 ISC_F9
+ROM:EAF9		 cpd	 ISC_OC_PW
 ROM:EAFC		 bcc	 loc_EB1C
 ROM:EAFE		 ldd	 ISC_Target_Pos
 ROM:EB00		 subd	 ISC_Last_Pos	 ; last	IAC position
@@ -56276,18 +56293,18 @@ ROM:EB41 loc_EB41:				 ; ...
 ROM:EB41		 staa	 CNT_120
 ROM:EB44		 ldd	 ISC_Target_Pos
 ROM:EB46		 std	 ISC_Last_Pos	 ; last	IAC position
-ROM:EB49		 ldd	 ISC_F9
+ROM:EB49		 ldd	 ISC_OC_PW
 ROM:EB4B		 std	 ISC_Last_F9	 ; a copy of ISCTargetPos
 ROM:EB4D		 cpd	 #$61A
 ROM:EB51		 bcc	 loc_EB5A
 ROM:EB53		 ldx	 #0
-ROM:EB56		 stx	 ISC_F9
+ROM:EB56		 stx	 ISC_OC_PW
 ROM:EB58		 bra	 loc_EB62
 ROM:EB5A ; ---------------------------------------------------------------------------
 ROM:EB5A
 ROM:EB5A loc_EB5A:				 ; ...
 ROM:EB5A		 subd	 #$61A
-ROM:EB5D		 std	 ISC_F9
+ROM:EB5D		 std	 ISC_OC_PW
 ROM:EB5F		 ldd	 #$61A
 ROM:EB62
 ROM:EB62 loc_EB62:				 ; ...
@@ -56298,7 +56315,7 @@ ROM:EB67		 bset	 STATUS_26 $10
 ROM:EB6A		 sei
 ROM:EB6B		 ldaa	 TCTL3		 ; TCTL3 Timer Control Register	3
 ROM:EB6E		 oraa	 #3
-ROM:EB70		 staa	 TCTL3		 ; TCTL3 Timer Control Register	3
+ROM:EB70		 staa	 TCTL3		 ; set on next match
 ROM:EB73		 ldaa	 #2
 ROM:EB75		 staa	 CFORC		 ; CFORC Compare Force Register
 ROM:EB78		 ldd	 TCNT2H		 ; TCNT2H Timer	Counter	Register 2 H
@@ -56309,7 +56326,7 @@ ROM:EB84		 oraa	 #2
 ROM:EB86		 staa	 TMSK2		 ; TMSK2 Misc. Timer Interrupt Mask Register 2
 ROM:EB89		 ldaa	 TCTL3		 ; TCTL3 Timer Control Register	3
 ROM:EB8C		 anda	 #$FE ;	'þ'
-ROM:EB8E		 staa	 TCTL3		 ; TCTL3 Timer Control Register	3
+ROM:EB8E		 staa	 TCTL3		 ; clear on next match
 ROM:EB91		 ldaa	 #2
 ROM:EB93		 staa	 TFLG2		 ; TFLG2 Misc. Timer Interrupt Flag Register 2
 ROM:EB96		 cli
@@ -56588,24 +56605,41 @@ ROM:ECE0		 rts
 ROM:ECE0 ; End of function TPS_ECB3
 ROM:ECE0
 ROM:ECE1 ;---------------------------------------------------------------------------
-ROM:ECE1 ; sub_ECE1:
-ROM:ECE1 ; called on a 32.7ms tick
+ROM:ECE1 ; misc_32p7ms:
+ROM:ECE1 ; misc. routines executed on a	32.7ms tick:
+ROM:ECE1 ;    update the output	shift register
+ROM:ECE1 ;    MAP and TPS at 32.7ms
+ROM:ECE1 ;    calculate	TFT
+ROM:ECE1 ;    calculate	gear
+ROM:ECE1 ;    calculate	ISC DC (diag?)
+ROM:ECE1 ;    test diag	switches
+ROM:ECE1 ;    calculate	PSE if starter engaged
+ROM:ECE1 ;    +.....
+ROM:ECE1 ;    test for PSP ignition kick required
 ROM:ECE1
 ROM:ECE1 ; =============== S U B R O U T I N E =======================================
 ROM:ECE1
 ROM:ECE1
-ROM:ECE1 sub_ECE1:				 ; ...
+ROM:ECE1 misc_32p7ms:				 ; ...
 ROM:ECE1		 ldaa	 PORTD		 ; PORTD I_O Port D
-ROM:ECE4		 anda	 #$DF ;	'ߧ      ; clr PD5/SCK
+ROM:ECE4
+ROM:ECE4 updateSR:				 ; clr PD5/SCK
+ROM:ECE4		 anda	 #$DF ;	'ߧ
 ROM:ECE6		 staa	 PORTD		 ; PORTD I_O Port D
 ROM:ECE9		 ldaa	 SPSR		 ; clear IF
 ROM:ECEC		 ldaa	 SR_DATAOUT	 ; get SPI data
 ROM:ECEE		 staa	 SPDAT		 ; and send to shift register
+ROM:ECF1
+ROM:ECF1 MAP_32p7:
 ROM:ECF1		 ldd	 MAP_RAW
-ROM:ECF3		 std	 MAP_RAW_SH
+ROM:ECF3		 std	 MAP_RAW_SH	 ; not used?
+ROM:ECF6
+ROM:ECF6 TPS_32p7:
 ROM:ECF6		 ldd	 TPSV
-ROM:ECF8		 std	 TPSV_SH
-ROM:ECFB		 ldaa	 PORTD		 ; PORTD I_O Port D
+ROM:ECF8		 std	 TPSV_SH	 ; not used?
+ROM:ECFB
+ROM:ECFB clk_SPI:				 ; PORTD I_O Port D
+ROM:ECFB		 ldaa	 PORTD
 ROM:ECFE		 oraa	 #$20 ;	' '      ; set PD5/SCK
 ROM:ED00		 staa	 PORTD		 ; PORTD I_O Port D
 ROM:ED03
@@ -56639,41 +56673,43 @@ ROM:ED1C		 stab	 RPM_VSS_F8	 ; RPM/(200*VSS) max=FFh
 ROM:ED1E
 ROM:ED1E ; calc_ISC_DC:
 ROM:ED1E ; ISC Duty Check is a PWM output equivalent to	the ISC	throttle position
-ROM:ED1E ; it shares the shift light pin, activated when the diag test Sw is grounded
+ROM:ED1E ; activated when the diag test	Sw is grounded,	it shares the shift light pin
 ROM:ED1E
 ROM:ED1E calc_ISC_DC:
 ROM:ED1E		 clrb
 ROM:ED1F		 ldaa	 ISC_Target_Pos
 ROM:ED21		 suba	 #$14		 ; ISC_CURR_Pos	- 20
-ROM:ED23		 bls	 loc_ED2D	 ; bra if current<20
+ROM:ED23		 bls	 SAVE_DC_ED2D	 ; bra if current<20
 ROM:ED25		 cmpa	 #$2B		 ; curr_pos - another 43
-ROM:ED27		 bcc	 loc_ED2C	 ; bra if curr_pos>63?
+ROM:ED27		 bcc	 DEC_DC_ED2C	 ; bra if curr_pos>63?
 ROM:ED29		 ldab	 #6
 ROM:ED2B		 mul
 ROM:ED2C
-ROM:ED2C loc_ED2C:				 ; ...
-ROM:ED2C		 decb
+ROM:ED2C DEC_DC_ED2C:				 ; ...
+ROM:ED2C		 decb			 ; decrement ISC DC
 ROM:ED2D
-ROM:ED2D loc_ED2D:				 ; ...
+ROM:ED2D SAVE_DC_ED2D:				 ; ...
 ROM:ED2D		 stab	 ISC_Duty_Check	 ; Also	Diag address
 ROM:ED30
-ROM:ED30 testPortG_ED30:
+ROM:ED30 test_Diag_SWs:
 ROM:ED30		 clrb
 ROM:ED31		 ldaa	 PORTG_SH_H	 ; get PortG shadow register
-ROM:ED33		 anda	 #6		 ; check for diagnostic	requests
+ROM:ED33		 anda	 #6		 ; test	sw and diag sw
 ROM:ED35		 cmpa	 #6
-ROM:ED37		 beq	 loc_ED46
+ROM:ED37		 beq	 setStatus39	 ; need	to check logic??????
 ROM:ED39		 ldab	 #4
 ROM:ED3B		 tsta			 ; set flags for PORTG_SH
-ROM:ED3C		 beq	 loc_ED46	 ; bra if all clear?
+ROM:ED3C		 beq	 setStatus39	 ; bra if all clear?
 ROM:ED3E		 ldab	 #1
 ROM:ED40		 cmpa	 #2		 ; check Test Sw
-ROM:ED42		 beq	 loc_ED46
+ROM:ED42		 beq	 setStatus39
 ROM:ED44		 ldab	 #2
 ROM:ED46
-ROM:ED46 loc_ED46:				 ; ...
-ROM:ED46		 stab	 Status_39
+ROM:ED46 setStatus39:				 ; ...
+ROM:ED46		 stab	 Diag_Stat_39
 ROM:ED48		 brset	 PORTG_SH_H $80	loc_ED69 ; '' ; bra if no starter signal
+ROM:ED4C
+ROM:ED4C calc_PSE:
 ROM:ED4C		 ldaa	 #3
 ROM:ED4E		 staa	 CSE_CNT_150	 ; counter for cold start enrichment
 ROM:ED51		 brset	 Status_2B 8 loc_ED7A ;	starter	engaged
@@ -56731,7 +56767,7 @@ ROM:EDB7		 bset	 Status_2B 2	 ; set auto in PN
 ROM:EDBA		 bset	 Status_2B 1	 ; RPM>500
 ROM:EDBD		 bset	 CONFIG_3A $80 ; '' ; set Auto/MT??
 ROM:EDC0		 jsr	 CALC_WTS_B9
-ROM:EDC3		 jsr	 sub_E3F0
+ROM:EDC3		 jsr	 calc_ISC_Cnt_11A
 ROM:EDC6		 bra	 loc_EDED	 ; bra if rpm>500
 ROM:EDC8 ; ---------------------------------------------------------------------------
 ROM:EDC8
@@ -56752,7 +56788,7 @@ ROM:EDE3
 ROM:EDE3 loc_EDE3:				 ; ...
 ROM:EDE3		 brclr	 Status_2B 2 loc_EDED ;	bra if auto in RDL
 ROM:EDE7		 bclr	 Status_2B 2	 ; set auto in RDL
-ROM:EDEA		 jsr	 sub_E3F0
+ROM:EDEA		 jsr	 calc_ISC_Cnt_11A
 ROM:EDED
 ROM:EDED loc_EDED:				 ; ...
 ROM:EDED		 brclr	 STATUS_27 $20 loc_EDF4	; ' ' ; bra if engine not running
@@ -56788,7 +56824,7 @@ ROM:EE2B		 jsr	 do_ISC_103
 ROM:EE2E
 ROM:EE2E locret_EE2E:				 ; ...
 ROM:EE2E		 rts
-ROM:EE2E ; End of function sub_ECE1
+ROM:EE2E ; End of function misc_32p7ms
 ROM:EE2E
 ROM:EE2F ; TIMERS_EE2F:
 ROM:EE2F ; Update a bunch of timers
@@ -57064,7 +57100,7 @@ ROM:EF79		 bitb	 #$80 ;	''      ; test IGN pin
 ROM:EF7B		 beq	 locret_EFB4
 ROM:EF7D		 brset	 Ctrls_Status_22 $10 loc_EF89 ;	fixed advance?
 ROM:EF81		 brset	 SCI_STATUS_21 $80 loc_EFA2 ; '' ;  ??
-ROM:EF85		 brclr	 Status_39 2 loc_EFA2 ;	set status IGP2	correction is zero
+ROM:EF85		 brclr	 Diag_Stat_39 2	loc_EFA2 ; set status IGP2 correction is zero
 ROM:EF89
 ROM:EF89 loc_EF89:				 ; ...
 ROM:EF89		 brset	 STATUS_38 $10 loc_EF93	; bra if idle switch OFF
@@ -57732,11 +57768,11 @@ ROM:F29E
 ROM:F29E do_MIL:				 ; ...
 ROM:F29E		 brset	 SCI_STATUS_21 $80 loc_F2B2 ; '' ; no codes when SCI active?
 ROM:F2A2		 brset	 STATUS_38 $10 loc_F2AE
-ROM:F2A6		 brset	 Status_39 2 set_MIL_F2FD
-ROM:F2AA		 brset	 Status_39 4 set_MIL_F2FD
+ROM:F2A6		 brset	 Diag_Stat_39 2	set_MIL_F2FD
+ROM:F2AA		 brset	 Diag_Stat_39 4	set_MIL_F2FD
 ROM:F2AE
 ROM:F2AE loc_F2AE:				 ; ...
-ROM:F2AE		 brset	 Status_39 1 NoCodes0
+ROM:F2AE		 brset	 Diag_Stat_39 1	NoCodes0
 ROM:F2B2
 ROM:F2B2 loc_F2B2:				 ; ...
 ROM:F2B2		 ldaa	 #4
@@ -57877,33 +57913,42 @@ ROM:F377		 cli
 ROM:F378		 rts
 ROM:F378 ; End of function calc_1E
 ROM:F378
+ROM:F379 do_ALST:
+ROM:F379 Assembly Line Self Test
+ROM:F379 performs a checksum test on the external EPROM
+ROM:F379 to enter:
+ROM:F379     O2S > 4.5V
+ROM:F379     test Sw ?
+ROM:F379     RPM< 500?
+ROM:F379
+ROM:F379 toggles the watchdog every 1024 locations
 ROM:F379
 ROM:F379 ; =============== S U B R O U T I N E =======================================
 ROM:F379
 ROM:F379
-ROM:F379 sub_F379:				 ; ...
-ROM:F379		 brset	 STATUS_38 $10 O2S_F389	; test for O2 sensor fault?
+ROM:F379 do_ALST:				 ; ...
+ROM:F379		 brset	 STATUS_38 $10 test_O2S_Entry ;	test for O2 sensor fault?
 ROM:F37D		 brset	 PORTG_SH_H 2 locret_F396 ; Test Switch
-ROM:F381		 brset	 STATUS_27 $28 O2S_F389	; '(' ; bra if rpm<500 && TPS?
+ROM:F381		 brset	 STATUS_27 $28 test_O2S_Entry ;	'(' ; bra if rpm<500 && TPS?
 ROM:F385
 ROM:F385 loc_F385:				 ; ...
 ROM:F385		 bclr	 STATUS_38 $10
 ROM:F388		 rts
 ROM:F389 ; ---------------------------------------------------------------------------
 ROM:F389
-ROM:F389 O2S_F389:				 ; ...
+ROM:F389 test_O2S_Entry:			 ; ...
 ROM:F389		 ldaa	 O2S_V
 ROM:F38B		 cmpa	 #$CC ;	'̧      ; O2SV - 3.98V
-ROM:F38D		 bcs	 loc_F385	 ; if O2SV<3.98V clear fault
+ROM:F38D		 bcs	 loc_F385	 ; if O2SV<3.98V exit test
 ROM:F38F		 cmpa	 #$E6 ;	'槠     ; O2SV -4.5V
-ROM:F391		 bcc	 do_MIL_2	 ; if O2SV>4.5V	set fault
+ROM:F391		 bcc	 set_MIL_ALST	 ; if O2SV>4.5V	set test active
 ROM:F393		 bset	 STATUS_38 $10
 ROM:F396
 ROM:F396 locret_F396:				 ; ...
 ROM:F396		 rts
 ROM:F397 ; ---------------------------------------------------------------------------
 ROM:F397
-ROM:F397 do_MIL_2:				 ; ...
+ROM:F397 set_MIL_ALST:				 ; ...
 ROM:F397		 sei
 ROM:F398		 ldaa	 PORTH		 ; PORTH I_O Port H
 ROM:F39B		 oraa	 #1		 ;  set	MIL
@@ -57913,38 +57958,38 @@ ROM:F3A3		 eora	 #1
 ROM:F3A5		 staa	 PORTJ		 ; toggle watchdog
 ROM:F3A8		 clra
 ROM:F3A9		 clrb
-ROM:F3AA		 ldx	 #$C000
+ROM:F3AA		 ldx	 #$C000		 ; start of programme memory
 ROM:F3AD
-ROM:F3AD loc_F3AD:				 ; ...
+ROM:F3AD testtoD000:				 ; ...
 ROM:F3AD		 addd	 0,x
 ROM:F3AF		 inx
 ROM:F3B0		 inx
 ROM:F3B1		 cpx	 #$D000
-ROM:F3B4		 bne	 loc_F3AD
+ROM:F3B4		 bne	 testtoD000
 ROM:F3B6		 psha
 ROM:F3B7		 ldaa	 PORTJ		 ; PORTJ I_O Port J
 ROM:F3BA		 eora	 #1
 ROM:F3BC		 staa	 PORTJ		 ; toggle watchdog
 ROM:F3BF		 pula
 ROM:F3C0
-ROM:F3C0 loc_F3C0:				 ; ...
+ROM:F3C0 testtoE000:				 ; ...
 ROM:F3C0		 addd	 0,x
 ROM:F3C2		 inx
 ROM:F3C3		 inx
 ROM:F3C4		 cpx	 #$E000
-ROM:F3C7		 bne	 loc_F3C0
+ROM:F3C7		 bne	 testtoE000
 ROM:F3C9		 psha
 ROM:F3CA		 ldaa	 PORTJ		 ; PORTJ I_O Port J
 ROM:F3CD		 eora	 #1
 ROM:F3CF		 staa	 PORTJ		 ; toggle watchdog
 ROM:F3D2		 pula
 ROM:F3D3
-ROM:F3D3 loc_F3D3:				 ; ...
+ROM:F3D3 testtoF000:				 ; ...
 ROM:F3D3		 addd	 0,x
 ROM:F3D5		 inx
 ROM:F3D6		 inx
 ROM:F3D7		 cpx	 #$F000
-ROM:F3DA		 bne	 loc_F3D3
+ROM:F3DA		 bne	 testtoF000
 ROM:F3DC		 psha
 ROM:F3DD		 ldaa	 PORTJ		 ; PORTJ I_O Port J
 ROM:F3E0		 eora	 #1
@@ -57957,39 +58002,41 @@ ROM:F3E8		 inx
 ROM:F3E9		 inx
 ROM:F3EA		 cpx	 #0
 ROM:F3ED		 bne	 loc_F3E6
+ROM:F3EF
+ROM:F3EF do_Checksum:				 ; test	against	checksum
 ROM:F3EF		 subd	 #$AA55
-ROM:F3F2		 bne	 loc_F423
+ROM:F3F2		 bne	 loopForever	 ; else	wait for watchdog timeout
 ROM:F3F4		 ldaa	 PORTJ		 ; PORTJ I_O Port J
 ROM:F3F7		 eora	 #1
 ROM:F3F9		 staa	 PORTJ		 ; toggle watchdog
 ROM:F3FC		 clra
 ROM:F3FD		 ldx	 #0
 ROM:F400
-ROM:F400 loc_F400:				 ; ...
+ROM:F400 resetRAM:				 ; ...
 ROM:F400		 staa	 0,x
 ROM:F402		 inca
 ROM:F403		 inx
 ROM:F404		 cpx	 #$200
-ROM:F407		 bne	 loc_F400
+ROM:F407		 bne	 resetRAM
 ROM:F409		 clra
 ROM:F40A		 ldx	 #0
 ROM:F40D
-ROM:F40D loc_F40D:				 ; ...
-ROM:F40D		 cmpa	 0,x
-ROM:F40F		 bne	 loc_F423
+ROM:F40D testRAM:				 ; ...
+ROM:F40D		 cmpa	 0,x		 ; zero	RAM locations and read back
+ROM:F40F		 bne	 loopForever	 ; else	wait for watchdog timeout
 ROM:F411		 inca
 ROM:F412		 inx
 ROM:F413		 cpx	 #$200
-ROM:F416		 bne	 loc_F40D
+ROM:F416		 bne	 testRAM	 ; zero	RAM locations and read back
 ROM:F418		 ldaa	 PORTJ		 ; PORTJ I_O Port J
 ROM:F41B		 eora	 #1
 ROM:F41D		 staa	 PORTJ		 ; toggle watchdog
-ROM:F420		 jmp	 INIT
+ROM:F420		 jmp	 INIT		 ; all OK restart ECU
 ROM:F423 ; ---------------------------------------------------------------------------
 ROM:F423
-ROM:F423 loc_F423:				 ; ...
-ROM:F423		 bra	 loc_F423
-ROM:F423 ; End of function sub_F379
+ROM:F423 loopForever:				 ; ...
+ROM:F423		 bra	 loopForever	 ; else	wait for watchdog timeout
+ROM:F423 ; End of function do_ALST
 ROM:F423
 ROM:F425 TABLE_LUT_2D
 ROM:F425 ; table format	is:
@@ -58124,6 +58171,9 @@ ROM:F492		 ldab	 2,x
 ROM:F494		 mul
 ROM:F494 ; End of function TABLE_LU_16bit
 ROM:F494
+ROM:F495 Table_LU_F495:
+ROM:F495 16-bit	table LU, adds an addr offset of 3 for tables
+ROM:F495 with no header
 ROM:F495
 ROM:F495 ; =============== S U B R O U T I N E =======================================
 ROM:F495
@@ -58142,7 +58192,7 @@ ROM:F4A2		 subd	 3,x
 ROM:F4A4		 beq	 loc_F4C0
 ROM:F4A6		 pshx
 ROM:F4A7		 bcs	 loc_F4B1
-ROM:F4A9		 ldx	 #$18C		 ; ptr to VE_18C
+ROM:F4A9		 ldx	 #396
 ROM:F4AC		 jsr	 Mult?
 ROM:F4AF		 bra	 loc_F4BF
 ROM:F4B1 ; ---------------------------------------------------------------------------
@@ -58960,11 +59010,11 @@ ROM:F930 ML_Tick_32_7ms:			 ; ...
 ROM:F930		 jsr	 do_CPS_EVENT
 ROM:F933		 jsr	 do_ACO
 ROM:F936		 jsr	 do_AUTO_TPS
-ROM:F939		 jsr	 sub_ECE1	 ; misc	done on	this tick
+ROM:F939		 jsr	 misc_32p7ms	 ; misc	done on	this tick
 ROM:F93C		 jsr	 EVAP_PURGE
 ROM:F93F		 jsr	 do_RAD_FAN
 ROM:F942		 jsr	 do_CPS_EVENT
-ROM:F945		 jsr	 sub_F379	 ; MIL related?
+ROM:F945		 jsr	 do_ALST	 ; MIL related?
 ROM:F948		 jsr	 do_CPS_FLT_CNT
 ROM:F94B		 jmp	 MAIN_LOOP
 ROM:F94E ; ---------------------------------------------------------------------------
@@ -59244,15 +59294,15 @@ ROM:FAF4		 ; public ISC_INT_HNDLR
 ROM:FAF4 ISC_INT_HNDLR:				 ; ...
 ROM:FAF4		 ldaa	 TCTL3		 ; TCTL3 Timer Control Register	3
 ROM:FAF7		 bita	 #1		 ; is OC7 set to toggle?
-ROM:FAF9		 bne	 loc_FB27	 ; bra if it is
-ROM:FAFB		 ldd	 ISC_F9
+ROM:FAF9		 bne	 OC7_went_1	 ; bra if it is
+ROM:FAFB		 ldd	 ISC_OC_PW
 ROM:FAFD		 beq	 loc_FB16	 ; bra if F9 is	zero
 ROM:FAFF		 ldd	 TCNT2H		 ; get OC7 count
 ROM:FB02		 addd	 #$64 ;	'd'      ; add (100*4us)
 ROM:FB05		 std	 TO7I6H		 ; set up next compare
 ROM:FB08		 ldaa	 TCTL3		 ; TCTL3 Timer Control Register	3
 ROM:FB0B		 oraa	 #3
-ROM:FB0D		 staa	 TCTL3		 ; OC7 capture on either edge
+ROM:FB0D		 staa	 TCTL3		 ; set OC7 to 1	on match
 ROM:FB10		 ldaa	 #2
 ROM:FB12		 staa	 TFLG2		 ; clear interrupt flag
 ROM:FB15		 rti
@@ -59268,18 +59318,18 @@ ROM:FB23		 staa	 TFLG2		 ; clear interrupt flag
 ROM:FB26		 rti
 ROM:FB27 ; ---------------------------------------------------------------------------
 ROM:FB27
-ROM:FB27 loc_FB27:				 ; ...
-ROM:FB27		 ldd	 ISC_F9
+ROM:FB27 OC7_went_1:				 ; ...
+ROM:FB27		 ldd	 ISC_OC_PW
 ROM:FB29		 cpd	 #$61A		 ; byte_F9 - 1562
 ROM:FB2D		 bcs	 loc_FB4B	 ; bra if byte_F9 < 1562
 ROM:FB2F		 subd	 #$61A		 ; else	subtract 1562 (zero count?)
-ROM:FB32		 std	 ISC_F9		 ; reset count?
+ROM:FB32		 std	 ISC_OC_PW	 ; reset count?
 ROM:FB34		 ldd	 TO7I6H		 ; get last OC7	count
 ROM:FB37		 addd	 #$186A		 ; add 6250 =(25ms)
 ROM:FB3A		 std	 TO7I6H		 ; set next compare
 ROM:FB3D		 ldaa	 TCTL3		 ; TCTL3 Timer Control Register	3
 ROM:FB40		 anda	 #$FE ;	'þ'
-ROM:FB42		 staa	 TCTL3		 ; clear bit on	next match (or toggle if bit0=1)
+ROM:FB42		 staa	 TCTL3		 ; clear OC7 on	next match
 ROM:FB45		 ldaa	 #2
 ROM:FB47		 staa	 TFLG2		 ; clear interrupt flag
 ROM:FB4A		 rti
@@ -59293,16 +59343,16 @@ ROM:FB51		 bcc	 loc_FB56	 ; bra if D>100
 ROM:FB53		 ldd	 #$64 ;	'd'      ; else minimum is 100
 ROM:FB56
 ROM:FB56 loc_FB56:				 ; ...
-ROM:FB56		 addd	 TCNT2H		 ; add to last OC7 match
+ROM:FB56		 addd	 TCNT2H		 ; add to current timer	value?
 ROM:FB59		 std	 TO7I6H		 ; set up next match
 ROM:FB5C		 ldaa	 TCTL3		 ; TCTL3 Timer Control Register	3
 ROM:FB5F		 anda	 #$FE ;	'þ'
-ROM:FB61		 staa	 TCTL3		 ; clear bit on	next match (or toggle if bit0=1)
+ROM:FB61		 staa	 TCTL3		 ; clear OC7 on	next match
 ROM:FB64		 ldaa	 #2
 ROM:FB66		 staa	 TFLG2		 ; clear interrupt flag
 ROM:FB69		 clra
 ROM:FB6A		 clrb
-ROM:FB6B		 std	 ISC_F9		 ; reset byte_F9 to zero
+ROM:FB6B		 std	 ISC_OC_PW	 ; reset byte_F9 to zero
 ROM:FB6D		 rti
 ROM:FB6D ; End of function ISC_INT_HNDLR
 ROM:FB6D
@@ -59406,7 +59456,7 @@ ROM:FBD4		 staa	 OC1M		 ; OC1 only affects IGN
 ROM:FBD7		 ldaa	 #$80 ;	''
 ROM:FBD9		 staa	 OC1D		 ; 1 = coil off	next OC	match
 ROM:FBDC		 ldaa	 #2
-ROM:FBDE		 staa	 TCTL3		 ; IC5,IC6,OC6,OC7 edge	select
+ROM:FBDE		 staa	 TCTL3		 ; IC5,IC6,OC6,clear OC7
 ROM:FBE1		 ldaa	 #$C0 ;	'À'
 ROM:FBE3		 staa	 TCTL1		 ; connect OC2,	set high
 ROM:FBE6		 ldaa	 #$C2 ;	'§
