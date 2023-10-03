@@ -57,3 +57,815 @@ doReturn	jmp		#$C9F5
 ;--------------------------------------------------------------------
 ; OBD data
 ;
+10 00 10 08 10 02 10 33 00 89 00 8A FF FF FF FF
+FF FF FF FF FF FF 00 03 00 02 00 01 00 00 FF FF
+00 89 00 8A FF FF FF FF FF FF FF FF FF FF FF FF 
+FF FF FF FF FF FF FF FF 10 00 10 08 10 02 10 33
+00 89 00 8A FF FF FF FF FF FF FF FF FF FF 01 AD
+01 AE 01 AB 00 6E 00 3F 00 7C 00 7E 00 3A 00 49
+FF FF FF FF 00 8B 00 8C 00 95 00 96 00 97 00 98 
+00 99 00 9A FF FF FF FF FF FF FF FF FF FF FF FF
+FF FF FF FF 01 A8 00 E0 00 D2 00 D3 00 D4 00 DB
+00 D5 00 D9 00 D6 00 D7 00 D8 00 DA FF FF FF FF
+FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF
+FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF
+FF FF FF FF 01 A6 01 A7 00 14 00 9D 00 A0 00 A2
+00 A4 00 A8 00 AD 00 AE 00 AF 01 5F 01 74 00 AA
+FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF
+FF FF FF FF FF FF FF 00 3D 00 3E 01 AF 01 B0 00
+69 FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF
+FF FF FF FF FF FF FF 00 76 01 AA 01 A4 01 26 00
+F7 FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF
+FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF
+FF 00 A6 00 B3 01 A9 FF FF FF FF FF FF FF FF FF
+FF FF FF FF FF FF FF FF FF FF FF 00 34 01 54 FF
+FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF 00
+30 00 B6 01 31 01 32 01 34 01 35 01 36 01 37 00
+B5 FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF
+FF FF FF FF FF FF FF FF FF FF FF FF FF 00 EE 00
+7E 00 24 00 25 00 27 00 28 00 29 00 2A 00 2B 00
+2C 00 2D 00 2E 00 2F 00 30 00 31 00 32 00 33 00
+34 00 36 00 37 00 38 00 39 FF FF FF FF FF FF FF
+FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF
+FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF
+FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF
+FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF
+FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF
+
+
+50G11 Extended Diagnostics										
+										
+Group	Function	Diag. Addr (Dec)	Diag. Addr (Hex)							
+Ports	PortA	0	0							
+	PortD	1	1							
+	PortG	2	2							
+	PortH	3	3							
+	PortG T1 H	4	4							
+	PortG T1 L	5	5							
+	Spare	6	6							
+	Spare	7	7							
+	Spare	8	8							
+	Spare	9	9							
+	Spare	10	A							
+Fcodes	FCodes0	11	B							
+	FCodes1	12	C							
+	FCodes2	13	D							
+	FCodes3	14	E							
+	Spare	15	F							
+	Spare	16	10							
+	Spare	17	11							
+	Spare	18	12							
+	Spare	19	13							
+	Spare	20	14							
+	Spare	21	15							
+	Spare	22	16							
+Sensors	CTS	23	17							
+	IAT	24	18							
+	MAP (DIAG)	25	19							
+	TPSA	26	1A							
+	TPSV	27	1B							
+	O2SV	28	1C							
+	BattV	29	1D							
+	CFG	30	1E							
+	Fuel level	31	1F							
+	Spare	32	20							
+	Spare	33	21							
+RPM	RPMH	34	22							
+	RPML	35	23							
+	dRPMH	36	24							
+	dRPML	37	25							
+	RPM_AV_97H	38	26							
+	RPM_AV_97L	39	27							
+	RPM_AV_99H	40	28							
+	RPM_AV_99L	41	29							
+	Spare	42	2A							
+	Spare	43	2B							
+	Spare	44	2C							
+	Spare	45	2D							
+	Spare	46	2E							
+	Spare	47	2F							
+	Spare	48	30							
+	Spare	49	31							
+Ignition	IGN ADV (OBD)	50	32							
+	Ign Dwell	51	33							
+	Ign base Advance	52	34							
+	Ign CTS correction	53	35							
+	Ign IAT correction	54	36							
+	Ign Sum1	55	37							
+	Ign idle correction	56	38							
+	Ign PSP kick	57	39							
+	Ign Eload kick	58	3A							
+	Ign Idle CTS correction	59	3B							
+	Ign VSS correction	60	3C							
+	Ign Rad fan correction	61	3D							
+	Spare	62	3E							
+	Spare	63	3F							
+	Spare	64	40							
+	Spare	65	41							
+	Spare	66	42							
+	Spare	67	43							
+	Spare	68	44							
+	Spare	69	45							
+	Spare	70	46							
+	Spare	71	47							
+	Spare	72	48							
+	Spare	73	49							
+	Spare	74	4A							
+	Spare	75	4B							
+	Spare	76	4C							
+	Spare	77	4D							
+	Spare	78	4E							
+	Spare	79	4F							
+	Spare	80	50							
+	Spare	81	51							
+Fuel	Inj_PW High	82	52							
+	Inj PW Low	83	53							
+	LTFT 14	84	54							
+	INJ PW2	85	55							
+	Fuel x Multiply MAP	86	56							
+	Inj Dwell	87	57							
+	CTS Corr A4	88	58							
+	CTS A8	89	59							
+	CTS AD	90	5A							
+	CTS MAP AE	91	5B							
+	dRPM correction	92	5C							
+	Inj IAT correction	93	5D							
+	Inj IAT Correction	94	5E							
+	Inj TPS correction 1	95	5F							
+	Spare	96	60							
+	Spare	97	61							
+	Spare	98	62							
+	Spare	99	63							
+	Spare	100	64							
+	Spare	101	65							
+	Spare	102	66							
+	Spare	103	67							
+	Spare	104	68							
+	Spare	105	69							
+	Spare	106	6A							
+MAP	MAP raw H	107	6B							
+	Map raw L	108	6C							
+	MAP raw 2 H	109	6D							
+	MAP raw 2 L	110	6E							
+	Baro	111	6F							
+	Spare	112	70							
+	Spare	113	71							
+	Spare	114	72							
+	Spare	115	73							
+	Spare	116	74							
+	Spare	117	75							
+	Spare	118	76							
+	Spare	119	77							
+	Spare	120	78							
+	Spare	121	79							
+	Spare	122	7A							
+ISC	ISC Target Pos	123	7B							
+	ISC Duty (Diag)	124	7C							
+	Target Idle	125	7D							
+	Target Idle Error	126	7E							
+	VSS	127	7F							
+	Spare	128	80							
+	Spare	129	81							
+	Spare	130	82							
+	Spare	131	83							
+	Spare	132	84							
+	Spare	133	85							
+	Spare	134	86							
+	Spare	135	87							
+	Spare	136	88							
+	Spare	137	89							
+	Spare	138	8A							
+	Spare	139	8B							
+	Spare	140	8C							
+	Spare	141	8D							
+	Spare	142	8E							
+	Spare	143	8F							
+Closed Loop	STFT	144	90							
+	LTFT	145	91							
+	TFT	146	92							
+	Spare	147	93							
+	Spare	148	94							
+	Spare	149	95							
+	Spare	150	96							
+	Spare	151	97							
+	Spare	152	98							
+	Spare	153	99							
+	Spare	154	9A							
+	Spare	155	9B							
+	Spare	156	9C							
+Evap	EVAP Status 34	157	9D							
+	Evap Count 154	158	9E							
+		159	9F							
+	Spare	160	A0							
+	Spare	161	A1							
+	Spare	162	A2							
+	Spare	163	A3							
+	Spare	164	A4							
+	Spare	165	A5							
+	EGR Status 30	166	A6							
+EGR	EGR B6	167	A7							
+	EGR Count 131	168	A8							
+	EGR Count 132	169	A9							
+	 VSS Count 134	170	AA							
+	Count 135	171	AB							
+	Count 136	172	AC							
+	Count 137	173	AD							
+	EGR B5	174	AE							
+	Spare	175	AF							
+	Spare	176	B0							
+	Spare	177	B1							
+	Spare	178	B2							
+	Spare	179	B3							
+	Spare	180	B4							
+	Spare	181	B5							
+	Spare	182	B6							
+	Spare	183	B7							
+	Spare	184	B8							
+	Spare	185	B9							
+	Spare	186	BA							
+	Spare	187	BB							
+	Spare	188	BC							
+	Spare	189	BD							
+Misc.	Time from Start	190	BE							
+	Battery Volts	191	BF							
+	Status 1 (OBD)	192	C0							
+	Status 2 (OBD)	193	C1							
+	Status 27	194	C2							
+	Status 28	195	C3							
+	Status 29	196	C4							
+	Status 2A	197	C5							
+	Status 2B	198	C6							
+	Ign Status 2C	199	C7							
+	Status 2D	200	C8							
+	ISC Status 2E	201	C9							
+	SL Status 2F	202	CA							
+	EGR Status 30	203	CB							
+	PTC Status 31	204	CC							
+	O2H Status	205	CD							
+	Status 33	206	CE							
+	Evap Status 34	207	CF							
+	AC Status 36	208	D0							
+	Rad fan Status 37	209	D1							
+	Status 38	210	D2							
+	Diag Status 39	211	D3							
+	Spare	212	D4							
+	Spare	213	D5							
+	Spare	214	D6							
+	Spare	215	D7							
+	Spare	216	D8							
+	Spare	217	D9							
+	Spare	218	DA							
+	Spare	219	DB							
+	Spare	220	DC							
+	Spare	221	DD							
+	Spare	222	DE							
+	Spare	223	DF							
+	Spare	224	E0							
+	Spare	225	E1							
+	Spare	226	E2							
+	Spare	227	E3							
+	Spare	228	E4							
+	Spare	229	E5							
+	Spare	230	E6							
+	Spare	231	E7							
+	Spare	232	E8							
+	Spare	233	E9							
+	Spare	234	EA							
+	Spare	235	EB							
+	Spare	236	EC							
+	Spare	237	ED							
+	Spare	238	EE							
+	Spare	239	EF							
+	Spare	240	F0							
+	Spare	241	F1							
+	Spare	242	F2							
+	Spare	243	F3							
+	Spare	244	F4							
+	Spare	245	F5							
+	Spare	246	F6							
+	Spare	247	F7							
+	Spare	248	F8							
+	Spare	249	F9							
+	Spare	250	FA							
+	Spare	251	FB							
+	Spare	252	FC							
+	Spare	253	FD							
+	Spare	254	FE							
+	Spare	255	FF							
+
+
+50G11 Extended Diagnostics			
+			
+Group	Function	Byte	Memory Addr
+Ports	PortA	0	10
+		1	00
+	PortD	2	10
+		3	08
+	PortG	4	10
+		5	02
+	PortH	6	10
+		7	33
+	PortG T1 H	8	00
+		9	89
+	PortG T1 L	10	00
+		11	8A
+	Spare	12	FF
+		13	FF
+		14	FF
+		15	FF
+		16	FF
+		17	FF
+		18	FF
+		19	FF
+		20	FF
+		21	FF
+Fcodes	FCodes0	22	00
+		23	03
+	FCodes1	24	00
+		25	02
+	FCodes2	26	00
+		27	01
+	FCodes3	28	00
+		29	00
+	Spare	30	FF
+		31	FF
+	Spare	32	FF
+		33	FF
+	Spare	34	FF
+		35	FF
+	Spare	36	FF
+		37	FF
+	Spare	38	FF
+		39	FF
+	Spare	40	FF
+		41	FF
+	Spare	42	FF
+		43	FF
+	Spare	44	FF
+		45	FF
+Sensors	CTS	46	01
+		47	AD
+	IAT	48	01
+		49	AE
+	MAP (DIAG)	50	01
+		51	AB
+	TPSA	52	00
+		53	6E
+	TPSV	54	00
+		55	3F
+	O2SV	56	00
+		57	7C
+	BattV	58	00
+		59	7E
+	CFG	60	00
+		61	3A
+	Fuel level	62	00
+		63	49
+	Spare	64	FF
+		65	FF
+		66	FF
+		67	FF
+RPM	RPMH	68	00
+		69	8B
+	RPML	70	00
+		71	8C
+	dRPMH	72	00
+		73	95
+	dRPML	74	00
+		75	96
+	RPM_AV_97H	76	00
+		77	97
+	RPM_AV_97L	78	00
+		79	98
+	RPM_AV_99H	80	00
+		81	99
+	RPM_AV_99L	82	00
+		83	9A
+	Spare	84	FF
+		85	FF
+	Spare	86	FF
+		87	FF
+	Spare	88	FF
+		89	FF
+	Spare	90	FF
+		91	FF
+	Spare	92	FF
+		93	FF
+	Spare	94	FF
+		95	FF
+	Spare	96	FF
+		97	FF
+	Spare	98	FF
+		99	FF
+Ignition	IGN ADV (OBD)	100	01
+		101	A8
+	Ign Dwell	102	00
+		103	E0
+	Ign base Advance	104	00
+		105	D2
+	Ign CTS correction	106	00
+		107	D3
+	Ign IAT correction	108	00
+		109	D4
+	Ign Sum1	110	00
+		111	DB
+	Ign idle correction	112	00
+		113	D5
+	Ign PSP kick	114	00
+		115	D9
+	Ign Eload kick	116	00
+		117	D6
+	Ign Idle CTS correction	118	00
+		119	D7
+	Ign VSS correction	120	00
+		121	D8
+	Ign Rad fan correction	122	00
+		123	DA
+	Spare	124	FF
+		125	FF
+		126	FF
+		127	FF
+		128	FF
+		129	FF
+		130	FF
+		131	FF
+		132	FF
+		133	FF
+		134	FF
+		135	FF
+		136	FF
+		137	FF
+		138	FF
+		139	FF
+		140	FF
+		141	FF
+		142	FF
+		143	FF
+		144	FF
+		145	FF
+		146	FF
+		147	FF
+		148	FF
+		149	FF
+		150	FF
+		151	FF
+		152	FF
+		153	FF
+		154	FF
+		155	FF
+		156	FF
+		157	FF
+		158	FF
+		159	FF
+		160	FF
+		161	FF
+		162	FF
+		163	FF
+Fuel	Inj_PW High	164	01
+		165	A6
+	Inj PW Low	166	01
+		167	A7
+	LTFT 14	168	00
+		169	14
+	INJ PW2	170	00
+		171	9D
+	Fuel x Multiply MAP	172	00
+		173	A0
+	Inj Dwell	174	00
+		175	A2
+	CTS Corr A4	176	00
+		177	A4
+	CTS A8	178	00
+		179	A8
+	CTS AD	180	00
+		181	AD
+	CTS MAP AE	182	00
+		183	AE
+	dRPM correction	184	00
+		185	AF
+	Inj IAT correction	186	01
+		187	5F
+	Inj IAT Correction	188	01
+		189	74
+	Inj TPS correction 1	190	00
+		191	AA
+	Spare	192	FF
+		193	FF
+		194	FF
+		195	FF
+		196	FF
+		197	FF
+		198	FF
+		199	FF
+		200	FF
+		201	FF
+		202	FF
+		203	FF
+		204	FF
+		205	FF
+		206	FF
+		207	FF
+		208	FF
+		209	FF
+		210	FF
+		211	FF
+		212	FF
+		213	FF
+MAP	MAP raw H	214	00
+		215	3D
+	Map raw L	216	00
+		217	3E
+	MAP raw 2 H	218	01
+		219	AF
+	MAP raw 2 L	220	01
+		221	B0
+	Baro	222	00
+		223	69
+	Spare	224	FF
+		225	FF
+		226	FF
+		227	FF
+		228	FF
+		229	FF
+		230	FF
+		231	FF
+		232	FF
+		233	FF
+		234	FF
+		235	FF
+		236	FF
+		237	FF
+		238	FF
+		239	FF
+		240	FF
+		241	FF
+		242	FF
+		243	FF
+		244	FF
+		245	FF
+ISC	ISC Target Pos	246	00
+		247	76
+	ISC Duty (Diag)	248	01
+		249	AA
+	Target Idle	250	01
+		251	A4
+	Target Idle Error	252	01
+		253	26
+	VSS	254	00
+		255	F7
+	Spare	256	FF
+		257	FF
+		258	FF
+		259	FF
+		260	FF
+		261	FF
+		262	FF
+		263	FF
+		264	FF
+		265	FF
+		266	FF
+		267	FF
+		268	FF
+		269	FF
+		270	FF
+		271	FF
+		272	FF
+		273	FF
+		274	FF
+		275	FF
+		276	FF
+		277	FF
+		278	FF
+		279	FF
+		280	FF
+		281	FF
+		282	FF
+		283	FF
+		284	FF
+		285	FF
+		286	FF
+		287	FF
+Closed Loop	STFT	288	00
+		289	A6
+	LTFT	290	00
+		291	B3
+	TFT	292	01
+		293	A9
+	Spare	294	FF
+		295	FF
+		296	FF
+		297	FF
+		298	FF
+		299	FF
+		300	FF
+		301	FF
+		302	FF
+		303	FF
+		304	FF
+		305	FF
+		306	FF
+		307	FF
+		308	FF
+		309	FF
+		310	FF
+		311	FF
+		312	FF
+		313	FF
+Evap	EVAP Status 34	314	00
+		315	34
+	Evap Count 154	316	01
+		317	54
+	Spare	318	FF
+		319	FF
+		320	FF
+		321	FF
+		322	FF
+		323	FF
+		324	FF
+		325	FF
+		326	FF
+		327	FF
+		328	FF
+		329	FF
+		330	FF
+		331	FF
+		332	FF
+		333	FF
+EGR	EGR Status 30	334	00
+		335	30
+	EGR B6	336	00
+		337	B6
+	EGR Count 131	338	01
+		339	31
+	EGR Count 132	340	01
+		341	32
+	 VSS Count 134	342	01
+		343	34
+	Count 135	344	01
+		345	35
+	Count 136	346	01
+		347	36
+	Count 137	348	01
+		349	37
+	EGR B5	350	00
+		351	B5
+	Spare	352	FF
+		353	FF
+		354	FF
+		355	FF
+		356	FF
+		357	FF
+		358	FF
+		359	FF
+		360	FF
+		361	FF
+		362	FF
+		363	FF
+		364	FF
+		365	FF
+		366	FF
+		367	FF
+		368	FF
+		369	FF
+		370	FF
+		371	FF
+		372	FF
+		373	FF
+		374	FF
+		375	FF
+		376	FF
+		377	FF
+		378	FF
+		379	FF
+Misc.	Time from Start	380	00
+		381	EE
+	Battery Volts	382	00
+		383	7E
+	Status 1 (OBD)	384	00
+		385	24
+	Status 2 (OBD)	386	00
+		387	25
+	Status 27	388	00
+		389	27
+	Status 28	390	00
+		391	28
+	Status 29	392	00
+		393	29
+	Status 2A	394	00
+		395	2A
+	Status 2B	396	00
+		397	2B
+	Ign Status 2C	398	00
+		399	2C
+	Status 2D	400	00
+		401	2D
+	ISC Status 2E	402	00
+		403	2E
+	SL Status 2F	404	00
+		405	2F
+	EGR Status 30	406	00
+		407	30
+	PTC Status 31	408	00
+		409	31
+	O2H Status	410	00
+		411	32
+	Status 33	412	00
+		413	33
+	Evap Status 34	414	00
+		415	34
+	AC Status 36	416	00
+		417	36
+	Rad fan Status 37	418	00
+		419	37
+	Status 38	420	00
+		421	38
+	Diag Status 39	422	00
+		423	39
+	Spare	424	FF
+		425	FF
+	Spare	426	FF
+		427	FF
+	Spare	428	FF
+		429	FF
+	Spare	430	FF
+		431	FF
+	Spare	432	FF
+		433	FF
+	Spare	434	FF
+		435	FF
+	Spare	436	FF
+		437	FF
+	Spare	438	FF
+		439	FF
+	Spare	440	FF
+		441	FF
+	Spare	442	FF
+		443	FF
+	Spare	444	FF
+		445	FF
+	Spare	446	FF
+		447	FF
+	Spare	448	FF
+		449	FF
+	Spare	450	FF
+		451	FF
+	Spare	452	FF
+		453	FF
+	Spare	454	FF
+		455	FF
+	Spare	456	FF
+		457	FF
+	Spare	458	FF
+		459	FF
+	Spare	460	FF
+		461	FF
+	Spare	462	FF
+		463	FF
+	Spare	464	FF
+		465	FF
+	Spare	466	FF
+		467	FF
+	Spare	468	FF
+		469	FF
+	Spare	470	FF
+		471	FF
+	Spare	472	FF
+		473	FF
+	Spare	474	FF
+		475	FF
+	Spare	476	FF
+		477	FF
+	Spare	478	FF
+		479	FF
+	Spare	480	FF
+		481	FF
+	Spare	482	FF
+		483	FF
+	Spare	484	FF
+		485	FF
+	Spare	486	FF
+		487	FF
+	Spare	488	FF
+		489	FF
+	Spare	490	FF
+		491	FF
+	Spare	492	FF
+		493	FF
+	Spare	494	FF
+		495	FF
+	Spare	496	FF
+		497	FF
+	Spare	498	FF
+		499	FF
+	Spare	500	FF
+		501	FF
+	Spare	502	FF
+		503	FF
+	Spare	504	FF
+		505	FF
+	Spare	506	FF
+		507	FF
+	Spare	508	FF
+		509	FF
+	Spare	510	FF
+		511	FF
