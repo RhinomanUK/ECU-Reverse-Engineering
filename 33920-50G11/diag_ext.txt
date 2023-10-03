@@ -1,0 +1,55 @@
+
+; original code 
+ROM:C9DB OBD_HDR13:				 ; A=HDR
+ROM:C9DB		 cmpa	 #$13
+ROM:C9DD		 bne	 set_SCI_Timeout
+ROM:C9DF		 ldy	 #$197
+ROM:C9E3		 subb	 #3
+ROM:C9E5		 aby
+ROM:C9E7		 ldab	 0,x		 ; get diagnostic address
+ROM:C9E9		 aslb			 ; multiply by two to get table	offset
+ROM:C9EA		 ldx	 #$C94D		 ; OBD_ADDR_LUT
+ROM:C9ED		 abx
+ROM:C9EE		 ldx	 0,x		 ; X= OBD ADDR
+ROM:C9F0		 ldaa	 0,x		 ; get data
+ROM:C9F2		 staa	 0,y		 ; store in buffer
+
+;------------------------------------------------------------------
+; mods to original code - replace first instruction with jump
+; overwrite rest with FF to make it obvious that it is a modified section
+
+	org #$C9DB
+
+OBD_HDR13: jmp #$B200
+
+	fill #$FF, 22
+;
+;
+;------------------------------------------------------------------
+; new code 
+; extend number of addresses to 256 by checking carry after x2 
+; and adding 256 if there is an overflow
+;
+	org #$B200
+;
+new_HDR13	cmpa	#$13
+			bne	 	doReturn
+			ldy	 	#$197
+			subb	#3
+			aby
+			ldab	0,x		; get diagnostic address
+			aslb			; multiply by two to get table	offset
+			ldx		#$B000	; OBD lower aqddresses
+			bcc		getData
+			ldx	 	#$B100	; OBD higher addresses
+			abx
+			ldx	 	0,x		; X= OBD ADDR
+			ldaa	0,x		; get data
+			staa	0,y		; store in buffer
+doReturn	jmp		#$C9F5
+;
+;---------------------------------------------------------------
+;
+; ie request A5
+; A5 * 2 = 14A
+; address = 8100 +4A
