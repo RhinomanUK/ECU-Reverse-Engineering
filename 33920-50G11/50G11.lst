@@ -8,7 +8,7 @@ RAM:0000 ; +--------------------------------------------------------------------
 RAM:0000 ;
 RAM:0000 ; Input MD5   : 43EF13D63448E9FFC48EAAF5A493AD06
 RAM:0000
-RAM:0000 ; last	updated: 12th October 2023
+RAM:0000 ; last	updated: 14th October 2023
 RAM:0000 ; E clock = 2MHz
 RAM:0000 ; Timers: TCNT1=E/4=2us:IGN,INJ,CPS
 RAM:0000 ;	   TCNT2 = E/8=4us:
@@ -177,7 +177,7 @@ RAM:002A ;bit5 - EGR fault
 RAM:002A ;bit4
 RAM:002A ;bit3
 RAM:002A ;bit2 - 1=starter engaged
-RAM:002A ;bit1
+RAM:002A ;bit1 - 1 = new baro reading
 RAM:002A ;bit0 - 1=Baro<910mB
 RAM:002A Status_2A:	 fcb $3F		 ; ...
 RAM:002B
@@ -353,24 +353,26 @@ RAM:0049					 ; Fuel	Level raw ADC reading
 RAM:004A		 fcb $3F ; ?
 RAM:004B CONFIG_4B:	 fcb $3F		 ; ...
 RAM:004C		 fcb $3F ; ?
-RAM:004D MAP_16b_4D:	 fcb $3F		 ; ...
-RAM:004D					 ; MAP16b = x*(5/65536)	= (0.0253x -199.93)
+RAM:004D MAP_4ms:	 fcb $3F		 ; ...
+RAM:004D					 ; map sampled at 4ms =	x*(5/65536) = (0.0253x -199.93)
 RAM:004E		 fcb $3F ; ?
-RAM:004F MAP_16b_4F:	 fcb $3F		 ; ...
-RAM:004F					 ; default to 1012mB
+RAM:004F MAP_4ms_T1:	 fcb $3F		 ; ...
+RAM:004F					 ; previous MAP_4ms value
 RAM:0050		 fcb $3F ; ?
-RAM:0051 MAP_51:	 fcb $3F		 ; ...
+RAM:0051 MAP_Cyl_Max:	 fcb $3F		 ; ...
 RAM:0052		 fcb $3F ; ?
-RAM:0053 MAP_53:	 fcb $3F		 ; ...
+RAM:0053 MAP_Cyl_Min:	 fcb $3F		 ; ...
 RAM:0053					 ; init	to FFFFh
 RAM:0054		 fcb $3F ; ?
 RAM:0055 MAP_16b_55:	 fcb $3F		 ; ...
 RAM:0055					 ; changes when	MAP changes - default is 9999h = 39321
 RAM:0056		 fcb $3F ; ?
-RAM:0057 MAP_16b_AV:	 fcb $3F		 ; ...
-RAM:0057					 ; =MAP/5.03 - changes with MAP	maybe because of MAP fault code??
+RAM:0057 MAP_Cyl_Av:	 fcb $3F		 ; ...
+RAM:0057					 ; MAP average = (MAP_MAX-MAP_Min)/2 scale = MAP/5.03
+RAM:0057					 ; Updated every CPS_Event
 RAM:0058		 fcb $3F ; ?
-RAM:0059 MAP_16b_AV_T1:	 fcb $3F		 ; ...
+RAM:0059 MAP_Cyl_Av_T1:	 fcb $3F		 ; ...
+RAM:0059					 ; previous MAP	average
 RAM:005A		 fcb $3F ; ?
 RAM:005B MAF Buffer:
 RAM:005B MAP_BUFF_T0:	 fcb $3F		 ; ...
@@ -497,7 +499,8 @@ RAM:00B4		 fcb $3F ; ?
 RAM:00B5 EGR_B5:	 fcb $3F		 ; ...
 RAM:00B6 EGR_B6:	 fcb $3F		 ; ...
 RAM:00B6					 ; fuelling correction for EGR (fault/on?)
-RAM:00B7 CT_WTS_B7?:	 fcb $3F		 ; ...
+RAM:00B7 ACO_WTS_B7:	 fcb $3F		 ; ...
+RAM:00B7					 ; tip in fuel correction when AC is On
 RAM:00B8 WTS_CORR_B8:	 fcb $3F		 ; ...
 RAM:00B9 PostStartEnrich:fcb $3F		 ; ...
 RAM:00B9					 ; a correction	applied	for 3 seconds after start
@@ -50675,7 +50678,7 @@ ROM:CB72
 ROM:CB72 MAP diagnostic	value is MAP_16b_AV high byte if no fault codes
 ROM:CB72 or MAP_RAW if a fault code is set
 ROM:CB72
-ROM:CB72		 ldaa	 MAP_16b_AV	 ; get MAP*50
+ROM:CB72		 ldaa	 MAP_Cyl_Av	 ; get MAP*50
 ROM:CB74		 brclr	 FCodes1 3 loc_CB7A ; bra if no	MAP errors
 ROM:CB78		 ldaa	 MAP_RAW	 ; otherwise get MAP_RAW
 ROM:CB7A
@@ -50772,7 +50775,8 @@ ROM:CBF4		 ldd	 INJ_PW		 ; inj pw * 2us	(one shot or shot one of two)
 ROM:CBF6		 jsr	 Mult?
 ROM:CBF9		 lsld
 ROM:CBFA		 std	 INJ_PW		 ; comes here during cranking
-ROM:CBFC		 ldaa	 MAP_16b_AV	 ; =MAP/5.03 - changes with MAP	maybe because of MAP fault code??
+ROM:CBFC		 ldaa	 MAP_Cyl_Av	 ; MAP average = (MAP_MAX-MAP_Min)/2 scale = MAP/5.03
+ROM:CBFC					 ; Updated every CPS_Event
 ROM:CBFE		 ldx	 #$C069		 ; injector high or low	load correction?
 ROM:CC01		 jsr	 TABLE_LU_2D	 ; (MAP) table look up with max	and min
 ROM:CC04		 staa	 word_18C	 ; VE_18C is the value from the	VE table
@@ -50957,7 +50961,7 @@ ROM:CCEA ;Does come here during	normal running
 ROM:CCEA ;related to LTFT?
 ROM:CCEA
 ROM:CCEA CALC_BYTE_BA:				 ; B = high byte of the	16-bit average MAP value
-ROM:CCEA		 ldab	 MAP_16b_AV
+ROM:CCEA		 ldab	 MAP_Cyl_Av
 ROM:CCEC		 subb	 #$50 ;	'P'      ; MAP-325mB
 ROM:CCEE		 bcc	 loc_CCF1	 ; bra if MAP>325mB
 ROM:CCF0		 clrb			 ; otherwise set to zero
@@ -51061,7 +51065,7 @@ ROM:CD68
 ROM:CD68 CT_WTS_B7? WTS	correction applied when	at closed throttle based on
 ROM:CD68 WTS from table	at C1DC, on a tick every COUNT_164 timeout
 ROM:CD68
-ROM:CD68		 addb	 CT_WTS_B7?
+ROM:CD68		 addb	 ACO_WTS_B7	 ; tip in fuel correction when AC is On
 ROM:CD6A		 adca	 #0		 ; add carry to	high byte
 ROM:CD6C		 lsld			 ; multiply by two
 ROM:CD6D
@@ -51204,7 +51208,8 @@ ROM:CE08		 brset	 CONFIG_3A $80 loc_CE0F	; '' ; bra if auto trans
 ROM:CE0C		 ldx	 #$C0CD		 ; load	if manual
 ROM:CE0F
 ROM:CE0F loc_CE0F:				 ; ...
-ROM:CE0F		 ldaa	 MAP_16b_AV	 ; =MAP/5.03 - changes with MAP	maybe because of MAP fault code??
+ROM:CE0F		 ldaa	 MAP_Cyl_Av	 ; MAP average = (MAP_MAX-MAP_Min)/2 scale = MAP/5.03
+ROM:CE0F					 ; Updated every CPS_Event
 ROM:CE11		 jsr	 TABLE_LU_2D	 ; (MAPvWTS) table look	up with	max and	min
 ROM:CE14		 pulb
 ROM:CE15		 mul
@@ -51560,7 +51565,8 @@ ROM:D017 loc_D017:				 ; ...
 ROM:D017		 ldab	 #$10
 ROM:D019		 mul
 ROM:D01A		 std	 word_18C	 ; VE_18C is the value from the	VE table
-ROM:D01D		 ldaa	 MAP_16b_AV	 ; =MAP/5.03 - changes with MAP	maybe because of MAP fault code??
+ROM:D01D		 ldaa	 MAP_Cyl_Av	 ; MAP average = (MAP_MAX-MAP_Min)/2 scale = MAP/5.03
+ROM:D01D					 ; Updated every CPS_Event
 ROM:D01F		 suba	 #$58 ;	'X'
 ROM:D021		 bcc	 loc_D024
 ROM:D023		 clra
@@ -51737,7 +51743,8 @@ ROM:D11E		 cmpa	 #$C		 ; = 600RPM
 ROM:D120		 bcs	 locret_D147
 ROM:D122		 cmpa	 #$40 ;	'@'      ; = 3200RPM
 ROM:D124		 bcc	 locret_D147
-ROM:D126		 ldaa	 MAP_16b_AV	 ; =MAP/5.03 - changes with MAP	maybe because of MAP fault code??
+ROM:D126		 ldaa	 MAP_Cyl_Av	 ; MAP average = (MAP_MAX-MAP_Min)/2 scale = MAP/5.03
+ROM:D126					 ; Updated every CPS_Event
 ROM:D128		 cmpa	 #$B8 ;	'¸'
 ROM:D12A		 bcc	 locret_D147
 ROM:D12C		 ldab	 MAP_BA		 ; related to MAP
@@ -51871,7 +51878,7 @@ ROM:D1CB		 ldaa	 RPMdiv50	 ; RPMdiv50 is a byte, as a double it is RPM/5.12
 ROM:D1CD		 ldx	 #$C0D9
 ROM:D1D0		 jsr	 TABLE_LU_2D	 ; (RPM) table look up with max	and min
 ROM:D1D3		 tab			 ; B = value wrt RPM
-ROM:D1D4		 ldaa	 MAP_16b_AV	 ; A = MAPx50
+ROM:D1D4		 ldaa	 MAP_Cyl_Av	 ; A = MAPx50
 ROM:D1D6		 cba			 ; A-B
 ROM:D1D7		 bcs	 loc_D1DC	 ; bra if MAPx50>x ?
 ROM:D1D9		 bset	 Status_2A $80 ; ''
@@ -51930,7 +51937,8 @@ ROM:D23A		 ldaa	 WTS_LIN
 ROM:D23C		 ldx	 #$C0E0
 ROM:D23F		 jsr	 TABLE_LU_2D	 ; (WTS) table look up with max	and min
 ROM:D242		 psha
-ROM:D243		 ldaa	 MAP_16b_AV	 ; =MAP/5.03 - changes with MAP	maybe because of MAP fault code??
+ROM:D243		 ldaa	 MAP_Cyl_Av	 ; MAP average = (MAP_MAX-MAP_Min)/2 scale = MAP/5.03
+ROM:D243					 ; Updated every CPS_Event
 ROM:D245		 suba	 #$98 ;	''
 ROM:D247		 bcc	 loc_D24A
 ROM:D249		 clra
@@ -52591,29 +52599,34 @@ ROM:D5C2 locret_D5C2:				 ; ...
 ROM:D5C2		 rts
 ROM:D5C2 ; End of function dec_WTS_B9
 ROM:D5C2
+ROM:D5C3 do_ACO_WTS_B7:
+ROM:D5C3 This is a WTS based fuel correction? for ACO,
+ROM:D5C3 calculated during closed throttle, applied on tip in?
 ROM:D5C3
 ROM:D5C3 ; =============== S U B R O U T I N E =======================================
 ROM:D5C3
 ROM:D5C3
-ROM:D5C3 set_CT_WTS_B7:				 ; ...
+ROM:D5C3 do_ACO_WTS_B7:				 ; ...
 ROM:D5C3		 brclr	 STATUS_27 $10 locret_D5D4 ; bra if idle switch	OFF
+ROM:D5C7
+ROM:D5C7 calc_ACO_WTS_B7:
 ROM:D5C7		 ldaa	 WTS_LIN
 ROM:D5C9		 ldx	 #$C1DC
 ROM:D5CC		 jsr	 TABLE_LU_2D	 ; (WTS) table look up with max	and min
-ROM:D5CF		 staa	 CT_WTS_B7?
+ROM:D5CF		 staa	 ACO_WTS_B7	 ; tip in fuel correction when AC is On
 ROM:D5D1		 clr	 WTS_CNT_164
 ROM:D5D4
 ROM:D5D4 locret_D5D4:				 ; ...
 ROM:D5D4		 rts
-ROM:D5D4 ; End of function set_CT_WTS_B7
+ROM:D5D4 ; End of function do_ACO_WTS_B7
 ROM:D5D4
 ROM:D5D5 decrement the closed throttle fuel correction ? by 8 every time count_164 times out
 ROM:D5D5
 ROM:D5D5 ; =============== S U B R O U T I N E =======================================
 ROM:D5D5
 ROM:D5D5
-ROM:D5D5 dec_CT_WTS:				 ; ...
-ROM:D5D5		 ldaa	 CT_WTS_B7?
+ROM:D5D5 dec_ACO_CT_WTS?:			 ; ...
+ROM:D5D5		 ldaa	 ACO_WTS_B7	 ; tip in fuel correction when AC is On
 ROM:D5D7		 beq	 locret_D5F7	 ; nothing to do if its	already	reached	zero
 ROM:D5D9		 brclr	 STATUS_27 $10 loc_D5F4	; bra if idle switch ON
 ROM:D5DD		 brclr	 Status_2B $80 loc_D5F4	; '' ; bra if AC OFF
@@ -52632,11 +52645,11 @@ ROM:D5F4 loc_D5F4:				 ; ...
 ROM:D5F4		 clra
 ROM:D5F5
 ROM:D5F5 loc_D5F5:				 ; ...
-ROM:D5F5		 staa	 CT_WTS_B7?
+ROM:D5F5		 staa	 ACO_WTS_B7	 ; tip in fuel correction when AC is On
 ROM:D5F7
 ROM:D5F7 locret_D5F7:				 ; ...
 ROM:D5F7		 rts
-ROM:D5F7 ; End of function dec_CT_WTS
+ROM:D5F7 ; End of function dec_ACO_CT_WTS?
 ROM:D5F7
 ROM:D5F8 CALC_EGR_B6:
 ROM:D5F8 Fetches a value from a	table RPM v MAP
@@ -53549,7 +53562,8 @@ ROM:DABF		 bcs	 dec_FAN_IGN_COR ; bra if WTS<90
 ROM:DAC1		 ldab	 IAT_LIN
 ROM:DAC3		 cmpb	 byte_C93B	 ; =IAT-65C
 ROM:DAC6		 bcs	 dec_FAN_IGN_COR ; bra if IAT<65
-ROM:DAC8		 ldab	 MAP_16b_AV	 ; =MAP/5.03 - changes with MAP	maybe because of MAP fault code??
+ROM:DAC8		 ldab	 MAP_Cyl_Av	 ; MAP average = (MAP_MAX-MAP_Min)/2 scale = MAP/5.03
+ROM:DAC8					 ; Updated every CPS_Event
 ROM:DACA		 cmpb	 byte_C940	 ; =MAP-578kpa
 ROM:DACD		 bcs	 dec_FAN_IGN_COR ; bra if MAP<578kPa
 ROM:DACF		 ldab	 VSS		 ; VSS=kmh
@@ -53559,7 +53573,8 @@ ROM:DAD5 VSS<1.25mph
 ROM:DAD5		 ldab	 WTS_LIN
 ROM:DAD7		 cmpb	 byte_C93A	 ; = WTS-100C
 ROM:DADA		 bcs	 loc_DAEA	 ; bra if WTS<100C
-ROM:DADC		 ldab	 MAP_16b_AV	 ; =MAP/5.03 - changes with MAP	maybe because of MAP fault code??
+ROM:DADC		 ldab	 MAP_Cyl_Av	 ; MAP average = (MAP_MAX-MAP_Min)/2 scale = MAP/5.03
+ROM:DADC					 ; Updated every CPS_Event
 ROM:DADE		 cmpb	 byte_C93C	 ; =MAP-613kPa
 ROM:DAE1		 bcs	 loc_DAEA	 ; bra if MAP<613
 ROM:DAE3		 ldab	 WTS_EVAP_AD
@@ -54095,7 +54110,8 @@ ROM:DD91		 rts
 ROM:DD92 ; ---------------------------------------------------------------------------
 ROM:DD92
 ROM:DD92 MAP_DD92:				 ; ...
-ROM:DD92		 ldaa	 MAP_16b_AV	 ; =MAP/5.03 - changes with MAP	maybe because of MAP fault code??
+ROM:DD92		 ldaa	 MAP_Cyl_Av	 ; MAP average = (MAP_MAX-MAP_Min)/2 scale = MAP/5.03
+ROM:DD92					 ; Updated every CPS_Event
 ROM:DD94		 ldab	 byte_C8DF	 ; =600mB
 ROM:DD97		 cba			 ; (MAP-600mB)
 ROM:DD98		 bcs	 loc_DD9D	 ; bra if MAP<600mB
@@ -54326,7 +54342,8 @@ ROM:DEFE
 ROM:DEFE loc_DEFE:				 ; ...
 ROM:DEFE		 jsr	 TABLE_LU_2D	 ; (RPM) table look up with max	and min
 ROM:DF01		 tab
-ROM:DF02		 ldaa	 MAP_16b_AV	 ; =MAP/5.03 - changes with MAP	maybe because of MAP fault code??
+ROM:DF02		 ldaa	 MAP_Cyl_Av	 ; MAP average = (MAP_MAX-MAP_Min)/2 scale = MAP/5.03
+ROM:DF02					 ; Updated every CPS_Event
 ROM:DF04		 cba
 ROM:DF05		 bcs	 loc_DF0A
 ROM:DF07		 bclr	 EGR_STATUS_30 $80 ; '' ; EGR?
@@ -54603,7 +54620,8 @@ ROM:E0B2
 ROM:E0B2 EGR_??:				 ; ...
 ROM:E0B2		 bset	 Status_2A $20 ; ' '
 ROM:E0B5		 bclr	 Status_2A $10
-ROM:E0B8		 ldaa	 MAP_16b_AV	 ; =MAP/5.03 - changes with MAP	maybe because of MAP fault code??
+ROM:E0B8		 ldaa	 MAP_Cyl_Av	 ; MAP average = (MAP_MAX-MAP_Min)/2 scale = MAP/5.03
+ROM:E0B8					 ; Updated every CPS_Event
 ROM:E0BA		 staa	 MAB_16b_AV_T1
 ROM:E0BD		 staa	 MAP_16b_AV_T1a
 ROM:E0C0		 ldaa	 byte_C8FD	 ;  =5h
@@ -54622,14 +54640,16 @@ ROM:E0DA		 ldaa	 EGR_CNT_13B
 ROM:E0DD		 beq	 loc_E102
 ROM:E0DF		 deca
 ROM:E0E0		 staa	 EGR_CNT_13B
-ROM:E0E3		 ldaa	 MAP_16b_AV	 ; =MAP/5.03 - changes with MAP	maybe because of MAP fault code??
+ROM:E0E3		 ldaa	 MAP_Cyl_Av	 ; MAP average = (MAP_MAX-MAP_Min)/2 scale = MAP/5.03
+ROM:E0E3					 ; Updated every CPS_Event
 ROM:E0E5		 ldab	 MAP_16b_AV_T1a
 ROM:E0E8		 staa	 MAP_16b_AV_T1a
 ROM:E0EB		 sba
 ROM:E0EC		 cmpa	 byte_C901	 ;  =2h
 ROM:E0EF		 bge	 loc_E158
 ROM:E0F1		 ldaa	 MAB_16b_AV_T1
-ROM:E0F4		 suba	 MAP_16b_AV	 ; =MAP/5.03 - changes with MAP	maybe because of MAP fault code??
+ROM:E0F4		 suba	 MAP_Cyl_Av	 ; MAP average = (MAP_MAX-MAP_Min)/2 scale = MAP/5.03
+ROM:E0F4					 ; Updated every CPS_Event
 ROM:E0F6		 cmpa	 byte_C902	 ; =2h
 ROM:E0F9		 blt	 locret_E16D
 ROM:E0FB		 bset	 Status_2A $10
@@ -54648,7 +54668,8 @@ ROM:E113		 jmp	 locret_E16D
 ROM:E116 ; ---------------------------------------------------------------------------
 ROM:E116
 ROM:E116 loc_E116:				 ; ...
-ROM:E116		 ldaa	 MAP_16b_AV	 ; =MAP/5.03 - changes with MAP	maybe because of MAP fault code??
+ROM:E116		 ldaa	 MAP_Cyl_Av	 ; MAP average = (MAP_MAX-MAP_Min)/2 scale = MAP/5.03
+ROM:E116					 ; Updated every CPS_Event
 ROM:E118		 suba	 MAB_16b_AV_T1
 ROM:E11B		 bcc	 loc_E11E
 ROM:E11D		 nega
@@ -54839,7 +54860,7 @@ ROM:E216		 ldaa	 RPMdiv50	 ; RPMdiv50 is a byte, as a double it is RPM/5.12
 ROM:E218		 ldx	 #$C20F
 ROM:E21B		 jsr	 TABLE_LU_2D	 ; (RPM)table look up with max and min
 ROM:E21E		 tab
-ROM:E21F		 ldaa	 MAP_16b_AV	 ; get MAP
+ROM:E21F		 ldaa	 MAP_Cyl_Av	 ; get MAP
 ROM:E221		 suba	 BARO		 ; subtract BARO
 ROM:E223		 adda	 #$B8 ;	'¸'      ; add 1000mB
 ROM:E225		 cba			 ; A - vacuum
@@ -54925,7 +54946,8 @@ ROM:E295		 bcc	 loc_E29A	 ; bra if RPM>1900
 ROM:E297		 bclr	 O2H_STATUS_32 1 ; else	clr RPM>2000
 ROM:E29A
 ROM:E29A loc_E29A:				 ; ...
-ROM:E29A		 ldaa	 MAP_16b_AV	 ; =MAP/5.03 - changes with MAP	maybe because of MAP fault code??
+ROM:E29A		 ldaa	 MAP_Cyl_Av	 ; MAP average = (MAP_MAX-MAP_Min)/2 scale = MAP/5.03
+ROM:E29A					 ; Updated every CPS_Event
 ROM:E29C		 ldab	 byte_C90D	 ; AEh = 935mBar?
 ROM:E29F		 cba			 ; MAP - 935mB
 ROM:E2A0		 bcs	 loc_E2A5	 ; bra if MAP<935mB
@@ -55035,7 +55057,7 @@ ROM:E34A		 bita	 #6		 ; test	WTS fault codes	= rad fan on?
 ROM:E34C		 bne	 loc_E368	 ; bra if any codes set
 ROM:E34E		 brset	 Status_2B $80 loc_E361	; '' ; bra if AC ON
 ROM:E352		 bset	 Status_2B $80 ; '' ; set AC ON
-ROM:E355		 jsr	 set_CT_WTS_B7
+ROM:E355		 jsr	 do_ACO_WTS_B7
 ROM:E358		 jsr	 do_Word_103_a
 ROM:E35B		 ldaa	 byte_C917	 ; =5
 ROM:E35E		 staa	 TPS_CNT_152	 ; counter for O2S heater status (TPS>65%)
@@ -57284,24 +57306,27 @@ ROM:F03F		 std	 RPM_AV_99	 ; and store as	the new	value
 ROM:F041		 rts
 ROM:F041 ; End of function CALC_RPM
 ROM:F041
+ROM:F042 update_MAP_Params:
+ROM:F042 Called	every CPS event
 ROM:F042
 ROM:F042 ; =============== S U B R O U T I N E =======================================
 ROM:F042
 ROM:F042
 ROM:F042 update_MAP_Params:			 ; ...
-ROM:F042		 ldd	 MAP_51
-ROM:F044		 addd	 MAP_53		 ; init	to FFFFh
+ROM:F042		 ldd	 MAP_Cyl_Max
+ROM:F044		 addd	 MAP_Cyl_Min	 ; init	to FFFFh
 ROM:F046		 rora
 ROM:F047		 rorb
-ROM:F048		 ldx	 MAP_16b_AV	 ; =MAP/5.03 - changes with MAP	maybe because of MAP fault code??
-ROM:F04A		 std	 MAP_16b_AV	 ; =(byte_51+byte_53)/2
+ROM:F048		 ldx	 MAP_Cyl_Av	 ; MAP average = (MAP_MAX-MAP_Min)/2 scale = MAP/5.03
+ROM:F048					 ; Updated every CPS_Event
+ROM:F04A		 std	 MAP_Cyl_Av	 ; =(byte_51+byte_53)/2
 ROM:F04C clear 51 and 53
-ROM:F04C		 stx	 MAP_16b_AV_T1
+ROM:F04C		 stx	 MAP_Cyl_Av_T1	 ; previous MAP	average
 ROM:F04E		 clra			 ; MAP_T1 = last MAP
 ROM:F04F		 clrb
-ROM:F050		 std	 MAP_51		 ; byte51 = 0000h
+ROM:F050		 std	 MAP_Cyl_Max	 ; byte51 = 0000h
 ROM:F052		 ldd	 #$FFFF
-ROM:F055		 std	 MAP_53		 ; byte_53=FFFF
+ROM:F055		 std	 MAP_Cyl_Min	 ; byte_53=FFFF
 ROM:F057 update	MAP buffer:
 ROM:F057     5B->5D->5F->61->63
 ROM:F057		 ldd	 MAF_BUFF_T3
@@ -57313,8 +57338,9 @@ ROM:F061		 std	 MAF_BUFF_T2	 ; byte_5F = byte_5D
 ROM:F063		 ldd	 MAP_BUFF_T0
 ROM:F065		 std	 MAF_BUFF_T1	 ; byte_5D = byte_5B
 ROM:F067 calculate dMAP	and limit
-ROM:F067		 ldaa	 MAP_16b_AV	 ; =MAP/5.03 - changes with MAP	maybe because of MAP fault code??
-ROM:F069		 suba	 MAP_16b_AV_T1	 ; MAP - MAP_T1
+ROM:F067		 ldaa	 MAP_Cyl_Av	 ; MAP average = (MAP_MAX-MAP_Min)/2 scale = MAP/5.03
+ROM:F067					 ; Updated every CPS_Event
+ROM:F069		 suba	 MAP_Cyl_Av_T1	 ; MAP - MAP_T1
 ROM:F06B		 bcc	 loc_F078	 ; bra if MAP>MAP_T1
 ROM:F06D		 cmpa	 #$80 ;	''      ; MAP-80h
 ROM:F06F		 bcc	 loc_F073	 ; bra if dMAP>80h
@@ -57341,7 +57367,7 @@ ROM:F080		 staa	 dMAP_6A?	 ; MAP related?
 ROM:F082		 cmpa	 byte_C7CE	 ; =4h
 ROM:F085		 bcs	 loc_F08F	 ; bra if dMAP<4
 ROM:F087 dMAP>4
-ROM:F087		 ldd	 MAP_16b_4D	 ; MAP16b = x*(5/65536)	= (0.0253x -199.93)
+ROM:F087		 ldd	 MAP_4ms	 ; map sampled at 4ms =	x*(5/65536) = (0.0253x -199.93)
 ROM:F089		 std	 MAP_16b_55	 ; copy	of MAP_16b
 ROM:F08B		 std	 MAP_BUFF_T0
 ROM:F08D		 bra	 locret_F0B6
@@ -57349,7 +57375,8 @@ ROM:F08F ; ---------------------------------------------------------------------
 ROM:F08F dMAP<4
 ROM:F08F
 ROM:F08F loc_F08F:				 ; ...
-ROM:F08F		 ldd	 MAP_16b_AV	 ; =MAP/5.03 - changes with MAP	maybe because of MAP fault code??
+ROM:F08F		 ldd	 MAP_Cyl_Av	 ; MAP average = (MAP_MAX-MAP_Min)/2 scale = MAP/5.03
+ROM:F08F					 ; Updated every CPS_Event
 ROM:F091		 std	 MAP_16b_55	 ; MAP*50
 ROM:F093		 ldd	 word_C7CF	 ; 8h if auto
 ROM:F096		 brset	 CONFIG_3A $80 loc_F09D	; '' ; bra if auto trans
@@ -57357,7 +57384,8 @@ ROM:F09A		 ldd	 word_C7D1	 ; 8h if manual
 ROM:F09D
 ROM:F09D loc_F09D:				 ; ...
 ROM:F09D		 xgdx
-ROM:F09E		 ldd	 MAP_16b_AV	 ; =MAP/5.03 - changes with MAP	maybe because of MAP fault code??
+ROM:F09E		 ldd	 MAP_Cyl_Av	 ; MAP average = (MAP_MAX-MAP_Min)/2 scale = MAP/5.03
+ROM:F09E					 ; Updated every CPS_Event
 ROM:F0A0		 subd	 MAP_BUFF_T0
 ROM:F0A2		 bcs	 loc_F0A8
 ROM:F0A4		 idiv
@@ -57616,13 +57644,15 @@ ROM:F1E8 ; loc_F1E8
 ROM:F1E8 ; This	seems to be a rather complicated way of	calling	CALC_BARO if MAPx50 and	BARO are not the same
 ROM:F1E8
 ROM:F1E8 CALC_BARO_1:				 ; ...
-ROM:F1E8		 ldaa	 MAP_16b_AV	 ; =MAP/5.03 - changes with MAP	maybe because of MAP fault code??
+ROM:F1E8		 ldaa	 MAP_Cyl_Av	 ; MAP average = (MAP_MAX-MAP_Min)/2 scale = MAP/5.03
+ROM:F1E8					 ; Updated every CPS_Event
 ROM:F1EA		 ldab	 BARO		 ; default Baro	= 1012mB
 ROM:F1EC		 cba			 ; MAPx50 - MAP_8
 ROM:F1ED		 bcs	 CALC_BARO_2	 ; bra if MAPx50 > MAP_8
 ROM:F1EF
 ROM:F1EF loc_F1EF:				 ; ...
-ROM:F1EF		 ldaa	 MAP_16b_AV	 ; =MAP/5.03 - changes with MAP	maybe because of MAP fault code??
+ROM:F1EF		 ldaa	 MAP_Cyl_Av	 ; MAP average = (MAP_MAX-MAP_Min)/2 scale = MAP/5.03
+ROM:F1EF					 ; Updated every CPS_Event
 ROM:F1F1		 cmpa	 BARO		 ; MAPx50 - MAP_8
 ROM:F1F3		 bcc	 CALC_BARO_2	 ; bra if MAP_8>MAPx50
 ROM:F1F5		 rts
@@ -58435,7 +58465,7 @@ ROM:F5BA
 ROM:F5BA
 ROM:F5BA test_MAP_SENSOR:			 ; ...
 ROM:F5BA		 ldd	 MAP_RAW
-ROM:F5BC		 std	 MAP_16b_4D	 ; 16-bit MAP value
+ROM:F5BC		 std	 MAP_4ms	 ; 16-bit MAP value
 ROM:F5BE		 cpd	 #$2666		 ; lower diag limit = 750mV/56mB
 ROM:F5C2		 bcs	 loc_F5DE	 ; bra if MAP<minimum
 ROM:F5C4		 cpd	 #$E666		 ; upper diag limit = 4.5V/1300mB
@@ -58476,7 +58506,7 @@ ROM:F604
 ROM:F604 testMAPatCrank:
 ROM:F604		 brset	 Status_2A 4 loc_F614
 ROM:F608		 bset	 Status_2A 4
-ROM:F60B		 ldaa	 MAP_16b_4D	 ; MAP16b = x*(5/65536)	= (0.0253x -199.93)
+ROM:F60B		 ldaa	 MAP_4ms	 ; map sampled at 4ms =	x*(5/65536) = (0.0253x -199.93)
 ROM:F60D		 cmpa	 MAP_400mB	 ; MAP_RAW_SH1 - 400mB
 ROM:F610		 bcc	 noMAPCodes	 ; if map is >400mB during cranking - don't set a fault
 ROM:F612		 bra	 loc_F64F
@@ -58502,7 +58532,7 @@ ROM:F630		 bra	 noMAPCodes
 ROM:F632 ; ---------------------------------------------------------------------------
 ROM:F632
 ROM:F632 loc_F632:				 ; ...
-ROM:F632		 subd	 MAP_16b_4F	 ; default to 1012mB
+ROM:F632		 subd	 MAP_4ms_T1	 ; previous MAP_4ms value
 ROM:F634		 bcc	 loc_F63A
 ROM:F636		 coma
 ROM:F637		 negb
@@ -58526,8 +58556,8 @@ ROM:F654		 bset	 FCodes1 1	 ; set MAPH fault code (current)
 ROM:F657		 bset	 FCodes3 1	 ; set MAPH fault code (history)
 ROM:F65A
 ROM:F65A loc_F65A:				 ; ...
-ROM:F65A		 ldd	 MAP_16b_4D	 ; copied from MAP_RAW above
-ROM:F65C		 std	 MAP_16b_4F	 ; default to 1012mB
+ROM:F65A		 ldd	 MAP_4ms	 ; copied from MAP_RAW above
+ROM:F65C		 std	 MAP_4ms_T1	 ; previous MAP_4ms value
 ROM:F65E		 ldd	 #$9999
 ROM:F661		 brclr	 STATUS_27 $10 MAP_defaults ; bra if idle switch OFF
 ROM:F665		 ldaa	 WTS_LIN
@@ -58541,9 +58571,9 @@ ROM:F670 loc_F670:				 ; ...
 ROM:F670		 ldd	 #$7AE1		 ; =31457
 ROM:F673
 ROM:F673 MAP_defaults:				 ; ...
-ROM:F673		 std	 MAP_16b_4D	 ; default value if MAP	fault
-ROM:F675		 std	 MAP_51		 ; default value if MAP	fault
-ROM:F677		 std	 MAP_53		 ; default value if MAP	fault
+ROM:F673		 std	 MAP_4ms	 ; default value if MAP	fault
+ROM:F675		 std	 MAP_Cyl_Max	 ; default value if MAP	fault
+ROM:F677		 std	 MAP_Cyl_Min	 ; default value if MAP	fault
 ROM:F679		 std	 MAP_16b_55	 ; default value if MAP	fault
 ROM:F67B		 rts
 ROM:F67C ; ---------------------------------------------------------------------------
@@ -58553,29 +58583,29 @@ ROM:F67C		 clr	 Count_13D+1
 ROM:F67F		 bclr	 FCodes1 3	 ; clear MAP codes
 ROM:F682
 ROM:F682 loc_F682:				 ; ...
-ROM:F682		 ldd	 MAP_16b_4D	 ; MAP16b = x*(5/65536)	= (0.0253x -199.93)
-ROM:F684		 std	 MAP_16b_4F	 ; default to 1012mB
-ROM:F686		 brclr	 STATUS_27 $20 loc_F69C	; ' ' ; bra if rpm>500 (engine running)
-ROM:F68A		 brset	 Status_2A 2 loc_F69C
-ROM:F68E		 brset	 PORTG_SH_H $80	loc_F69C ; '' ; 0 = starter engaged
+ROM:F682		 ldd	 MAP_4ms	 ; map sampled at 4ms =	x*(5/65536) = (0.0253x -199.93)
+ROM:F684		 std	 MAP_4ms_T1	 ; previous MAP_4ms value
+ROM:F686		 brclr	 STATUS_27 $20 test_MAP_Max ; ' ' ; bra if rpm>500 (engine running)
+ROM:F68A		 brset	 Status_2A 2 test_MAP_Max
+ROM:F68E		 brset	 PORTG_SH_H $80	test_MAP_Max ; '' ; 1 = starter engaged
 ROM:F692		 bset	 Status_2A 2	 ; set status bit
 ROM:F695		 pshb			 ; push	MAP_16
 ROM:F696		 psha
-ROM:F697		 jsr	 CALC_BARO_2
+ROM:F697		 jsr	 CALC_BARO_2	 ; calc	baro if	engine not turning
 ROM:F69A
-ROM:F69A code_F69A:				 ; Pull	MAP_16
+ROM:F69A code_F69A:
 ROM:F69A		 pula
-ROM:F69B		 pulb
+ROM:F69B		 pulb			 ; D = MAP_4D
 ROM:F69C
-ROM:F69C loc_F69C:				 ; ...
-ROM:F69C		 cpd	 MAP_51
-ROM:F69F		 bls	 loc_F6A3
-ROM:F6A1		 std	 MAP_51
+ROM:F69C test_MAP_Max:				 ; ...
+ROM:F69C		 cpd	 MAP_Cyl_Max	 ; MAP_4D - MAP_MAX
+ROM:F69F		 bls	 test_MAP_min	 ; bra if MAP_4D < MAP_MAX
+ROM:F6A1		 std	 MAP_Cyl_Max	 ; else	update MAP_Max
 ROM:F6A3
-ROM:F6A3 loc_F6A3:				 ; ...
-ROM:F6A3		 cpd	 MAP_53		 ; init	to FFFFh
-ROM:F6A6		 bhi	 locret_F6AA
-ROM:F6A8		 std	 MAP_53		 ; init	to FFFFh
+ROM:F6A3 test_MAP_min:				 ; ...
+ROM:F6A3		 cpd	 MAP_Cyl_Min	 ; MAP_4D - MAP_Min
+ROM:F6A6		 bhi	 locret_F6AA	 ; bra if MAP_4D > MAP_Min
+ROM:F6A8		 std	 MAP_Cyl_Min	 ; else	update MAP_Min
 ROM:F6AA
 ROM:F6AA locret_F6AA:				 ; ...
 ROM:F6AA		 rts
@@ -58931,7 +58961,7 @@ ROM:F8A4
 ROM:F8A4 loc_F8A4:				 ; ...
 ROM:F8A4		 jsr	 CALC_WTS_CORR_A4
 ROM:F8A7		 jsr	 dec_WTS_B9
-ROM:F8AA		 jsr	 dec_CT_WTS
+ROM:F8AA		 jsr	 dec_ACO_CT_WTS?
 ROM:F8AD		 jsr	 set_WTS_CORR_B8_C
 ROM:F8B0		 rts
 ROM:F8B0 ; End of function do_CPS_EVENT
@@ -59643,9 +59673,9 @@ ROM:FCE3		 bclr	 FCodes1 $10	 ; clear Code 46 - ISC
 ROM:FCE6		 bclr	 FCodes1 1	 ; clear Code 31 MAP high
 ROM:FCE9		 ldd	 #$BA00
 ROM:FCEC		 staa	 BARO		 ; default Baro	= 1012mB
-ROM:FCEE		 std	 MAP_16b_4F	 ; default to 1012mB
+ROM:FCEE		 std	 MAP_4ms_T1	 ; default to 1012mB
 ROM:FCF0		 ldd	 #$FFFF
-ROM:FCF3		 std	 MAP_53		 ; init	to FFFFh
+ROM:FCF3		 std	 MAP_Cyl_Min	 ; init	to FFFFh
 ROM:FCF5		 ldd	 byte_16
 ROM:FCF7		 std	 ISC_Target_Pos	 ; default ISC pos = 100% ??
 ROM:FCF9		 std	 word_10D
@@ -59710,8 +59740,9 @@ ROM:FD7C		 ldaa	 #$1F
 ROM:FD7E		 staa	 CPS_FLT_TMR	 ; init	CPS fault timer
 ROM:FD81		 ldaa	 #$50 ;	'P'
 ROM:FD83		 staa	 O2_CNT_148	 ; init	to 80 decimal
-ROM:FD86		 ldaa	 MAP_16b_4D	 ; MAP16b = x*(5/65536)	= (0.0253x -199.93)
-ROM:FD88		 staa	 MAP_16b_AV	 ; =MAP/5.03 - changes with MAP	maybe because of MAP fault code??
+ROM:FD86		 ldaa	 MAP_4ms	 ; map sampled at 4ms =	x*(5/65536) = (0.0253x -199.93)
+ROM:FD88		 staa	 MAP_Cyl_Av	 ; MAP average = (MAP_MAX-MAP_Min)/2 scale = MAP/5.03
+ROM:FD88					 ; Updated every CPS_Event
 ROM:FD8A		 staa	 MAP_16b_55	 ; changes when	MAP changes - default is 9999h = 39321
 ROM:FD8C
 ROM:FD8C init_MAP_BUFF:
