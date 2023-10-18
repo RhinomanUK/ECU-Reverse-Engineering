@@ -1,1 +1,61 @@
-111
+#define UNLOADED_FILE   
+#include <idc.idc>
+
+static main(void)
+{
+
+	MakeName(0134, "VSS_Count_134");
+	MakeName(0135, "EGR_Count_135");
+	MakeName(0136, "MAP_16b_Av_T1a");
+	MakeName(0137, "MAP_16b_Av_T1");
+	MakeName(0138, "Count_138");
+	MakeName(0139, "EGR_Count_139");
+	MakeName(013A, "EGR_Count_13A");
+	MakeName(013B, "EGR_Count_13B");
+	MakeName(013C, "EGR_Count_13C");
+	MakeName(013D, "Count_13D");
+	MakeName(013F, "TPSFaultTimer");
+	MakeName(0140, "WTS_Count_140");
+	MakeName(0142, "No_IFS_Count");
+	MakeName(0143, "VSS_Count_143);
+	MakeName(0144, "CPS_Fault_Timer");
+	MakeName(0145, "CL_Adjust");
+	MakeName(0146, "CL_Count");
+	MakeName(0147, "O2S_Count_147");
+	MakeName(0149, "Count_149");
+	MakeName(014A, "Count_14A");
+	MakeName(014B, "Inj_Count_14B");
+	MakeName(014C, "TPS_Count_14C");
+	MakeName(014D, "WTS_Count_14D");
+	MakeName(014E, "ISC_Count_14E");
+	MakeName(014F, "Count_14F");
+	MakeName(0150, "CSE_Count_150");
+	MakeName(0151, "WTS_Count_151");
+	MakeName(0152, "TPS_Count_152");
+	MakeName(0153, "Count_153");
+	MakeName(0154, "Evap_Count_154");
+	MakeName(0155, "RF_Count_155");
+	MakeName(0156, "PSE_Tick_156");
+	MakeName(0157, "Count_157");
+	MakeName(0158, "STFT_Count_158");
+	MakeName(0159, "Count_159");
+	MakeName(015A, "Count_15A");
+	MakeName(015D, "Count_15D");
+	MakeName(015E, "Inj_Count_15E");
+	MakeName(015F, "Inj_IAT_Count");
+	MakeName(0160, "Count_160");
+	MakeName(0161, "Count_161");
+	MakeName(0162, "Count_162");
+	MakeName(0163, "Count_163");
+	MakeName(0164, "WTS_Count_164");
+	MakeName(0165, "Ign_Count_165");
+	MakeName(0166, "Ign_Kick_Count");
+	MakeName(0168, "Inj_PW3");
+	MakeName(016A, "PSE_Value");
+	MakeName(016D, "Baro_Corr_16D");
+	MakeName(0170, "WTS_Count_170");
+	MakeName(0171, "WTS_SH");
+	MakeName(0172, "O2H_TFS_172");
+	MakeName(0174, "Inj_IAT_Corr");
+
+}
