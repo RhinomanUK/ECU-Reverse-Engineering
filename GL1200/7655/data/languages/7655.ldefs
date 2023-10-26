@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<language_definitions>
+  <language processor="7655"
+            endian="big"
+            size="8"
+            variant="default"
+            version="1.0"
+            slafile="7655.sla"
+            processorspec="7655.pspec"
+            id="7655:BE:8:default">
+    <description>7655 Microcontroller Family</description>
+    <compiler name="default" spec="7655.cspec" id="default"/>
+  </language>
+</language_definitions>
