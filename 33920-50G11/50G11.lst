@@ -8,7 +8,7 @@ RAM:0000 ; +--------------------------------------------------------------------
 RAM:0000 ;
 RAM:0000 ; Input MD5   : 43EF13D63448E9FFC48EAAF5A493AD06
 RAM:0000
-RAM:0000 ; last	updated: 22nd October 2023
+RAM:0000 ; last	updated: 27th October 2023
 RAM:0000 ; E clock = 2MHz
 RAM:0000 ; Timers: TCNT1=E/4=2us:IGN,INJ,CPS
 RAM:0000 ;	   TCNT2 = E/8=4us:
@@ -128,9 +128,9 @@ RAM:0025 ;OBD Status Register2
 RAM:0025 OBD_STATUS_25:	 fcb $3F		 ; ...
 RAM:0026
 RAM:0026 ;STATUS_26 - Internal Status
-RAM:0026 ;bit7 new CPS_COUNT?
-RAM:0026 ;bit6 WTS>-25C	or 2 shot injection or just pulse pending???
-RAM:0026 ;bit5 RTI 4ms tick
+RAM:0026 ;bit7 - new CPS_COUNT?
+RAM:0026 ;bit6 - 2 shot	injection?
+RAM:0026 ;bit5 - RTI 4ms tick
 RAM:0026 ;bit4 - related to ISC?
 RAM:0026 ;bit3
 RAM:0026 ;bit2
@@ -767,49 +767,48 @@ RAM:0193 unk_193:	 fcb $3F ; ?		 ; ...
 RAM:0194		 fcb $3F ; ?
 RAM:0195 ;SCI:
 RAM:0195 ;SDL message length = 11 bytes	maximum
-RAM:0195 unk_195:	 fcb $3F ; ?		 ; ...
+RAM:0195 SCI_Hdr:	 fcb $3F ; ?		 ; ...
 RAM:0195					 ; SDL message header
-RAM:0196 unk_196:	 fcb $3F ; ?		 ; ...
+RAM:0196 SCI_Data_Buff:	 fcb $3F ; ?		 ; ...
 RAM:0196					 ; SDL data buffer
 RAM:0197 unk_197:	 fcb $3F ; ?		 ; ...
 RAM:0198		 fcb $3F ; ?
 RAM:0199		 fcb $3F ; ?
-RAM:019A unk_19A:	 fcb $3F ; ?		 ; ...
+RAM:019A SCI_Buff_4:	 fcb $3F ; ?		 ; ...
 RAM:019B		 fcb $3F ; ?
 RAM:019C		 fcb $3F ; ?
 RAM:019D		 fcb $3F ; ?
 RAM:019E		 fcb $3F ; ?
 RAM:019F		 fcb $3F ; ?
-RAM:01A0 unk_1A0:	 fcb $3F ; ?		 ; ...
+RAM:01A0 SCI_1A0:	 fdb %11111100111111	 ; ...
 RAM:01A0					 ; 1A0 = rx buffer address pointer
 RAM:01A0					 ; 1A1 = checksum
-RAM:01A1 unk_1A1:	 fcb $3F ; ?		 ; ...
 RAM:01A2 OBDRstTimer:	 fcb $3F ; ?		 ; ...
 RAM:01A2					 ; 2s timer set	when ECU is reset by OBD
-RAM:01A3 unk_1A3:	 fcb $3F ; ?		 ; ...
+RAM:01A3 SCI_Count_1A3:	 fcb $3F ; ?		 ; ...
 RAM:01A3					 ; serial port timeout each tick = 64.5ms
-RAM:01A4 unk_1A4:	 fcb $3F ; ?		 ; ...
-RAM:01A5 unk_1A5:	 fcb $3F ; ?		 ; ...
-RAM:01A6 unk_1A6:	 fcb $3F ; ?		 ; ...
+RAM:01A4 TIdle:		 fcb $3F ; ?		 ; ...
+RAM:01A5 OBD_TIdle:	 fcb $3F ; ?		 ; ...
+RAM:01A6 Inj_PWH:	 fcb $3F ; ?		 ; ...
 RAM:01A6					 ; Injector Pulse Width
 RAM:01A6					 ; 1h =	256us
 RAM:01A7		 fcb $3F ; ?
-RAM:01A8 unk_1A8:	 fcb $3F ; ?		 ; ...
+RAM:01A8 Ign_Adv_OBD:	 fcb $3F ; ?		 ; ...
 RAM:01A8					 ; IGNADV = -0.355x-12.5 degrees
-RAM:01A9 unk_1A9:	 fcb $3F ; ?		 ; ...
-RAM:01AA unk_1AA:	 fcb $3F ; ?		 ; ...
+RAM:01A9 TFT:		 fcb $3F ; ?		 ; ...
+RAM:01AA ISC_Duty_Cycle: fcb $3F ; ?		 ; ...
 RAM:01AA					 ; Also	Diag address
-RAM:01AB unk_1AB:	 fcb $3F ; ?		 ; ...
+RAM:01AB MAP_Diag:	 fcb $3F ; ?		 ; ...
 RAM:01AC		 fcb $3F ; ?
-RAM:01AD unk_1AD:	 fcb $3F ; ?		 ; ...
-RAM:01AE unk_1AE:	 fcb $3F ; ?		 ; ...
-RAM:01AF unk_1AF:	 fcb $3F ; ?		 ; ...
+RAM:01AD WTS:		 fcb $3F ; ?		 ; ...
+RAM:01AE IAT:		 fcb $3F ; ?		 ; ...
+RAM:01AF MAP_Raw_SH:	 fcb $3F ; ?		 ; ...
 RAM:01B0		 fcb $3F ; ?
-RAM:01B1 unk_1B1:	 fcb $3F ; ?		 ; ...
+RAM:01B1 TPSV_SH:	 fcb $3F ; ?		 ; ...
 RAM:01B2		 fcb $3F ; ?
-RAM:01B3 unk_1B3:	 fcb $3F ; ?		 ; ...
+RAM:01B3 WTS_Raw_Sh1:	 fcb $3F ; ?		 ; ...
 RAM:01B4		 fcb $3F ; ?
-RAM:01B5 unk_1B5:	 fcb $3F ; ?		 ; ...
+RAM:01B5 IAT_Raw_Diag:	 fcb $3F ; ?		 ; ...
 RAM:01B6		 fcb $3F ; ?
 RAM:01B7		 fcb $3F ; ?
 RAM:01B8		 fcb $3F ; ?
@@ -50382,21 +50381,22 @@ ROM:C9B2		 bita	 #$A		 ; test	for error flags
 ROM:C9B4		 bne	 reset_SCI_Comms ; bra if TxPending or RxData received
 ROM:C9B6		 tba			 ; RxData to A
 ROM:C9B7 ;note:	SCI_1A0	is defined as a	word so	1A1 is shown as	1A0+1
-ROM:C9B7		 addb	 unk_1A1
-ROM:C9BA		 stab	 unk_1A1	 ; data	count?
-ROM:C9BD		 ldab	 unk_1A0	 ; SDL msg buffer addr pointer?
+ROM:C9B7		 addb	 SCI_1A0+1	 ; 1A0 = rx buffer address pointer
+ROM:C9B7					 ; 1A1 = checksum
+ROM:C9BA		 stab	 SCI_1A0+1	 ; data	count?
+ROM:C9BD		 ldab	 SCI_1A0	 ; SDL msg buffer addr pointer?
 ROM:C9C0		 ldx	 #$195		 ; SDL message buffer
 ROM:C9C3		 abx			 ; add the data	count?
 ROM:C9C4		 cpx	 #$1A0		 ; X - msg buffer top
 ROM:C9C7		 bcc	 reset_SCI_Comms ; bra if buffer full
 ROM:C9C9		 staa	 0,x		 ; RxData to SDL msg buffer
 ROM:C9CB		 incb
-ROM:C9CC		 stab	 unk_1A0	 ; inc msg buffer pointer
-ROM:C9CF		 cmpb	 unk_196	 ; SDL Message byte count
+ROM:C9CC		 stab	 SCI_1A0	 ; inc msg buffer pointer
+ROM:C9CF		 cmpb	 SCI_Data_Buff	 ; SDL Message byte count
 ROM:C9D2		 beq	 parse_OBD_HDR	 ; bra if end of message
 ROM:C9D4		 cmpb	 #3
 ROM:C9D6		 bcs	 set_SCI_Timeout ; set message timeout
-ROM:C9D8		 ldaa	 unk_195	 ; SDL message header
+ROM:C9D8		 ldaa	 SCI_Hdr	 ; SDL message header
 ROM:C9DB
 ROM:C9DB OBD_HDR13:				 ; A=HDR
 ROM:C9DB		 cmpa	 #$13
@@ -50414,14 +50414,15 @@ ROM:C9F2		 staa	 0,y		 ; store in buffer
 ROM:C9F5
 ROM:C9F5 set_SCI_Timeout:			 ; ...
 ROM:C9F5		 ldaa	 #$2E ;	'.'
-ROM:C9F7		 staa	 unk_1A3	 ; 46*64.5ms = 3sec timeout
+ROM:C9F7		 staa	 SCI_Count_1A3	 ; 46*64.5ms = 3sec timeout
 ROM:C9FA		 rts
 ROM:C9FB ; ---------------------------------------------------------------------------
 ROM:C9FB
 ROM:C9FB parse_OBD_HDR:				 ; ...
-ROM:C9FB		 ldaa	 unk_1A1
+ROM:C9FB		 ldaa	 SCI_1A0+1	 ; 1A0 = rx buffer address pointer
+ROM:C9FB					 ; 1A1 = checksum
 ROM:C9FE		 bne	 reset_SCI_Comms ; checksum must add to	zero
-ROM:CA00		 ldaa	 unk_195	 ; SDL message header
+ROM:CA00		 ldaa	 SCI_Hdr	 ; SDL message header
 ROM:CA03		 ldx	 #$C941		 ; OBD Hdr Jump	table
 ROM:CA03					 ;
 ROM:CA06		 ldab	 #3
@@ -50437,7 +50438,7 @@ ROM:CA12 reset_SCI_Comms:			 ; ...
 ROM:CA12		 clra
 ROM:CA13		 clrb
 ROM:CA14		 std	 SCI_STATUS_21	 ; clr sci_status_21
-ROM:CA16		 std	 unk_1A0	 ; clear rx buffer address pointer
+ROM:CA16		 std	 SCI_1A0	 ; clear rx buffer address pointer
 ROM:CA19		 staa	 STATUS_23	 ; clear status_23
 ROM:CA1B		 ldd	 SCSR		 ; read	to clear error flags?
 ROM:CA1E		 ldaa	 #$26 ;	'&'
@@ -50452,38 +50453,40 @@ ROM:CA28		 ldaa	 #$88 ;	''      ; enable Tx and Tx interrupt
 ROM:CA2A		 staa	 SCCR2		 ; SCCR2 SCI Control Register 2
 ROM:CA2D		 bclr	 SCI_STATUS_21 $40 ; '@'
 ROM:CA30		 bset	 SCI_STATUS_21 $20 ; ' '
-ROM:CA33		 ldaa	 unk_195	 ; SDL message header
+ROM:CA33		 ldaa	 SCI_Hdr	 ; SDL message header
 ROM:CA36		 staa	 SCDAT		 ; send	SDL header
-ROM:CA39		 staa	 unk_1A1	 ; 1A1 = csum?
+ROM:CA39		 staa	 SCI_1A0+1	 ; 1A1 = csum?
 ROM:CA3C		 clra
-ROM:CA3D		 staa	 unk_1A0	 ; reset rx buffer address pointer
+ROM:CA3D		 staa	 SCI_1A0	 ; reset rx buffer address pointer
 ROM:CA40		 rts
 ROM:CA41 ; ---------------------------------------------------------------------------
 ROM:CA41
 ROM:CA41 Tx_CA41:				 ; ...
 ROM:CA41		 bita	 #$80 ;	''      ; test for tx empty
 ROM:CA43		 beq	 reset_SCI_Comms ; bra if tx still pending
-ROM:CA45		 ldaa	 unk_196	 ; get data from buffer
-ROM:CA48		 ldab	 unk_1A0	 ; b = TxDataCount
+ROM:CA45		 ldaa	 SCI_Data_Buff	 ; get data from buffer
+ROM:CA48		 ldab	 SCI_1A0	 ; b = TxDataCount
 ROM:CA4B		 bne	 do_Tx_CSum
 ROM:CA4D		 incb
-ROM:CA4E		 stab	 unk_1A0	 ; 1A0 = rx buffer address pointer
+ROM:CA4E		 stab	 SCI_1A0	 ; 1A0 = rx buffer address pointer
 ROM:CA4E					 ; 1A1 = checksum
 ROM:CA51		 staa	 SCDAT		 ; SCDAT SCI Data (Read	RDR, Write TDR)
-ROM:CA54		 adda	 unk_1A1	 ; checksum?
-ROM:CA57		 staa	 unk_1A1
+ROM:CA54		 adda	 SCI_1A0+1	 ; checksum?
+ROM:CA57		 staa	 SCI_1A0+1	 ; 1A0 = rx buffer address pointer
+ROM:CA57					 ; 1A1 = checksum
 ROM:CA5A		 rts
 ROM:CA5B ; ---------------------------------------------------------------------------
 ROM:CA5B
 ROM:CA5B do_Tx_CSum:				 ; ...
 ROM:CA5B		 incb
-ROM:CA5C		 stab	 unk_1A0	 ; 1A0 = rx buffer address pointer
+ROM:CA5C		 stab	 SCI_1A0	 ; 1A0 = rx buffer address pointer
 ROM:CA5C					 ; 1A1 = checksum
 ROM:CA5F		 deca
 ROM:CA60		 cba
 ROM:CA61		 bhi	 Tx_CA6D	 ; SCI_DATA_BUFF+1
 ROM:CA63		 bcs	 RST_SCI
-ROM:CA65		 ldaa	 unk_1A1
+ROM:CA65		 ldaa	 SCI_1A0+1	 ; 1A0 = rx buffer address pointer
+ROM:CA65					 ; 1A1 = checksum
 ROM:CA68		 nega
 ROM:CA69		 staa	 SCDAT		 ; SCDAT SCI Data (Read	RDR, Write TDR)
 ROM:CA6C		 rts
@@ -50495,8 +50498,10 @@ ROM:CA70		 subb	 #2
 ROM:CA72		 abx
 ROM:CA73		 ldaa	 0,x
 ROM:CA75		 staa	 SCDAT		 ; SCDAT SCI Data (Read	RDR, Write TDR)
-ROM:CA78		 adda	 unk_1A1
-ROM:CA7B		 staa	 unk_1A1
+ROM:CA78		 adda	 SCI_1A0+1	 ; 1A0 = rx buffer address pointer
+ROM:CA78					 ; 1A1 = checksum
+ROM:CA7B		 staa	 SCI_1A0+1	 ; 1A0 = rx buffer address pointer
+ROM:CA7B					 ; 1A1 = checksum
 ROM:CA7E		 rts
 ROM:CA7F ; ---------------------------------------------------------------------------
 ROM:CA7F
@@ -50506,7 +50511,7 @@ ROM:CA81		 staa	 SCCR2		 ; set RIE, RE,	RWU
 ROM:CA84		 bclr	 SCI_STATUS_21 $20 ; ' '
 ROM:CA87		 clra
 ROM:CA88		 clrb
-ROM:CA89		 std	 unk_1A0	 ; 1A0 = rx buffer address pointer
+ROM:CA89		 std	 SCI_1A0	 ; 1A0 = rx buffer address pointer
 ROM:CA89					 ; 1A1 = checksum
 ROM:CA8C		 rts
 ROM:CA8C ; End of function SCI_INT_HNDLR
@@ -50517,7 +50522,7 @@ ROM:CA8D
 ROM:CA8D
 ROM:CA8D OBD_HDR_10:
 ROM:CA8D		 ldaa	 #5		 ; message length
-ROM:CA8F		 staa	 unk_196	 ; SDL data buffer
+ROM:CA8F		 staa	 SCI_Data_Buff	 ; SDL data buffer
 ROM:CA92		 ldd	 #$1453		 ; ECU ID
 ROM:CA95		 std	 unk_197
 ROM:CA98		 rts
@@ -50551,7 +50556,7 @@ ROM:CAAB		 beq	 loc_CAAF	 ; bra if tmr=0;
 ROM:CAAD		 ldab	 #1
 ROM:CAAF
 ROM:CAAF loc_CAAF:				 ; ...
-ROM:CAAF		 std	 unk_196	 ; SDL data buffer
+ROM:CAAF		 std	 SCI_Data_Buff	 ; SDL data buffer
 ROM:CAB2		 ldaa	 #$1F
 ROM:CAB4		 staa	 OBDRstTimer	 ; timeout = 2s
 ROM:CAB7		 rts
@@ -50562,7 +50567,7 @@ ROM:CAB8 ; =============== S U B R O U T I N E =================================
 ROM:CAB8
 ROM:CAB8
 ROM:CAB8 OBD_HDR_15:
-ROM:CAB8		 ldd	 unk_19A
+ROM:CAB8		 ldd	 SCI_Buff_4
 ROM:CABB		 beq	 loc_CAC7	 ; bra if lower	order commands
 ROM:CABD		 tsta			 ; higher order	sub-set	1?
 ROM:CABE		 beq	 loc_CAC7
@@ -50577,7 +50582,7 @@ ROM:CAC9		 andb	 #$FC ;	'ü'      ; test for current EGR control
 ROM:CACB		 aba
 ROM:CACC		 staa	 STATUS_23	 ; 03 if EGR control
 ROM:CACE		 ldaa	 #3
-ROM:CAD0		 staa	 unk_196	 ; SDL data buffer
+ROM:CAD0		 staa	 SCI_Data_Buff	 ; SDL data buffer
 ROM:CAD3		 ldd	 unk_197
 ROM:CAD6		 staa	 Ctrls_Status_22 ; 22 =	10 if fixed advance
 ROM:CAD6					 ;	80 if IAC cal
@@ -50596,7 +50601,7 @@ ROM:CAE6		 ldaa	 #5		 ; multiply by 5
 ROM:CAE8		 mul
 ROM:CAE9		 lsrd			 ; divide word by 2
 ROM:CAEA		 lsrd			 ; divide word by 2
-ROM:CAEB		 stab	 unk_1A5	 ; target idle 2
+ROM:CAEB		 stab	 OBD_TIdle	 ; target idle 2
 ROM:CAEE		 rts
 ROM:CAEE ; End of function OBD_HDR_15
 ROM:CAEE
@@ -50615,14 +50620,14 @@ ROM:CAF5		 deca
 ROM:CAF6		 staa	 OBDRstTimer	 ; decrement 2s	tick
 ROM:CAF9
 ROM:CAF9 SCI_TMR_TICK:				 ; ...
-ROM:CAF9		 ldaa	 unk_1A3	 ; serial port timeout each tick = 64.5ms
+ROM:CAF9		 ldaa	 SCI_Count_1A3	 ; serial port timeout each tick = 64.5ms
 ROM:CAFC		 beq	 locret_CB15
 ROM:CAFE		 deca
-ROM:CAFF		 staa	 unk_1A3	 ; decrement tick
+ROM:CAFF		 staa	 SCI_Count_1A3	 ; decrement tick
 ROM:CB02		 bne	 update_DIAG_VALUES ; bra if O2S inactive
 ROM:CB04		 sei
 ROM:CB05		 std	 SCI_STATUS_21
-ROM:CB07		 std	 unk_1A0	 ; 1A0 = rx buffer address pointer
+ROM:CB07		 std	 SCI_1A0	 ; 1A0 = rx buffer address pointer
 ROM:CB07					 ; 1A1 = checksum
 ROM:CB0A		 staa	 STATUS_23
 ROM:CB0C		 ldd	 SCSR		 ; SCSR	SCI Status Register
@@ -50699,14 +50704,14 @@ ROM:CB62		 lsld
 ROM:CB63		 ldx	 #5
 ROM:CB66		 idiv			 ; divide by 5
 ROM:CB67		 xgdx
-ROM:CB68		 stab	 unk_1A4	 ; TIDLE = D/1280
+ROM:CB68		 stab	 TIdle		 ; TIDLE = D/1280
 ROM:CB6B
 ROM:CB6B calculate inj_PW value
 ROM:CB6B     = INJ_PW +	INJ_DWELL
 ROM:CB6B
 ROM:CB6B		 ldd	 INJ_Dwell
 ROM:CB6D		 addd	 INJ_PW		 ; and add the duration	to it
-ROM:CB6F		 std	 unk_1A6	 ; used	by SDL only
+ROM:CB6F		 std	 Inj_PWH	 ; used	by SDL only
 ROM:CB72
 ROM:CB72 MAP diagnostic	value is MAP_16b_AV high byte if no fault codes
 ROM:CB72 or MAP_RAW if a fault code is set
@@ -50716,7 +50721,7 @@ ROM:CB74		 brclr	 FCodes1 3 loc_CB7A ; bra if no	MAP errors
 ROM:CB78		 ldaa	 MAP_RAW	 ; otherwise get MAP_RAW
 ROM:CB7A
 ROM:CB7A loc_CB7A:				 ; ...
-ROM:CB7A		 staa	 unk_1AB	 ; MAP = MAP*50	if no codes
+ROM:CB7A		 staa	 MAP_Diag	 ; MAP = MAP*50	if no codes
 ROM:CB7A					 ;     or MAP if codes
 ROM:CB7D
 ROM:CB7D WTS diagnostic	value is WTS_LIN if no fault codes or
@@ -50732,7 +50737,7 @@ ROM:CB8A		 lsrd
 ROM:CB8B		 jsr	 TABLE_LU_2Da	 ; get WTS_LIN
 ROM:CB8E
 ROM:CB8E loc_CB8E:				 ; ...
-ROM:CB8E		 staa	 unk_1AD	 ; update WTS
+ROM:CB8E		 staa	 WTS		 ; update WTS
 ROM:CB91
 ROM:CB91 IAT diagnostic	value is IAT_LIN if no fault codes or
 ROM:CB91 IAT_RAW (16-bit)/8 if any codes are set
@@ -50747,7 +50752,7 @@ ROM:CB9E		 lsrd
 ROM:CB9F		 jsr	 TABLE_LU_2Da	 ; get IAT_LIN
 ROM:CBA2
 ROM:CBA2 loc_CBA2:				 ; ...
-ROM:CBA2		 staa	 unk_1AE
+ROM:CBA2		 staa	 IAT
 ROM:CBA5
 ROM:CBA5 IGN Advance is	the scaled value plus the base advance
 ROM:CBA5 unless	COUNT_ED is set	then its 48 degrees??
@@ -50759,7 +50764,7 @@ ROM:CBAC		 beq	 loc_CBB0	 ; only	used for OBD
 ROM:CBAE		 ldab	 #$30 ;	'0'      ; if it is zero report 5 degs (why?)
 ROM:CBB0
 ROM:CBB0 loc_CBB0:				 ; ...
-ROM:CBB0		 stab	 unk_1A8	 ; only	used for OBD
+ROM:CBB0		 stab	 Ign_Adv_OBD	 ; only	used for OBD
 ROM:CBB3		 rts
 ROM:CBB3 ; End of function updateSCITimers
 ROM:CBB3
@@ -50880,8 +50885,8 @@ ROM:CC64		 cmpb	 byte_C7DB	 ; WTS - -25C
 ROM:CC67		 bcc	 SPLIT_INJ_PW2
 ROM:CC69
 ROM:CC69 ;SPLIT_INJ_PW1:
-ROM:CC69 ;This appears to limit	the injector pulse to CFFh during
-ROM:CC69 ;cold start, remainder	of pulse is stored in INJ_PW2
+ROM:CC69 ;Limit	the injector pulse to 6.6ms during
+ROM:CC69 ;very cold start, remainder of	pulse is stored	in INJ_PW2
 ROM:CC69
 ROM:CC69 SPLIT_INJ_PW?:				 ; disable interrupts
 ROM:CC69		 sei
@@ -50894,8 +50899,8 @@ ROM:CC78		 ldd	 INJ_PW		 ; loads D but then only calcs on A?
 ROM:CC7A		 cmpa	 byte_C7DD	 ; INJ_PW-3072
 ROM:CC7D		 bcs	 loc_CC87	 ; bra if inj_pw<3072
 ROM:CC7F		 suba	 byte_C7DD	 ; else	A=A-3072
-ROM:CC82		 staa	 INJ_PW2	 ; store in byte_9D
-ROM:CC84		 ldaa	 byte_C7DD	 ; A=3072
+ROM:CC82		 staa	 INJ_PW2	 ; inj_pw2 = remainder
+ROM:CC84		 ldaa	 byte_C7DD	 ; schedule 6ms? pulse
 ROM:CC87
 ROM:CC87 loc_CC87:				 ; ...
 ROM:CC87		 jsr	 INJ_TIMING
@@ -54121,7 +54126,7 @@ ROM:DD58		 bset	 SL_Status_2F 1	 ; set diag_tst_sw active?
 ROM:DD5B		 ldaa	 PWEN		 ; PWEN	PWM Timer Enable
 ROM:DD5E		 oraa	 #4
 ROM:DD60		 staa	 PWEN		 ; enable PWM on shift light
-ROM:DD63		 ldab	 unk_1AA	 ; Also	Diag address
+ROM:DD63		 ldab	 ISC_Duty_Cycle	 ; Also	Diag address
 ROM:DD66		 ldaa	 #$A0 ;	' '      ; ISC_DC = (0.xx * PWPER)
 ROM:DD68		 mul
 ROM:DD69		 staa	 PWDTY3		 ; output ISC duty check
@@ -55582,7 +55587,7 @@ ROM:E61E		 jsr	 TABLE_LU_2D	 ; (WTS) table look up with max	and min
 ROM:E621		 brclr	 Ctrls_Status_22 $40 loc_E628 ;	'@' ; are we controlled by SDL command?
 ROM:E625
 ROM:E625 SDLControl:				 ; yes,	load command value
-ROM:E625		 ldaa	 unk_1A5
+ROM:E625		 ldaa	 OBD_TIdle
 ROM:E628
 ROM:E628 loc_E628:				 ; ...
 ROM:E628		 staa	 TIdle_RPM	 ; store calculated value or command value
@@ -56705,11 +56710,11 @@ ROM:ECEE		 staa	 SPDAT		 ; and send to shift register
 ROM:ECF1
 ROM:ECF1 MAP_32p7:
 ROM:ECF1		 ldd	 MAP_RAW
-ROM:ECF3		 std	 unk_1AF	 ; not used?
+ROM:ECF3		 std	 MAP_Raw_SH	 ; not used?
 ROM:ECF6
 ROM:ECF6 TPS_32p7:				 ; = TPS_RAW, no conversion applied
 ROM:ECF6		 ldd	 TPSV
-ROM:ECF8		 std	 unk_1B1	 ; not used?
+ROM:ECF8		 std	 TPSV_SH	 ; not used?
 ROM:ECFB
 ROM:ECFB clk_SPI:				 ; PORTD I_O Port D
 ROM:ECFB		 ldaa	 PORTD
@@ -56720,7 +56725,7 @@ ROM:ED03 CALC_TFT:				 ; get STFT
 ROM:ED03		 ldab	 STFT
 ROM:ED05		 addb	 LTFT		 ; add LTFT
 ROM:ED07		 rorb			 ; divide by two
-ROM:ED08		 stab	 unk_1A9	 ; store as TFT
+ROM:ED08		 stab	 TFT		 ; store as TFT
 ROM:ED0B ; CALC_GEAR:
 ROM:ED0B ; Derive the value of RPM/VSS used for	shift light calcs
 ROM:ED0B ; (RPM	= RPMH*50)
@@ -56762,7 +56767,7 @@ ROM:ED2C DEC_DC_ED2C:				 ; ...
 ROM:ED2C		 decb			 ; decrement ISC DC
 ROM:ED2D
 ROM:ED2D SAVE_DC_ED2D:				 ; ...
-ROM:ED2D		 stab	 unk_1AA	 ; Also	Diag address
+ROM:ED2D		 stab	 ISC_Duty_Cycle	 ; Also	Diag address
 ROM:ED30
 ROM:ED30 test_Diag_SWs:
 ROM:ED30		 clrb
@@ -58742,7 +58747,7 @@ ROM:F719
 ROM:F719
 ROM:F719 get_WTS:				 ; ...
 ROM:F719		 ldd	 WTS_RAW
-ROM:F71B		 std	 unk_1B3
+ROM:F71B		 std	 WTS_Raw_Sh1
 ROM:F71E		 cmpa	 #7
 ROM:F720		 bcs	 loc_F73A
 ROM:F722		 cmpa	 #$F8 ;	'ø'
@@ -58791,7 +58796,7 @@ ROM:F763
 ROM:F763
 ROM:F763 get_IAT:				 ; ...
 ROM:F763		 ldd	 IAT_RAW
-ROM:F765		 staa	 unk_1B5
+ROM:F765		 staa	 IAT_Raw_Diag
 ROM:F768		 cmpa	 #7
 ROM:F76A		 bcs	 loc_F784
 ROM:F76C		 cmpa	 #$F8 ;	'ø'
