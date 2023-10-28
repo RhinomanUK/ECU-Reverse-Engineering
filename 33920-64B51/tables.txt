@@ -1,0 +1,88 @@
+
+Compiling file 'C:\Users\James\Documents\ECUs\Swift F3\63_tablefinder.idc'...
+Executing function 'main'...
+Checking for data indexed from main code
+Possible table at 0xC8D8
+Possible table at 0xDE3E
+Possible table at 0xC8
+C8: can't rename byte as 'X_C8 ;' because it contains a bad character ' '.
+Possible table at 0xCA90
+Possible table at 0xCAB0
+Possible table at 0xD086
+Possible table at 0xD08A
+Possible table at 0xD088
+Possible table at 0xD08D
+Possible table at 0xCB60
+Possible table at 0xCB00
+Possible table at 0xCB10
+Possible table at 0xD036
+Possible table at 0xCC20
+Possible table at 0xCC30
+Possible table at 0xC900
+Possible table at 0xC910
+Possible table at 0xC0
+C0: can't rename byte as 'X_C0 ;' because it contains a bad character ' '.
+Possible table at 0xD0F8
+Possible table at 0xD205
+Possible table at 0xD0F8
+Possible table at 0xD205
+Possible table at 0xD0F8
+Possible table at 0xD205
+Possible table at 0xCBB8
+Possible table at 0xCBB0
+Possible table at 0xCAD0
+Possible table at 0xCAE0
+Possible table at 0xCC00
+Possible table at 0xCC10
+Possible table at 0xCBC0
+Possible table at 0xCBF0
+Possible table at 0xCBD0
+Possible table at 0xCBE0
+Possible table at 0xD0A3
+Possible table at 0xCAF0
+Possible table at 0xD046
+Possible table at 0xC960
+C960: can't rename byte as 'X_C960' because this byte can't have a name (it is a tail byte).
+Possible table at 0xCBA0
+Possible table at 0xC970
+C970: can't rename byte as 'X_C970' because this byte can't have a name (it is a tail byte).
+Possible table at 0xCD20
+Possible table at 0xC890
+C890: can't rename byte as 'X_C890' because this byte can't have a name (it is a tail byte).
+Possible table at 0xC8A0
+C8A0: can't rename byte as 'X_C8A0' because this byte can't have a name (it is a tail byte).
+Possible table at 0xC880
+C880: can't rename byte as 'X_C880' because this byte can't have a name (it is a tail byte).
+Possible table at 0xC8D0
+Possible table at 0xD014
+Possible table at 0xD21D
+Possible table at 0xCA20
+Possible table at 0xD023
+Possible table at 0xD06F
+Possible table at 0xCA50
+Possible table at 0xCEA0
+Possible table at 0xCA30
+Possible table at 0xCE80
+Possible table at 0xD073
+Possible table at 0xCA70
+Possible table at 0xD024
+Possible table at 0xD071
+Possible table at 0xCA60
+Possible table at 0xCEB0
+Possible table at 0xCA40
+Possible table at 0xCE90
+Possible table at 0xD073
+Possible table at 0xCA70
+Possible table at 0xD06A
+Possible table at 0xD06C
+Possible table at 0xD05D
+Possible table at 0xD05F
+Possible table at 0xD0F0
+Possible table at 0xCB40
+Possible table at 0xD019
+Possible table at 0xC940
+Possible table at 0xC950
+C950: can't rename byte as 'X_C950' because this byte can't have a name (it is a tail byte).
+Possible table at 0xCC40
+Done, 74 possible tables found
+Search completed
