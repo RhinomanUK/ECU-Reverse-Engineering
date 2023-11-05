@@ -16,25 +16,56 @@ RAM:0000 ; 1985	Honda GL1200 ECU
 RAM:0000 ; This	ECU appears to use a Toshiba TMP76C40 processor.
 RAM:0000 ; A second 40-pin chip	contains an ADC	and some other
 RAM:0000 ; (TBD	- timer	and port expander?) functions
-RAM:0000 ;
+RAM:0000 ; Date: 3rd November 2023
 RAM:0000
-RAM:0000 ; Processor:	     NONE []
+RAM:0000 ; Processor:	     6301 []
 RAM:0000 ; Target assembler: Motorola FreeWare Assembler
 RAM:0000
 RAM:0000 ; ===========================================================================
 RAM:0000
 RAM:0000 ; Segment type: Regular
 RAM:0000		 ; segment RAM
-RAM:0000 P1DDR:		 rmb 1
-RAM:0001 P2DDR:		 rmb 1
+RAM:0000 P1DDR:		 rmb 1			 ; DATA	XREF: ROM:EF06w
+RAM:0000					 ; =FEh
+RAM:0001 P2DDR:		 rmb 1			 ; =1Eh
+RAM:0002 ;
+RAM:0002 ; Port	1 Data register
+RAM:0002 ; bit 7 (0x80): out - LED3
+RAM:0002 ; bit 6 (0x40): out - LED2
+RAM:0002 ; bit 5 (0x20): out - LED1
+RAM:0002 ; bit 4 (0x10): out - LED0
+RAM:0002 ; bit 3 (0x08): out -
+RAM:0002 ; bit 2 (0x04): out -
+RAM:0002 ; bit 1 (0x02): out -
+RAM:0002 ; bit 0 (0x01): in  - Right Cam Sensor
 RAM:0002 PORT1:		 rmb 1			 ; DATA	XREF: ROM:EC6Ar
 RAM:0002					 ; ROM:EC6Ew ...
+RAM:0003 ;
+RAM:0003 ; Port	2 Data register
+RAM:0003 ; bit 7 (0x80): in - no external connection
+RAM:0003 ; bit 6 (0x40): in - no external connection
+RAM:0003 ; bit 5 (0x20): in - no external connection
+RAM:0003 ; bit 4 (0x10): out - Watchdog	Reset
+RAM:0003 ; bit 3 (0x08): out - IRQ IF Clear
+RAM:0003 ; bit 2 (0x04): out -
+RAM:0003 ; bit 1 (0x02): out -
+RAM:0003 ; bit 0 (0x01): in  - Crank Sensor (Ns)
 RAM:0003 PORT2:		 rmb 1			 ; DATA	XREF: ROM:nIRQ_IntHandlerr
 RAM:0003					 ; ROM:E804w ...
 RAM:0004 P3DDR:		 rmb 1
 RAM:0005 P4DDR:		 rmb 1			 ; DATA	XREF: ROM:F006w
 RAM:0006 PORT3:		 rmb 1
 RAM:0007 PORT4:		 rmb 1
+RAM:0008 ;
+RAM:0008 ; Timer 1 Control & Status Register 1
+RAM:0008 ; bit 7 (0x80):
+RAM:0008 ; bit 6 (0x40):
+RAM:0008 ; bit 5 (0x20):
+RAM:0008 ; bit 4 (0x10):
+RAM:0008 ; bit 3 (0x08):
+RAM:0008 ; bit 2 (0x04):
+RAM:0008 ; bit 1 (0x02):
+RAM:0008 ; bit 0 (0x01):
 RAM:0008 TCSR1:		 rmb 1			 ; DATA	XREF: ROM:IC_IntHandlerr
 RAM:0008					 ; ROM:loc_ED3Br ...
 RAM:0009 FRCH:		 rmb 1			 ; DATA	XREF: ROM:EC05r
@@ -44,8 +75,18 @@ RAM:000B OCR1H:		 rmb 1			 ; DATA	XREF: ROM:ED2Cr
 RAM:000B					 ; ROM:ED32r ...
 RAM:000C OCR1L:		 rmb 1
 RAM:000D ICR1H:		 rmb 1			 ; DATA	XREF: ROM:loc_E909r
-RAM:000D					 ; ROM:F74Br
+RAM:000D					 ; ROM:EF1Dr ...
 RAM:000E ICR1L:		 rmb 1
+RAM:000F ;
+RAM:000F ; Timer 1 Control & Status Register 2
+RAM:000F ; bit 7 (0x80):
+RAM:000F ; bit 6 (0x40):
+RAM:000F ; bit 5 (0x20):
+RAM:000F ; bit 4 (0x10):
+RAM:000F ; bit 3 (0x08):
+RAM:000F ; bit 2 (0x04):
+RAM:000F ; bit 1 (0x02):
+RAM:000F ; bit 0 (0x01):
 RAM:000F P3CSR:		 rmb 1
 RAM:0010 RMCR:		 rmb 1			 ; DATA	XREF: sub_FE99+4r
 RAM:0011 TRCSR1:	 rmb 1
@@ -55,15 +96,24 @@ RAM:0014 RAMCR:		 rmb 1
 RAM:0015		 rmb 1
 RAM:0016		 rmb 1
 RAM:0017		 rmb 1
-RAM:0018 TRCSR2:	 rmb 1			 ; DATA	XREF: ROM:E813r
+RAM:0018 ; Timer Control & Status Register 2
+RAM:0018 ; bit 0 (0x01):
+RAM:0018 ; bit 1 (0x02):
+RAM:0018 ; bit 2 (0x04):
+RAM:0018 ; bit 3 (0x08):
+RAM:0018 ; bit 4 (0x10):
+RAM:0018 ; bit 5 (0x20):
+RAM:0018 ; bit 6 (0x40):
+RAM:0018 ; bit 7 (0x80):
+RAM:0018 TCSR2:		 rmb 1			 ; DATA	XREF: ROM:E813r
 RAM:0018					 ; ROM:E90Dr ...
 RAM:0019		 rmb 1
 RAM:001A		 rmb 1
 RAM:001B OCR2H:		 rmb 1			 ; DATA	XREF: ROM:ED91r
 RAM:001B					 ; ROM:ED97r ...
 RAM:001C		 rmb 1
-RAM:001D ICR2H:		 rmb 1			 ; DATA	XREF: ROM:F792r
-RAM:001D					 ; ROM:loc_F79Ar ...
+RAM:001D ICR2H:		 rmb 1			 ; DATA	XREF: ROM:EF21r
+RAM:001D					 ; ROM:EFACr ...
 RAM:001E		 rmb 1
 RAM:001F		 rmb 1
 RAM:0020		 rmb 1
@@ -102,7 +152,7 @@ RAM:0040 byte_40:	 rmb 1			 ; DATA	XREF: sub_FCEF+20r
 RAM:0041		 rmb 1
 RAM:0042 byte_42:	 rmb 1			 ; DATA	XREF: sub_FCEF+10r
 RAM:0043		 rmb 1
-RAM:0044		 rmb 1
+RAM:0044 byte_44:	 rmb 1			 ; DATA	XREF: ROM:EF3Dw
 RAM:0045 byte_45:	 rmb 1			 ; DATA	XREF: ROM:F9FCw
 RAM:0046 byte_46:	 rmb 1			 ; DATA	XREF: ROM:ED7Dw
 RAM:0046					 ; ROM:EDC0r ...
@@ -111,7 +161,7 @@ RAM:0048 byte_48:	 rmb 1			 ; DATA	XREF: sub_FCA7+20r
 RAM:0049		 rmb 1
 RAM:004A byte_4A:	 rmb 1			 ; DATA	XREF: sub_FCA7+10r
 RAM:004B		 rmb 1
-RAM:004C		 rmb 1
+RAM:004C byte_4C:	 rmb 1			 ; DATA	XREF: ROM:EF42w
 RAM:004D byte_4D:	 rmb 1			 ; DATA	XREF: ROM:F947w
 RAM:004E byte_4E:	 rmb 1			 ; DATA	XREF: ROM:ED16w
 RAM:004E					 ; ROM:ED5Br ...
@@ -134,21 +184,21 @@ RAM:005A byte_5A:	 rmb 1			 ; DATA	XREF: sub_EA34+48r
 RAM:005A					 ; sub_F12D+32r ...
 RAM:005B		 rmb 1
 RAM:005C byte_5C:	 rmb 1			 ; DATA	XREF: sub_EA34+4Cr
-RAM:005C					 ; sub_F12D+36r
+RAM:005C					 ; ROM:EE97w ...
 RAM:005D		 rmb 1
 RAM:005E byte_5E:	 rmb 1			 ; DATA	XREF: sub_EA34:loc_EA49r
 RAM:005E					 ; sub_EA34+1Ar ...
 RAM:005F byte_5F:	 rmb 1			 ; DATA	XREF: sub_EA34+29r
 RAM:005F					 ; ROM:loc_EAB9w
 RAM:0060 byte_60:	 rmb 1			 ; DATA	XREF: sub_EA34+Fr
-RAM:0060					 ; sub_F12D+Fr	...
+RAM:0060					 ; ROM:EEC4w ...
 RAM:0061 byte_61:	 rmb 1			 ; DATA	XREF: sub_EA34+1Cr
 RAM:0061					 ; sub_F12D+1Cr
 RAM:0062 byte_62:	 rmb 1			 ; DATA	XREF: sub_F4E5:loc_F50Ew
 RAM:0062					 ; sub_FBC8+Ar
 RAM:0063 byte_63:	 rmb 1			 ; DATA	XREF: ROM:loc_EBF4w
 RAM:0063					 ; sub_F4E5+1Ar ...
-RAM:0064 byte_64:	 rmb 1			 ; DATA	XREF: ROM:F238w
+RAM:0064 byte_64:	 rmb 1			 ; DATA	XREF: sub_F1EC+4Cw
 RAM:0064					 ; sub_F4E5+1Cr
 RAM:0065 byte_65:	 rmb 1			 ; DATA	XREF: sub_F4E5+17w
 RAM:0065					 ; sub_F4E5+20r
@@ -164,32 +214,35 @@ RAM:006B					 ; ROM:F5DCr
 RAM:006C		 rmb 1
 RAM:006D byte_6D:	 rmb 1			 ; DATA	XREF: sub_F342+40w
 RAM:006D					 ; sub_F342:loc_F38Cr ...
-RAM:006E byte_6E:	 rmb 1			 ; DATA	XREF: ROM:F210w
-RAM:006E					 ; ROM:F220r ...
-RAM:006F byte_6F:	 rmb 1			 ; DATA	XREF: ROM:F1F9w
+RAM:006E byte_6E:	 rmb 1			 ; DATA	XREF: sub_F1EC+24w
+RAM:006E					 ; sub_F1EC+34r ...
+RAM:006F byte_6F:	 rmb 1			 ; DATA	XREF: sub_F1EC+Dw
 RAM:0070 byte_70:	 rmb 1			 ; DATA	XREF: sub_F26E:loc_F282w
 RAM:0070					 ; sub_F26E+29r ...
 RAM:0071 byte_71:	 rmb 1			 ; DATA	XREF: ROM:loc_EB39r
 RAM:0071					 ; ROM:EBDFr ...
 RAM:0072 byte_72:	 rmb 1			 ; DATA	XREF: ROM:EB4Cr
 RAM:0072					 ; ROM:EBD7r ...
-RAM:0073 byte_73:	 rmb 1			 ; DATA	XREF: sub_F0F2:loc_F10Dw
-RAM:0073					 ; sub_F0F2+2Fr ...
+RAM:0073 byte_73:	 rmb 1			 ; DATA	XREF: ROM:EFA2r
+RAM:0073					 ; sub_F0F2:loc_F10Dw ...
 RAM:0074 byte_74:	 rmb 1			 ; DATA	XREF: sub_F0F2+12r
 RAM:0074					 ; sub_F0F2:loc_F12Aw ...
 RAM:0075 byte_75:	 rmb 1			 ; DATA	XREF: ROM:EA92r
 RAM:0075					 ; ROM:EA9Ar ...
-RAM:0076 byte_76:	 rmb 1			 ; DATA	XREF: sub_F3C2+6w
+RAM:0076 byte_76:	 rmb 1			 ; DATA	XREF: ROM:EF8Ew
+RAM:0076					 ; sub_F3C2+6w
 RAM:0077 byte_77:	 rmb 1			 ; DATA	XREF: sub_F3C2r
-RAM:0078 byte_78:	 rmb 1			 ; DATA	XREF: sub_F3C2+2w
+RAM:0078 byte_78:	 rmb 1			 ; DATA	XREF: ROM:EF90w
+RAM:0078					 ; sub_F3C2+2w
 RAM:0079 byte_79:	 rmb 1			 ; DATA	XREF: ROM:EA9Cr
 RAM:0079					 ; sub_F342+34r ...
-RAM:007A		 rmb 1
+RAM:007A byte_7A:	 rmb 1			 ; DATA	XREF: ROM:EE8Fw
+RAM:007A					 ; ROM:EE99r
 RAM:007B byte_7B:	 rmb 1			 ; DATA	XREF: sub_F342+5w
 RAM:007B					 ; sub_F342+1Cr
 RAM:007C byte_7C:	 rmb 1			 ; DATA	XREF: sub_F1CCr
 RAM:007C					 ; sub_F26E+24w
-RAM:007D byte_7D:	 rmb 1			 ; DATA	XREF: ROM:F201w
+RAM:007D byte_7D:	 rmb 1			 ; DATA	XREF: sub_F1EC+15w
 RAM:007D					 ; sub_F26E+26r
 RAM:007E byte_7E:	 rmb 1			 ; DATA	XREF: ROM:ED65r
 RAM:007E					 ; ROM:EDCAr ...
@@ -223,8 +276,8 @@ RAM:008F byte_8F:	 rmb 1			 ; DATA	XREF: ROM:F2CAw
 RAM:008F					 ; ROM:loc_F2DFr ...
 RAM:0090 byte_90:	 rmb 1			 ; DATA	XREF: ROM:F2C8w
 RAM:0090					 ; ROM:F2DBr ...
-RAM:0091 byte_91:	 rmb 1			 ; DATA	XREF: ROM:loc_F32Ar
-RAM:0091					 ; ROM:F32Fw
+RAM:0091 byte_91:	 rmb 1			 ; DATA	XREF: ROM:EF47w
+RAM:0091					 ; ROM:loc_F32Ar ...
 RAM:0092		 rmb 1
 RAM:0093		 rmb 1
 RAM:0094		 rmb 1
@@ -256,27 +309,29 @@ RAM:00A3 byte_A3:	 rmb 1			 ; DATA	XREF: ROM:E80Ar
 RAM:00A3					 ; ROM:E81Ew ...
 RAM:00A4 byte_A4:	 rmb 1			 ; DATA	XREF: sub_EA34r
 RAM:00A4					 ; ROM:ED05r ...
-RAM:00A5 byte_A5:	 rmb 1			 ; DATA	XREF: ROM:F2BFr
-RAM:00A5					 ; ROM:F2C1w ...
+RAM:00A5 byte_A5:	 rmb 1			 ; DATA	XREF: ROM:EF54w
+RAM:00A5					 ; ROM:F2BFr ...
 RAM:00A6 byte_A6:	 rmb 1			 ; DATA	XREF: sub_E880:loc_E8ABr
 RAM:00A6					 ; sub_E880+2Fw ...
 RAM:00A7 byte_A7:	 rmb 1			 ; DATA	XREF: ROM:EC1Dr
 RAM:00A7					 ; ROM:EC2Ar ...
 RAM:00A8 byte_A8:	 rmb 1			 ; DATA	XREF: sub_F463+4r
 RAM:00A8					 ; sub_F463+6w	...
-RAM:00A9 byte_A9:	 rmb 1			 ; DATA	XREF: ROM:F23Dr
-RAM:00A9					 ; sub_F26E+2r	...
-RAM:00AA byte_AA:	 rmb 1			 ; DATA	XREF: ROM:F7A4r
-RAM:00AA					 ; ROM:FAEDw ...
+RAM:00A9 byte_A9:	 rmb 1			 ; DATA	XREF: ROM:EEDBw
+RAM:00A9					 ; ROM:EFC1w ...
+RAM:00AA byte_AA:	 rmb 1			 ; DATA	XREF: ROM:EF56w
+RAM:00AA					 ; ROM:F7A4r ...
 RAM:00AB		 rmb 1
 RAM:00AC byte_AC:	 rmb 1			 ; DATA	XREF: ROM:F824r
 RAM:00AC					 ; ROM:loc_F82Ar ...
 RAM:00AD byte_AD:	 rmb 1			 ; DATA	XREF: ROM:EC74w
 RAM:00AD					 ; ROM:F075w ...
-RAM:00AE		 rmb 1
+RAM:00AE byte_AE:	 rmb 1			 ; DATA	XREF: ROM:EEE3r
+RAM:00AE					 ; ROM:EEEAw ...
 RAM:00AF byte_AF:	 rmb 1			 ; DATA	XREF: sub_EA34+18w
 RAM:00AF					 ; sub_EA34+20r ...
-RAM:00B0		 rmb 1
+RAM:00B0 byte_B0:	 rmb 1			 ; DATA	XREF: ROM:EE71r
+RAM:00B0					 ; ROM:EE81w
 RAM:00B1 byte_B1:	 rmb 1			 ; DATA	XREF: sub_EA34+27w
 RAM:00B1					 ; sub_EA34:loc_EA6Dr ...
 RAM:00B2 byte_B2:	 rmb 1			 ; DATA	XREF: tableLU_3Da+1Ew
@@ -298,10 +353,11 @@ RAM:00BB					 ; ROM:F983w ...
 RAM:00BC byte_BC:	 rmb 1			 ; DATA	XREF: ROM:F979w
 RAM:00BC					 ; ROM:F9B2r ...
 RAM:00BD		 rmb 1
-RAM:00BE byte_BE:	 rmb 1			 ; DATA	XREF: ROM:F22Ew
-RAM:00BE					 ; ROM:F254r ...
+RAM:00BE byte_BE:	 rmb 1			 ; DATA	XREF: sub_F1EC+42w
+RAM:00BE					 ; sub_F1EC+68r ...
 RAM:00BF		 rmb 1
-RAM:00C0 byte_C0:	 rmb 1			 ; DATA	XREF: ROM:F21Ew
+RAM:00C0 byte_C0:	 rmb 1			 ; DATA	XREF: ROM:loc_EEC2r
+RAM:00C0					 ; ROM:EF9Br ...
 RAM:00C1		 rmb 1
 RAM:00C2 byte_C2:	 rmb 1			 ; DATA	XREF: ROM:loc_F2B5r
 RAM:00C2					 ; ROM:F2BAw ...
@@ -321,7 +377,7 @@ RAM:00CE		 rmb 1
 RAM:00CF		 rmb 1
 RAM:00D0		 rmb 1
 RAM:00D1		 rmb 1
-RAM:00D2		 rmb 1
+RAM:00D2 byte_D2:	 rmb 1			 ; DATA	XREF: ROM:EF6Aw
 RAM:00D3		 rmb 1
 RAM:00D4		 rmb 1
 RAM:00D5		 rmb 1
@@ -377,27 +433,58 @@ PE:C000			; segment PE
 PE:C000			org $C000
 PE:C000	byte_C000:	rmb 1			; DATA XREF: sub_FF86r
 PE:C000						; sub_FFC6r
+PE:C000						; only read compared to	56h
+PE:C000						; bit7 is ctrl bit
+PE:C000						; bit0 is status - action on 1
 PE:C001	byte_C001:	rmb 1			; DATA XREF: sub_FF86+7r
 PE:C001						; sub_FF86+Fw ...
+PE:C001						; read/write
 PE:C002	word_C002:	rmb 2			; DATA XREF: sub_FF86+15r
+PE:C002						; read only shift and test (RTC	like?)
 PE:C004	byte_C004:	rmb 1			; DATA XREF: sub_FF86+12r
+PE:C004						; read only used as a ptr to upper addresses in	this chip?
 PE:C005			rmb 1
 PE:C006	word_C006:	rmb 2			; DATA XREF: sub_FF86+23r
 PE:C006						; sub_FF86:loc_FFBAw ...
 PE:C006	; end of 'PE'
 PE:C006
+ADC:D000 ; The Analogue	to Digital Converter is	part of	IC402, a hitherto undocumented
+ADC:D000 ; 40-pin DIP IC.
 ADC:D000 ; ===========================================================================
 ADC:D000
 ADC:D000 ; Segment type: Regular
 ADC:D000		 ; segment ADC
 ADC:D000		 org $D000
-ADC:D000		 rmb 1
+ADC:D000 byte_D000:	 rmb 1			 ; DATA	XREF: ROM:EF4Ew
+ADC:D001 ;
+ADC:D001 ; ADC Control Register
+ADC:D001 ; bit 7 (0x80): Go
+ADC:D001 ; bit 6 (0x40): Unknown/unimplemented
+ADC:D001 ; bit 5 (0x20): Unknown/unimplemented
+ADC:D001 ; bit 4 (0x10): Unknown/unimplemented
+ADC:D001 ; bit 3 (0x08): Unknown/unimplemented
+ADC:D001 ; bit 2 (0x04): ADC Channel Select bit	2
+ADC:D001 ; bit 1 (0x02): ADC Channel Select bit	1
+ADC:D001 ; bit 0 (0x01): ADC Channel Select bit	0
 ADC:D001 ADCCR:		 rmb 1			 ; DATA	XREF: readADCw
 ADC:D001					 ; sub_F485w
+ADC:D002 ;
+ADC:D002 ; ADC Status Register
+ADC:D002 ; bit 7 (0x80): Done
+ADC:D002 ; bit 6 (0x40): Unknown/unimplemented
+ADC:D002 ; bit 5 (0x20): Unknown/unimplemented
+ADC:D002 ; bit 4 (0x10): Unknown/unimplemented
+ADC:D002 ; bit 3 (0x08): Unknown/unimplemented
+ADC:D002 ; bit 2 (0x04): Unknown/unimplemented
+ADC:D002 ; bit 1 (0x02): Unknown/unimplemented
+ADC:D002 ; bit 0 (0x01): Unknown/unimplemented
 ADC:D002 ADCStatus:	 rmb 1			 ; DATA	XREF: readADC:loc_F263r
 ADC:D002					 ; sub_F485:loc_F488r
-ADC:D003 ADCResult:	 rmb 1			 ; DATA	XREF: readADC+Ar
-ADC:D003					 ; sub_F660+3w
+ADC:D003 ;
+ADC:D003 ; ADC Result Register
+ADC:D003 ; returns an 8-bit result
+ADC:D003 ADCResult:	 rmb 1			 ; DATA	XREF: ROM:EE6Aw
+ADC:D003					 ; ROM:EEA8w ...
 ADC:D003 ; end of 'ADC'
 ADC:D003
 ROM:E000 ; ===========================================================================
@@ -418,11 +505,11 @@ ROM:E00C					 ; sub_F12D+8r
 ROM:E00E X_E00E:	 fcb $29 ; )
 ROM:E00F		 fcb $31 ; 1
 ROM:E010 X_E010:	 fcb   2
-ROM:E011		 fcb $10
+ROM:E011 byte_E011:	 fcb $10		 ; DATA	XREF: ROM:EE93r
 ROM:E012 byte_E012:	 fcb $54		 ; DATA	XREF: sub_F26E+2Br
 ROM:E012					 ; ROM:loc_F4B5r
 ROM:E013		 fcb $13
-ROM:E014		 fcb $88 ; à
+ROM:E014		 fcb $88 ; ÀÜ
 ROM:E015 X_E015:	 fcb   0
 ROM:E016		 fcb   0
 ROM:E017		 fcb   4
@@ -463,11 +550,11 @@ ROM:E03D		 fcb $3F ; ?
 ROM:E03E		 fcb $3F ; ?
 ROM:E03F		 fcb $3F ; ?
 ROM:E040 X_E040:	 fcb $1B
-ROM:E041		 fcb $F0 ; 
+ROM:E041		 fcb $F0 ; √∞
 ROM:E042 byte_E042:	 fcb $C2		 ; DATA	XREF: sub_F0F2+35r
 ROM:E043		 fcb  $A
 ROM:E044		 fcb $1B
-ROM:E045		 fcb $F0 ; 
+ROM:E045		 fcb $F0 ; √∞
 ROM:E046 byte_E046:	 fcb $C2,$A,6,$E8,$F	 ; 0 ; DATA XREF: sub_F0F2+18r
 ROM:E046		 fcb $A,$1B,$F0,$C2,$A	 ; 5
 ROM:E046		 fcb 5,$F0,$6D,$A,5	 ; 10
@@ -484,9 +571,9 @@ ROM:E060 word_E060:	 fdb $100		 ; DATA	XREF: sub_FBC8:loc_FBF0r
 ROM:E062		 fcb $3F ; ?
 ROM:E063		 fcb $3F ; ?
 ROM:E064 X_E064:	 fcb $10
-ROM:E065		 fcb $F0 ; 
+ROM:E065		 fcb $F0 ; √∞
 ROM:E066		 fcb   3
-ROM:E067		 fcb $FD ; ˝
+ROM:E067		 fcb $FD ; √Ω
 ROM:E068		 fcb $3F ; ?
 ROM:E069		 fcb $3F ; ?
 ROM:E06A		 fcb $3F ; ?
@@ -577,27 +664,27 @@ ROM:E0BE		 fcb $3F ; ?
 ROM:E0BF		 fcb $3F ; ?
 ROM:E0C0 X_E0C0:	 fcb $10
 ROM:E0C1 X_E0C1:	 fcb $1B
-ROM:E0C2		 fcb $F0 ; 
-ROM:E0C3		 fcb $C2 ; ¬
+ROM:E0C2		 fcb $F0 ; √∞
+ROM:E0C3		 fcb $C2 ; √Ç
 ROM:E0C4		 fcb  $A
 ROM:E0C5		 fcb $1B
-ROM:E0C6		 fcb $F0 ; 
-ROM:E0C7		 fcb $C2 ; ¬
+ROM:E0C6		 fcb $F0 ; √∞
+ROM:E0C7		 fcb $C2 ; √Ç
 ROM:E0C8		 fcb  $A
 ROM:E0C9		 fcb   6
-ROM:E0CA		 fcb $F0 ; 
+ROM:E0CA		 fcb $F0 ; √∞
 ROM:E0CB		 fcb  $F
 ROM:E0CC		 fcb  $A
 ROM:E0CD		 fcb $1B
-ROM:E0CE		 fcb $F0 ; 
-ROM:E0CF		 fcb $C2 ; ¬
+ROM:E0CE		 fcb $F0 ; √∞
+ROM:E0CF		 fcb $C2 ; √Ç
 ROM:E0D0		 fcb   3
 ROM:E0D1		 fcb   5
-ROM:E0D2		 fcb $F0 ; 
+ROM:E0D2		 fcb $F0 ; √∞
 ROM:E0D3		 fcb $6D ; m
 ROM:E0D4		 fcb   2
 ROM:E0D5		 fcb   5
-ROM:E0D6		 fcb $F0 ; 
+ROM:E0D6		 fcb $F0 ; √∞
 ROM:E0D7		 fcb $18
 ROM:E0D8		 fcb   2
 ROM:E0D9		 fcb $3F ; ?
@@ -708,7 +795,7 @@ ROM:E170 X_E170:	 fcb 0,1,3,$F,$1D,$3A,$40,$40,$3F,$3F,$3F,$3F,$3F,$3F,$3F,$3F; 
 ROM:E180 X_E180:	 fcb 0,0,0,8,$10,$14,$18,$1C,$3F,$3F,$3F,$3F,$3F,$3F,$3F,$3F; 0
 ROM:E190 X_E190:	 fcb $DA,$9E,$70,$50,$30,$20,$10,0,0,0,0,0,$3F,$3F,$3F,$3F; 0
 ROM:E1A0 X_E1A0:	 fcb  $F
-ROM:E1A1		 fcb $A0 ; †
+ROM:E1A1		 fcb $A0 ; ¬†
 ROM:E1A2		 fcb $17
 ROM:E1A3		 fcb $70 ; p
 ROM:E1A4		 fcb $27 ; '
@@ -1255,10 +1342,10 @@ ROM:E79F		 fcb $3F ; ?
 ROM:E7A0 byte_E7A0:	 fcb $B6		 ; CODE	XREF: ROM:EA10P
 ROM:E7A0					 ; ROM:F0A6P
 ROM:E7A0					 ; DATA	XREF: ...
-ROM:E7A1		 fcb $C0 ; ¿
+ROM:E7A1		 fcb $C0 ; √Ä
 ROM:E7A2		 fcb   0
-ROM:E7A3		 fcb $81 ; Å
-ROM:E7A4		 fcb $A9 ; ©
+ROM:E7A3		 fcb $81 ; ¬Å
+ROM:E7A4		 fcb $A9 ; ¬©
 ROM:E7A5		 fcb $26 ; &
 ROM:E7A6		 fcb $44 ; D
 ROM:E7A7		 fcb $30 ; 0
@@ -1266,32 +1353,32 @@ ROM:E7A8		 fcb   9
 ROM:E7A9		 fcb   9
 ROM:E7AA		 fcb $35 ; 5
 ROM:E7AB		 fcb $4F ; O
-ROM:E7AC		 fcb $A7 ; ß
+ROM:E7AC		 fcb $A7 ; ¬ß
 ROM:E7AD		 fcb   1
-ROM:E7AE		 fcb $E6 ; Ê
+ROM:E7AE		 fcb $E6 ; √¶
 ROM:E7AF		 fcb   1
-ROM:E7B0		 fcb $CE ; Œ
-ROM:E7B1		 fcb $C0 ; ¿
+ROM:E7B0		 fcb $CE ; √é
+ROM:E7B1		 fcb $C0 ; √Ä
 ROM:E7B2		 fcb $20
 ROM:E7B3		 fcb $3A ; :
-ROM:E7B4		 fcb $A6 ; ¶
+ROM:E7B4		 fcb $A6 ; ¬¶
 ROM:E7B5		 fcb   1
-ROM:E7B6		 fcb $84 ; Ñ
+ROM:E7B6		 fcb $84 ; ‚Äû
 ROM:E7B7		 fcb  $F
 ROM:E7B8		 fcb $30 ; 0
-ROM:E7B9		 fcb $A7 ; ß
+ROM:E7B9		 fcb $A7 ; ¬ß
 ROM:E7BA		 fcb   0
-ROM:E7BB		 fcb $CE ; Œ
-ROM:E7BC		 fcb $C0 ; ¿
+ROM:E7BB		 fcb $CE ; √é
+ROM:E7BC		 fcb $C0 ; √Ä
 ROM:E7BD		 fcb $20
 ROM:E7BE		 fcb $3A ; :
-ROM:E7BF		 fcb $E6 ; Ê
+ROM:E7BF		 fcb $E6 ; √¶
 ROM:E7C0		 fcb   0
-ROM:E7C1		 fcb $CE ; Œ
+ROM:E7C1		 fcb $CE ; √é
 ROM:E7C2		 fcb   0
 ROM:E7C3		 fcb   0
 ROM:E7C4		 fcb $3A ; :
-ROM:E7C5		 fcb $EC ; Ï
+ROM:E7C5		 fcb $EC ; √¨
 ROM:E7C6		 fcb   0
 ROM:E7C7		 fcb $30 ; 0
 ROM:E7C8		 fcb $6D ; m
@@ -1302,20 +1389,20 @@ ROM:E7CC		 fcb   4
 ROM:E7CD		 fcb $6A ; j
 ROM:E7CE		 fcb   0
 ROM:E7CF		 fcb $20
-ROM:E7D0		 fcb $F7 ; ˜
+ROM:E7D0		 fcb $F7 ; √∑
 ROM:E7D1		 fcb $17
-ROM:E7D2		 fcb $E6 ; Ê
+ROM:E7D2		 fcb $E6 ; √¶
 ROM:E7D3		 fcb   1
-ROM:E7D4		 fcb $CE ; Œ
-ROM:E7D5		 fcb $C0 ; ¿
+ROM:E7D4		 fcb $CE ; √é
+ROM:E7D5		 fcb $C0 ; √Ä
 ROM:E7D6		 fcb $20
 ROM:E7D7		 fcb $3A ; :
-ROM:E7D8		 fcb $A7 ; ß
+ROM:E7D8		 fcb $A7 ; ¬ß
 ROM:E7D9		 fcb   1
 ROM:E7DA		 fcb $30 ; 0
-ROM:E7DB		 fcb $A6 ; ¶
+ROM:E7DB		 fcb $A6 ; ¬¶
 ROM:E7DC		 fcb   1
-ROM:E7DD		 fcb $81 ; Å
+ROM:E7DD		 fcb $81 ; ¬Å
 ROM:E7DE		 fcb   6
 ROM:E7DF		 fcb $2C ; ,
 ROM:E7E0		 fcb   6
@@ -1324,7 +1411,7 @@ ROM:E7E2		 fcb   1
 ROM:E7E3		 fcb $6C ; l
 ROM:E7E4		 fcb   1
 ROM:E7E5		 fcb $20
-ROM:E7E6		 fcb $C7 ; «
+ROM:E7E6		 fcb $C7 ; √á
 ROM:E7E7		 fcb $30 ; 0
 ROM:E7E8		 fcb   8
 ROM:E7E9		 fcb   8
@@ -1356,14 +1443,14 @@ ROM:E800 nIRQ_IntHandler:			 ; Load	accumulator from memory
 ROM:E800		 ldaa	 PORT2
 ROM:E802		 oraa	 #8		 ; Inclusive OR	memory with accumulator
 ROM:E804		 staa	 PORT2		 ; Store accumulator in	memory
-ROM:E806		 anda	 #$F7 ;	'˜'      ; Logical AND
+ROM:E806		 anda	 #$F7 ;	'√∑'      ; Logical AND
 ROM:E808		 staa	 PORT2		 ; Store accumulator in	memory
 ROM:E80A		 ldab	 byte_A3	 ; Load	accumulator from memory
 ROM:E80C		 ldx	 byte_86	 ; Load	index register from memory
 ROM:E80E		 cpx	 #$180		 ; Compare index register 16 bit
 ROM:E811		 bcs	 loc_E81B+1	 ; Branch if carry bit set
-ROM:E813		 ldaa	 TRCSR2		 ; Load	accumulator from memory
-ROM:E815		 bita	 #$80 ;	'Ä'      ; Bit test
+ROM:E813		 ldaa	 TCSR2		 ; Load	accumulator from memory
+ROM:E815		 bita	 #$80 ;	'‚Ç¨'      ; Bit test
 ROM:E817		 beq	 loc_E81B+1	 ; Branch if equal
 ROM:E819		 orab	 #$20 ;	' '      ; Inclusive OR memory with accumulator
 ROM:E81B
@@ -1372,13 +1459,13 @@ ROM:E81B					 ; ROM:E817j
 ROM:E81B		 cpx	 #$C4DF		 ; Compare index register 16 bit
 ROM:E81E		 stab	 byte_A3	 ; Store accumulator in	memory
 ROM:E820		 ldab	 #1		 ; Load	accumulator from memory
-ROM:E822		 ldx	 #$9A ;	'ö'      ; Load index register from memory
+ROM:E822		 ldx	 #$9A ;	'≈°'      ; Load index register from memory
 ROM:E825		 jsr	 sub_F686	 ; Jump	to subroutine
 ROM:E828		 jsr	 sub_F6FC	 ; Jump	to subroutine
 ROM:E82B		 bita	 #1		 ; Bit test
 ROM:E82D		 beq	 loc_E83D	 ; Branch if equal
 ROM:E82F		 ldaa	 byte_A3	 ; Load	accumulator from memory
-ROM:E831		 bita	 #$80 ;	'Ä'      ; Bit test
+ROM:E831		 bita	 #$80 ;	'‚Ç¨'      ; Bit test
 ROM:E833		 beq	 loc_E839	 ; Branch if equal
 ROM:E835		 ldaa	 #$F		 ; Load	accumulator from memory
 ROM:E837		 staa	 byte_84	 ; Store accumulator in	memory
@@ -1469,7 +1556,7 @@ ROM:E888		 bra	 loc_E89E	 ; Branch always
 ROM:E88A ; ---------------------------------------------------------------------------
 ROM:E88A
 ROM:E88A loc_E88A:				 ; CODE	XREF: sub_E880+4j
-ROM:E88A		 andb	 #$F7 ;	'˜'      ; Logical AND
+ROM:E88A		 andb	 #$F7 ;	'√∑'      ; Logical AND
 ROM:E88C		 stab	 byte_A3	 ; Store accumulator in	memory
 ROM:E88E		 cmpa	 byte_84	 ; Compare accumulator with memory
 ROM:E890		 beq	 loc_E8B2	 ; Branch if equal
@@ -1502,7 +1589,7 @@ ROM:E8B2 ; ---------------------------------------------------------------------
 ROM:E8B2
 ROM:E8B2 loc_E8B2:				 ; CODE	XREF: sub_E880+10j
 ROM:E8B2		 ldab	 byte_A6	 ; Load	accumulator from memory
-ROM:E8B4		 andb	 #$FE ;	'˛'      ; Logical AND
+ROM:E8B4		 andb	 #$FE ;	'√æ'      ; Logical AND
 ROM:E8B6		 stab	 byte_A6	 ; Store accumulator in	memory
 ROM:E8B8		 clrb			 ; Clear
 ROM:E8B9		 stab	 byte_98	 ; Store accumulator in	memory
@@ -1581,19 +1668,22 @@ ROM:E8FD		 fcb $3F ; ?
 ROM:E8FE		 fcb $3F ; ?
 ROM:E8FF		 fcb $3F ; ?
 ROM:E900 ; ---------------------------------------------------------------------------
+ROM:E900 ; IC_IntHandler:
+ROM:E900 ; IC1 is the crank sensor input
+ROM:E900 ; IC2 is ???
 ROM:E900
 ROM:E900 IC_IntHandler:				 ; Load	accumulator from memory
 ROM:E900		 ldaa	 TCSR1
-ROM:E902		 bita	 #$80 ;	'Ä'      ; Bit test
-ROM:E904		 bne	 loc_E909	 ; clear interrupt flags
+ROM:E902		 bita	 #$80 ;	'‚Ç¨'      ; test IC1 IF
+ROM:E904		 bne	 loc_E909	 ; bra if no IC1 interrupt
 ROM:E906		 jmp	 loc_F77C	 ; Jump
 ROM:E909 ; ---------------------------------------------------------------------------
 ROM:E909
 ROM:E909 loc_E909:				 ; CODE	XREF: ROM:E904j
 ROM:E909		 ldd	 ICR1H		 ; clear interrupt flags
 ROM:E90B		 ldab	 byte_A3	 ; Load	accumulator from memory
-ROM:E90D		 ldaa	 TRCSR2		 ; Load	accumulator from memory
-ROM:E90F		 bita	 #$80 ;	'Ä'      ; Bit test
+ROM:E90D		 ldaa	 TCSR2		 ; Load	accumulator from memory
+ROM:E90F		 bita	 #$80 ;	'‚Ç¨'      ; Bit test
 ROM:E911		 beq	 loc_E915+1	 ; Branch if equal
 ROM:E913		 orab	 #$20 ;	' '      ; Inclusive OR memory with accumulator
 ROM:E915
@@ -1601,13 +1691,13 @@ ROM:E915 loc_E915:				 ; CODE	XREF: ROM:E911j
 ROM:E915		 cpx	 #$C4DF		 ; Compare index register 16 bit
 ROM:E918		 stab	 byte_A3	 ; Store accumulator in	memory
 ROM:E91A		 ldab	 #2		 ; Load	accumulator from memory
-ROM:E91C		 ldx	 #$99 ;	'ô'      ; Load index register from memory
+ROM:E91C		 ldx	 #$99 ;	'‚Ñ¢'      ; Load index register from memory
 ROM:E91F		 jsr	 sub_F686	 ; Jump	to subroutine
 ROM:E922		 jsr	 sub_F6FC	 ; Jump	to subroutine
 ROM:E925		 bita	 #1		 ; Bit test
 ROM:E927		 beq	 loc_E937	 ; Branch if equal
 ROM:E929		 ldaa	 byte_A3	 ; Load	accumulator from memory
-ROM:E92B		 bita	 #$80 ;	'Ä'      ; Bit test
+ROM:E92B		 bita	 #$80 ;	'‚Ç¨'      ; Bit test
 ROM:E92D		 beq	 loc_E933	 ; Branch if equal
 ROM:E92F		 ldaa	 #7		 ; Load	accumulator from memory
 ROM:E931		 staa	 byte_84	 ; Store accumulator in	memory
@@ -1825,7 +1915,7 @@ ROM:EA02		 nop			 ; No Operation
 ROM:EA03		 jsr	 sub_FF86	 ; Jump	to subroutine
 ROM:EA06		 jsr	 sub_FFC6	 ; Jump	to subroutine
 ROM:EA09		 ldab	 byte_E7A0	 ; Load	accumulator from memory
-ROM:EA0C		 cmpb	 #$B6 ;	'∂'      ; Compare accumulator with memory
+ROM:EA0C		 cmpb	 #$B6 ;	'¬∂'      ; Compare accumulator with memory
 ROM:EA0E		 bne	 loc_EA13	 ; Branch if not equal
 ROM:EA10		 jsr	 byte_E7A0	 ; Jump	to subroutine
 ROM:EA13
@@ -1861,7 +1951,7 @@ ROM:EA41 loc_EA41:				 ; CODE	XREF: sub_EA34+6j
 ROM:EA41		 ldab	 #$40 ;	'@'      ; Load accumulator from memory
 ROM:EA43		 ldaa	 byte_60	 ; Load	accumulator from memory
 ROM:EA45		 beq	 loc_EA49	 ; Branch if equal
-ROM:EA47		 addb	 #$80 ;	'Ä'      ; Add without carry
+ROM:EA47		 addb	 #$80 ;	'‚Ç¨'      ; Add without carry
 ROM:EA49
 ROM:EA49 loc_EA49:				 ; CODE	XREF: sub_EA34+11j
 ROM:EA49		 ldaa	 byte_5E	 ; Load	accumulator from memory
@@ -2062,7 +2152,7 @@ ROM:EB2E		 addd	 #$840		 ; Add 16-bit to D
 ROM:EB31
 ROM:EB31 loc_EB31:				 ; CODE	XREF: ROM:EB2Aj
 ROM:EB31		 ldx	 #$E400		 ; Load	index register from memory
-ROM:EB34		 bsr	 sub_EB68	 ; Branch to subroutine
+ROM:EB34		 bsr	 tableLU_3Db	 ; Branch to subroutine
 ROM:EB36		 std	 byte_56	 ; Store accumulators in memory
 ROM:EB38		 rts			 ; Return from subroutine
 ROM:EB39 ; ---------------------------------------------------------------------------
@@ -2080,7 +2170,7 @@ ROM:EB4A		 std	 byte_56	 ; Store accumulators in memory
 ROM:EB4C		 ldaa	 byte_72	 ; Load	accumulator from memory
 ROM:EB4E		 jsr	 sub_F1CC	 ; Jump	to subroutine
 ROM:EB51		 ldx	 #$E200		 ; Load	index register from memory
-ROM:EB54		 bsr	 sub_EB68	 ; Branch to subroutine
+ROM:EB54		 bsr	 tableLU_3Db	 ; Branch to subroutine
 ROM:EB56		 ldaa	 byte_95	 ; Load	accumulator from memory
 ROM:EB58		 beq	 loc_EB5F	 ; Branch if equal
 ROM:EB5A		 ldd	 byte_58	 ; Load	double accumulator
@@ -2100,7 +2190,7 @@ ROM:EB68
 ROM:EB68 ; =============== S U B R O U T I N E =======================================
 ROM:EB68
 ROM:EB68
-ROM:EB68 sub_EB68:				 ; CODE	XREF: ROM:EB34p
+ROM:EB68 tableLU_3Db:				 ; CODE	XREF: ROM:EB34p
 ROM:EB68					 ; ROM:EB54p
 ROM:EB68		 std	 byte_AF	 ; Store accumulators in memory
 ROM:EB6A		 ldd	 byte_B3	 ; Load	double accumulator
@@ -2109,7 +2199,7 @@ ROM:EB6F		 lsrd			 ; Logical shift right double
 ROM:EB70		 lsrd			 ; Logical shift right double
 ROM:EB71		 std	 byte_58	 ; Store accumulators in memory
 ROM:EB73		 rts			 ; Return from subroutine
-ROM:EB73 ; End of function sub_EB68
+ROM:EB73 ; End of function tableLU_3Db
 ROM:EB73
 ROM:EB74 ; ---------------------------------------------------------------------------
 ROM:EB74
@@ -2129,7 +2219,7 @@ ROM:EB87		 ldd	 byte_86	 ; Load	double accumulator
 ROM:EB89		 jsr	 sub_FE88	 ; Jump	to subroutine
 ROM:EB89 ; ---------------------------------------------------------------------------
 ROM:EB8C		 fcb   3
-ROM:EB8D		 fcb $80 ; Ä
+ROM:EB8D		 fcb $80 ; ‚Ç¨
 ROM:EB8E		 fcb   0
 ROM:EB8F ; ---------------------------------------------------------------------------
 ROM:EB8F		 bra	 loc_EB96	 ; Branch always
@@ -2231,7 +2321,7 @@ ROM:EBFF		 fcb $3F ; ?
 ROM:EC00 ; ---------------------------------------------------------------------------
 ROM:EC00
 ROM:EC00 loc_EC00:				 ; CODE	XREF: ROM:EC07j
-ROM:EC00					 ; ROM:loc_EC92J
+ROM:EC00					 ; ROM:loc_EC92J ...
 ROM:EC00		 jsr	 sub_F0C7	 ; Jump	to subroutine
 ROM:EC03		 ldaa	 byte_8E	 ; Load	accumulator from memory
 ROM:EC05		 cmpa	 FRCH		 ; Compare accumulator with memory
@@ -2265,7 +2355,7 @@ ROM:EC30		 ldx	 0,x		 ; Load	index register from memory
 ROM:EC32		 cpx	 byte_86	 ; Compare index register 16 bit
 ROM:EC34		 bcc	 loc_EC5D	 ; Branch if carry bit clear
 ROM:EC36		 ldab	 byte_A0	 ; Load	accumulator from memory
-ROM:EC38		 andb	 #$BF ;	'ø'      ; Logical AND
+ROM:EC38		 andb	 #$BF ;	'¬ø'      ; Logical AND
 ROM:EC3A		 bra	 loc_EC5B	 ; Branch always
 ROM:EC3C ; ---------------------------------------------------------------------------
 ROM:EC3C
@@ -2449,12 +2539,12 @@ ROM:ED00					 ; ROM:ED09j
 ROM:ED00		 rts			 ; Return from subroutine
 ROM:ED01 ; ---------------------------------------------------------------------------
 ROM:ED01
-ROM:ED01 loc_ED01:				 ; CODE	XREF: sub_F3C2+5FP
-ROM:ED01					 ; ROM:F4DBP
+ROM:ED01 loc_ED01:				 ; CODE	XREF: ROM:EEBFP
+ROM:ED01					 ; sub_F3C2+5FP ...
 ROM:ED01		 ldd	 0,x		 ; Load	double accumulator
 ROM:ED03		 beq	 locret_ED00	 ; Branch if equal
 ROM:ED05		 ldaa	 byte_A4	 ; Load	accumulator from memory
-ROM:ED07		 bita	 #$C0 ;	'¿'      ; Bit test
+ROM:ED07		 bita	 #$C0 ;	'√Ä'      ; Bit test
 ROM:ED09		 bne	 locret_ED00	 ; Branch if not equal
 ROM:ED0B		 sei			 ; Set interrupt mask bit
 ROM:ED0C		 ldaa	 PORT1		 ; Load	accumulator from memory
@@ -2464,7 +2554,7 @@ ROM:ED12		 ldd	 FRCH		 ; Load	double accumulator
 ROM:ED14		 addd	 0,x		 ; Add 16-bit to D
 ROM:ED16		 std	 byte_4E	 ; Store accumulators in memory
 ROM:ED18		 ldaa	 PORT1		 ; Load	accumulator from memory
-ROM:ED1A		 anda	 #$FB ;	'˚'      ; Logical AND
+ROM:ED1A		 anda	 #$FB ;	'√ª'      ; Logical AND
 ROM:ED1C		 staa	 PORT1		 ; Store accumulator in	memory
 ROM:ED1E		 pshx			 ; Push	index register into stack (low first)
 ROM:ED1F		 ldx	 #$48 ;	'H'      ; Load index register from memory
@@ -2487,7 +2577,7 @@ ROM:ED3B		 ldab	 TCSR1		 ; Load	accumulator from memory
 ROM:ED3D		 ldaa	 PORT2		 ; Load	accumulator from memory
 ROM:ED3F		 bita	 #2		 ; Bit test
 ROM:ED41		 bne	 loc_ED45+1	 ; Branch if not equal
-ROM:ED43		 andb	 #$FE ;	'˛'      ; Logical AND
+ROM:ED43		 andb	 #$FE ;	'√æ'      ; Logical AND
 ROM:ED45
 ROM:ED45 loc_ED45:				 ; CODE	XREF: ROM:ED41j
 ROM:ED45		 cpx	 #$CA01		 ; Compare index register 16 bit
@@ -2513,7 +2603,7 @@ ROM:ED67		 bmi	 loc_ED73	 ; Branch if minus
 ROM:ED69		 subd	 byte_B1	 ; Subtract 16 bit
 ROM:ED6B		 bpl	 loc_ED73	 ; Branch if plus
 ROM:ED6D		 ldaa	 byte_9F	 ; Load	accumulator from memory
-ROM:ED6F		 anda	 #$EF ;	'Ô'      ; Logical AND
+ROM:ED6F		 anda	 #$EF ;	'√Ø'      ; Logical AND
 ROM:ED71		 staa	 byte_9F	 ; Store accumulator in	memory
 ROM:ED73
 ROM:ED73 loc_ED73:				 ; CODE	XREF: ROM:ED39j
@@ -2525,7 +2615,7 @@ ROM:ED79		 ldd	 FRCH		 ; Load	double accumulator
 ROM:ED7B		 addd	 0,x		 ; Add 16-bit to D
 ROM:ED7D		 std	 byte_46	 ; Store accumulators in memory
 ROM:ED7F		 ldaa	 PORT1		 ; Load	accumulator from memory
-ROM:ED81		 anda	 #$F7 ;	'˜'      ; Logical AND
+ROM:ED81		 anda	 #$F7 ;	'√∑'      ; Logical AND
 ROM:ED83		 staa	 PORT1		 ; Store accumulator in	memory
 ROM:ED85		 ldx	 #$40 ;	'@'      ; Load index register from memory
 ROM:ED88		 jsr	 sub_F463	 ; Jump	to subroutine
@@ -2542,16 +2632,16 @@ ROM:ED9E		 bmi	 loc_EDD8	 ; Branch if minus
 ROM:EDA0
 ROM:EDA0 loc_EDA0:				 ; CODE	XREF: ROM:ED8Fj
 ROM:EDA0					 ; ROM:ED95j
-ROM:EDA0		 ldab	 TRCSR2		 ; Load	accumulator from memory
+ROM:EDA0		 ldab	 TCSR2		 ; Load	accumulator from memory
 ROM:EDA2		 ldaa	 PORT1		 ; Load	accumulator from memory
 ROM:EDA4		 bita	 #2		 ; Bit test
 ROM:EDA6		 bne	 loc_EDAA+1	 ; Branch if not equal
-ROM:EDA8		 andb	 #$FE ;	'˛'      ; Logical AND
+ROM:EDA8		 andb	 #$FE ;	'√æ'      ; Logical AND
 ROM:EDAA
 ROM:EDAA loc_EDAA:				 ; CODE	XREF: ROM:EDA6j
 ROM:EDAA		 cpx	 #$CA01		 ; Compare index register 16 bit
 ROM:EDAD		 orab	 #8		 ; Inclusive OR	memory with accumulator
-ROM:EDAF		 stab	 TRCSR2		 ; Store accumulator in	memory
+ROM:EDAF		 stab	 TCSR2		 ; Store accumulator in	memory
 ROM:EDB1		 ldd	 #$14		 ; Load	double accumulator
 ROM:EDB4		 addd	 FRCH		 ; Add 16-bit to D
 ROM:EDB6		 std	 OCR2H		 ; Store accumulators in memory
@@ -2572,7 +2662,7 @@ ROM:EDCC		 bmi	 loc_EDD8	 ; Branch if minus
 ROM:EDCE		 subd	 byte_B1	 ; Subtract 16 bit
 ROM:EDD0		 bpl	 loc_EDD8	 ; Branch if plus
 ROM:EDD2		 ldaa	 byte_9F	 ; Load	accumulator from memory
-ROM:EDD4		 anda	 #$BF ;	'ø'      ; Logical AND
+ROM:EDD4		 anda	 #$BF ;	'¬ø'      ; Logical AND
 ROM:EDD6		 staa	 byte_9F	 ; Store accumulator in	memory
 ROM:EDD8
 ROM:EDD8 loc_EDD8:				 ; CODE	XREF: ROM:ED9Ej
@@ -2633,7 +2723,7 @@ ROM:EE0C		 fcb $3F ; ?
 ROM:EE0D		 fcb $3F ; ?
 ROM:EE0E		 fcb $3F ; ?
 ROM:EE0F		 fcb $3F ; ?
-ROM:EE10		 fcb $AB ; ´
+ROM:EE10		 fcb $AB ; ¬´
 ROM:EE11		 fcb $7B ; {
 ROM:EE12		 fcb $3F ; ?
 ROM:EE13		 fcb $3F ; ?
@@ -2711,386 +2801,263 @@ ROM:EE5F		 stab	 byte_A4	 ; Store accumulator in	memory
 ROM:EE61		 cli			 ; Clear interrupt mask
 ROM:EE62		 rts			 ; Return from subroutine
 ROM:EE62 ; END OF FUNCTION CHUNK FOR sub_F5F1
-ROM:EE62 ; ---------------------------------------------------------------------------
-ROM:EE63 byte_EE63:	 fcb $CC		 ; CODE	XREF: ROM:F5EDJ
+ROM:EE63 ; ---------------------------------------------------------------------------
+ROM:EE63
+ROM:EE63 loc_EE63:				 ; CODE	XREF: ROM:F5EDJ
 ROM:EE63					 ; DATA	XREF: ROM:F5E6r
-ROM:EE64		 fcb   0
-ROM:EE65		 fcb   1
-ROM:EE66		 fcb $DD ; ›
-ROM:EE67		 fcb $AF ; Ø
-ROM:EE68		 fcb $86 ; Ü
-ROM:EE69		 fcb $80 ; Ä
-ROM:EE6A		 fcb $B7 ; ∑
-ROM:EE6B		 fcb $D0 ; –
-ROM:EE6C		 fcb   3
-ROM:EE6D		 fcb $86 ; Ü
-ROM:EE6E		 fcb $2C ; ,
-ROM:EE6F		 fcb $97 ; ó
-ROM:EE70		 fcb $B1 ; ±
-ROM:EE71		 fcb $D6 ; ÷
-ROM:EE72		 fcb $B0 ; ∞
-ROM:EE73		 fcb $BD ; Ω
-ROM:EE74		 fcb $F4 ; Ù
-ROM:EE75		 fcb $85 ; Ö
-ROM:EE76		 fcb $27 ; '
-ROM:EE77		 fcb   4
-ROM:EE78		 fcb $DA ; ⁄
-ROM:EE79		 fcb $AF ; Ø
-ROM:EE7A		 fcb $20
-ROM:EE7B		 fcb   3
-ROM:EE7C		 fcb $53 ; S
-ROM:EE7D		 fcb $D4 ; ‘
-ROM:EE7E		 fcb $AF ; Ø
-ROM:EE7F		 fcb $D7 ; ◊
-ROM:EE80		 fcb $AF ; Ø
-ROM:EE81		 fcb $78 ; x
-ROM:EE82		 fcb   0
-ROM:EE83		 fcb $B0 ; ∞
-ROM:EE84		 fcb $96 ; ñ
-ROM:EE85		 fcb $B1 ; ±
-ROM:EE86		 fcb $4C ; L
-ROM:EE87		 fcb $81 ; Å
-ROM:EE88		 fcb $2F ; /
-ROM:EE89		 fcb $23 ; #
-ROM:EE8A		 fcb $E4 ; ‰
-ROM:EE8B		 fcb $D6 ; ÷
-ROM:EE8C		 fcb $AF ; Ø
-ROM:EE8D		 fcb $C4 ; ƒ
-ROM:EE8E		 fcb  $F
-ROM:EE8F		 fcb $D7 ; ◊
-ROM:EE90		 fcb $7A ; z
-ROM:EE91		 fcb $C4 ; ƒ
-ROM:EE92		 fcb   7
-ROM:EE93		 fcb $B6 ; ∂
-ROM:EE94		 fcb $E0 ; ‡
-ROM:EE95		 fcb $11
-ROM:EE96		 fcb $3D ; =
-ROM:EE97		 fcb $DD ; ›
-ROM:EE98		 fcb $5C ; \
-ROM:EE99		 fcb $96 ; ñ
-ROM:EE9A		 fcb $7A ; z
-ROM:EE9B		 fcb $85 ; Ö
-ROM:EE9C		 fcb   8
-ROM:EE9D		 fcb $27 ; '
-ROM:EE9E		 fcb   6
-ROM:EE9F		 fcb $4F ; O
-ROM:EEA0		 fcb $5F ; _
-ROM:EEA1		 fcb $93 ; ì
-ROM:EEA2		 fcb $5C ; \
-ROM:EEA3		 fcb $DD ; ›
-ROM:EEA4		 fcb $5C ; \
-ROM:EEA5		 fcb $39 ; 9
-ROM:EEA6 byte_EEA6:	 fcb $86		 ; CODE	XREF: ROM:F481P
+ROM:EE63		 ldd	 #1		 ; Load	double accumulator
+ROM:EE66		 std	 byte_AF	 ; Store accumulators in memory
+ROM:EE68		 ldaa	 #$80 ;	'‚Ç¨'      ; Load accumulator from memory
+ROM:EE6A		 staa	 ADCResult	 ; Store accumulator in	memory
+ROM:EE6D		 ldaa	 #$2C ;	','      ; Load accumulator from memory
+ROM:EE6F
+ROM:EE6F loc_EE6F:				 ; CODE	XREF: ROM:EE89j
+ROM:EE6F		 staa	 byte_B1	 ; Store accumulator in	memory
+ROM:EE71		 ldab	 byte_B0	 ; Load	accumulator from memory
+ROM:EE73		 jsr	 sub_F485	 ; Jump	to subroutine
+ROM:EE76		 beq	 loc_EE7C	 ; Branch if equal
+ROM:EE78		 orab	 byte_AF	 ; Inclusive OR	memory with accumulator
+ROM:EE7A		 bra	 loc_EE7F	 ; Branch always
+ROM:EE7C ; ---------------------------------------------------------------------------
+ROM:EE7C
+ROM:EE7C loc_EE7C:				 ; CODE	XREF: ROM:EE76j
+ROM:EE7C		 comb			 ; Complement
+ROM:EE7D		 andb	 byte_AF	 ; Logical AND
+ROM:EE7F
+ROM:EE7F loc_EE7F:				 ; CODE	XREF: ROM:EE7Aj
+ROM:EE7F		 stab	 byte_AF	 ; Store accumulator in	memory
+ROM:EE81		 asl	 byte_B0	 ; Logical (or Ariphmetic) shift left
+ROM:EE84		 ldaa	 byte_B1	 ; Load	accumulator from memory
+ROM:EE86		 inca			 ; Increment
+ROM:EE87		 cmpa	 #$2F ;	'/'      ; Compare accumulator with memory
+ROM:EE89		 bls	 loc_EE6F	 ; Branch if <=	(unsigned)
+ROM:EE8B		 ldab	 byte_AF	 ; Load	accumulator from memory
+ROM:EE8D		 andb	 #$F		 ; Logical AND
+ROM:EE8F		 stab	 byte_7A	 ; Store accumulator in	memory
+ROM:EE91		 andb	 #7		 ; Logical AND
+ROM:EE93		 ldaa	 byte_E011	 ; Load	accumulator from memory
+ROM:EE96		 mul			 ; Unsigned multiply
+ROM:EE97		 std	 byte_5C	 ; Store accumulators in memory
+ROM:EE99		 ldaa	 byte_7A	 ; Load	accumulator from memory
+ROM:EE9B		 bita	 #8		 ; Bit test
+ROM:EE9D		 beq	 locret_EEA5	 ; Branch if equal
+ROM:EE9F		 clra			 ; Clear
+ROM:EEA0		 clrb			 ; Clear
+ROM:EEA1		 subd	 byte_5C	 ; Subtract 16 bit
+ROM:EEA3		 std	 byte_5C	 ; Store accumulators in memory
+ROM:EEA5
+ROM:EEA5 locret_EEA5:				 ; CODE	XREF: ROM:EE9Dj
+ROM:EEA5		 rts			 ; Return from subroutine
+ROM:EEA6 ; ---------------------------------------------------------------------------
+ROM:EEA6
+ROM:EEA6 loc_EEA6:				 ; CODE	XREF: ROM:F481P
 ROM:EEA6					 ; DATA	XREF: ROM:F47Ar
-ROM:EEA7		 fcb $80 ; Ä
-ROM:EEA8		 fcb $B7 ; ∑
-ROM:EEA9		 fcb $D0 ; –
-ROM:EEAA		 fcb   3
-ROM:EEAB		 fcb $86 ; Ü
-ROM:EEAC		 fcb $2A ; *
-ROM:EEAD		 fcb $BD ; Ω
-ROM:EEAE		 fcb $F4 ; Ù
-ROM:EEAF		 fcb $85 ; Ö
-ROM:EEB0		 fcb $26 ; &
-ROM:EEB1		 fcb $16
-ROM:EEB2		 fcb $D6 ; ÷
-ROM:EEB3		 fcb $A7 ; ß
-ROM:EEB4		 fcb $2B ; +
-ROM:EEB5		 fcb  $C
-ROM:EEB6		 fcb $CB ; À
-ROM:EEB7		 fcb $40 ; @
-ROM:EEB8		 fcb $D7 ; ◊
-ROM:EEB9		 fcb $A7 ; ß
-ROM:EEBA		 fcb $2A ; *
-ROM:EEBB		 fcb $12
-ROM:EEBC		 fcb $CE ; Œ
-ROM:EEBD		 fcb $E0 ; ‡
-ROM:EEBE		 fcb $13
-ROM:EEBF		 fcb $BD ; Ω
-ROM:EEC0		 fcb $ED ; Ì
-ROM:EEC1		 fcb   1
-ROM:EEC2		 fcb $DC ; ‹
-ROM:EEC3		 fcb $C0 ; ¿
-ROM:EEC4		 fcb $DD ; ›
-ROM:EEC5		 fcb $60 ; `
-ROM:EEC6		 fcb $20
-ROM:EEC7		 fcb   6
-ROM:EEC8		 fcb $D6 ; ÷
-ROM:EEC9		 fcb $A7 ; ß
-ROM:EECA		 fcb $C4 ; ƒ
-ROM:EECB		 fcb $7F ; 
-ROM:EECC		 fcb $D7 ; ◊
-ROM:EECD		 fcb $A7 ; ß
-ROM:EECE		 fcb $86 ; Ü
-ROM:EECF		 fcb $80 ; Ä
-ROM:EED0		 fcb $B7 ; ∑
-ROM:EED1		 fcb $D0 ; –
-ROM:EED2		 fcb   3
-ROM:EED3		 fcb $86 ; Ü
-ROM:EED4		 fcb $27 ; '
-ROM:EED5		 fcb $BD ; Ω
-ROM:EED6		 fcb $F4 ; Ù
-ROM:EED7		 fcb $85 ; Ö
-ROM:EED8		 fcb $27 ; '
-ROM:EED9		 fcb   3
-ROM:EEDA		 fcb $4F ; O
-ROM:EEDB		 fcb $97 ; ó
-ROM:EEDC		 fcb $A9 ; ©
-ROM:EEDD		 fcb $96 ; ñ
-ROM:EEDE		 fcb $85 ; Ö
-ROM:EEDF		 fcb $81 ; Å
-ROM:EEE0		 fcb $13
-ROM:EEE1		 fcb $25 ; %
-ROM:EEE2		 fcb $16
-ROM:EEE3		 fcb $96 ; ñ
-ROM:EEE4		 fcb $AE ; Æ
-ROM:EEE5		 fcb $81 ; Å
-ROM:EEE6		 fcb  $F
-ROM:EEE7		 fcb $24 ; $
-ROM:EEE8		 fcb  $F
-ROM:EEE9		 fcb $4C ; L
-ROM:EEEA		 fcb $97 ; ó
-ROM:EEEB		 fcb $AE ; Æ
-ROM:EEEC		 fcb $81 ; Å
-ROM:EEED		 fcb  $F
-ROM:EEEE		 fcb $26 ; &
-ROM:EEEF		 fcb   8
-ROM:EEF0		 fcb  $F
-ROM:EEF1		 fcb $BD ; Ω
-ROM:EEF2		 fcb $FA ; ˙
-ROM:EEF3		 fcb $7D ; }
-ROM:EEF4		 fcb $BD ; Ω
-ROM:EEF5		 fcb $FA ; ˙
-ROM:EEF6		 fcb $A2 ; ¢
-ROM:EEF7		 fcb  $E
-ROM:EEF8		 fcb $39 ; 9
-ROM:EEF9		 fcb $4F ; O
-ROM:EEFA		 fcb $97 ; ó
-ROM:EEFB		 fcb $AE ; Æ
-ROM:EEFC		 fcb $39 ; 9
-ROM:EEFD byte_EEFD:	 fcb $F			 ; CODE	XREF: ROM:F00FJ
+ROM:EEA6		 ldaa	 #$80 ;	'‚Ç¨'      ; Load accumulator from memory
+ROM:EEA8		 staa	 ADCResult	 ; Store accumulator in	memory
+ROM:EEAB		 ldaa	 #$2A ;	'*'      ; Load accumulator from memory
+ROM:EEAD		 jsr	 sub_F485	 ; Jump	to subroutine
+ROM:EEB0		 bne	 loc_EEC8	 ; Branch if not equal
+ROM:EEB2		 ldab	 byte_A7	 ; Load	accumulator from memory
+ROM:EEB4		 bmi	 loc_EEC2	 ; Branch if minus
+ROM:EEB6		 addb	 #$40 ;	'@'      ; Add without carry
+ROM:EEB8		 stab	 byte_A7	 ; Store accumulator in	memory
+ROM:EEBA		 bpl	 loc_EECE	 ; Branch if plus
+ROM:EEBC		 ldx	 #$E013		 ; Load	index register from memory
+ROM:EEBF		 jsr	 loc_ED01	 ; Jump	to subroutine
+ROM:EEC2
+ROM:EEC2 loc_EEC2:				 ; CODE	XREF: ROM:EEB4j
+ROM:EEC2		 ldd	 byte_C0	 ; Load	double accumulator
+ROM:EEC4		 std	 byte_60	 ; Store accumulators in memory
+ROM:EEC6		 bra	 loc_EECE	 ; Branch always
+ROM:EEC8 ; ---------------------------------------------------------------------------
+ROM:EEC8
+ROM:EEC8 loc_EEC8:				 ; CODE	XREF: ROM:EEB0j
+ROM:EEC8		 ldab	 byte_A7	 ; Load	accumulator from memory
+ROM:EECA		 andb	 #$7F ;	''      ; Logical AND
+ROM:EECC		 stab	 byte_A7	 ; Store accumulator in	memory
+ROM:EECE
+ROM:EECE loc_EECE:				 ; CODE	XREF: ROM:EEBAj
+ROM:EECE					 ; ROM:EEC6j
+ROM:EECE		 ldaa	 #$80 ;	'‚Ç¨'      ; Load accumulator from memory
+ROM:EED0		 staa	 ADCResult	 ; Store accumulator in	memory
+ROM:EED3		 ldaa	 #$27 ;	'''      ; Load accumulator from memory
+ROM:EED5		 jsr	 sub_F485	 ; Jump	to subroutine
+ROM:EED8		 beq	 loc_EEDD	 ; Branch if equal
+ROM:EEDA		 clra			 ; Clear
+ROM:EEDB		 staa	 byte_A9	 ; Store accumulator in	memory
+ROM:EEDD
+ROM:EEDD loc_EEDD:				 ; CODE	XREF: ROM:EED8j
+ROM:EEDD		 ldaa	 byte_85	 ; Load	accumulator from memory
+ROM:EEDF		 cmpa	 #$13		 ; Compare accumulator with memory
+ROM:EEE1		 bcs	 loc_EEF9	 ; Branch if carry bit set
+ROM:EEE3		 ldaa	 byte_AE	 ; Load	accumulator from memory
+ROM:EEE5		 cmpa	 #$F		 ; Compare accumulator with memory
+ROM:EEE7		 bcc	 locret_EEF8	 ; Branch if carry bit clear
+ROM:EEE9		 inca			 ; Increment
+ROM:EEEA		 staa	 byte_AE	 ; Store accumulator in	memory
+ROM:EEEC		 cmpa	 #$F		 ; Compare accumulator with memory
+ROM:EEEE		 bne	 locret_EEF8	 ; Branch if not equal
+ROM:EEF0		 sei			 ; Set interrupt mask bit
+ROM:EEF1		 jsr	 loc_FA7D	 ; Jump	to subroutine
+ROM:EEF4		 jsr	 loc_FAA2	 ; Jump	to subroutine
+ROM:EEF7		 cli			 ; Clear interrupt mask
+ROM:EEF8
+ROM:EEF8 locret_EEF8:				 ; CODE	XREF: ROM:EEE7j
+ROM:EEF8					 ; ROM:EEEEj
+ROM:EEF8		 rts			 ; Return from subroutine
+ROM:EEF9 ; ---------------------------------------------------------------------------
+ROM:EEF9
+ROM:EEF9 loc_EEF9:				 ; CODE	XREF: ROM:EEE1j
+ROM:EEF9		 clra			 ; Clear
+ROM:EEFA		 staa	 byte_AE	 ; Store accumulator in	memory
+ROM:EEFC		 rts			 ; Return from subroutine
+ROM:EEFD ; ---------------------------------------------------------------------------
+ROM:EEFD
+ROM:EEFD INIT:					 ; CODE	XREF: ROM:F00FJ
 ROM:EEFD					 ; DATA	XREF: ROM:F008r
-ROM:EEFE		 fcb $CE ; Œ
-ROM:EEFF		 fcb $FC ; ¸
-ROM:EF00		 fcb   8
-ROM:EF01		 fcb $DF ; ﬂ
-ROM:EF02		 fcb   2
-ROM:EF03		 fcb $CE ; Œ
-ROM:EF04		 fcb $FE ; ˛
-ROM:EF05		 fcb $1E
-ROM:EF06		 fcb $DF ; ﬂ
-ROM:EF07		 fcb   0
-ROM:EF08		 fcb $4F ; O
-ROM:EF09		 fcb $97 ; ó
-ROM:EF0A		 fcb   3
-ROM:EF0B		 fcb $CC ; Ã
-ROM:EF0C		 fcb $1B
-ROM:EF0D		 fcb $1B
-ROM:EF0E		 fcb $97 ; ó
-ROM:EF0F		 fcb   8
-ROM:EF10		 fcb $D7 ; ◊
-ROM:EF11		 fcb $18
-ROM:EF12		 fcb $CC ; Ã
-ROM:EF13		 fcb   0
-ROM:EF14		 fcb $1E
-ROM:EF15		 fcb $D3 ; ”
-ROM:EF16		 fcb   9
-ROM:EF17		 fcb $DD ; ›
-ROM:EF18		 fcb  $B
-ROM:EF19		 fcb $DD ; ›
-ROM:EF1A		 fcb $1B
-ROM:EF1B		 fcb $96 ; ñ
-ROM:EF1C		 fcb   8
-ROM:EF1D		 fcb $DC ; ‹
-ROM:EF1E		 fcb  $D
-ROM:EF1F		 fcb $96 ; ñ
-ROM:EF20		 fcb $18
-ROM:EF21		 fcb $DC ; ‹
-ROM:EF22		 fcb $1D
-ROM:EF23		 fcb $CE ; Œ
-ROM:EF24		 fcb   0
-ROM:EF25		 fcb $BF ; ø
-ROM:EF26		 fcb $CC ; Ã
-ROM:EF27		 fcb $FF
-ROM:EF28		 fcb   0
-ROM:EF29		 fcb $A7 ; ß
-ROM:EF2A		 fcb $40 ; @
-ROM:EF2B		 fcb $A6 ; ¶
-ROM:EF2C		 fcb $40 ; @
-ROM:EF2D		 fcb $81 ; Å
-ROM:EF2E		 fcb $FF
-ROM:EF2F		 fcb $26 ; &
-ROM:EF30		 fcb $FE ; ˛
-ROM:EF31		 fcb $E7 ; Á
-ROM:EF32		 fcb $40 ; @
-ROM:EF33		 fcb $E6 ; Ê
-ROM:EF34		 fcb $40 ; @
-ROM:EF35		 fcb $26 ; &
-ROM:EF36		 fcb $FE ; ˛
-ROM:EF37		 fcb   9
-ROM:EF38		 fcb $26 ; &
-ROM:EF39		 fcb $EF ; Ô
-ROM:EF3A		 fcb $CC ; Ã
-ROM:EF3B		 fcb $CC ; Ã
-ROM:EF3C		 fcb $FF
-ROM:EF3D		 fcb $DD ; ›
-ROM:EF3E		 fcb $44 ; D
-ROM:EF3F		 fcb $CC ; Ã
-ROM:EF40		 fcb $33 ; 3
-ROM:EF41		 fcb $FF
-ROM:EF42		 fcb $DD ; ›
-ROM:EF43		 fcb $4C ; L
-ROM:EF44		 fcb $CC ; Ã
-ROM:EF45		 fcb $2F ; /
-ROM:EF46		 fcb $10
-ROM:EF47		 fcb $97 ; ó
-ROM:EF48		 fcb $91 ; ë
-ROM:EF49		 fcb $D7 ; ◊
-ROM:EF4A		 fcb $84 ; Ñ
-ROM:EF4B		 fcb $CC ; Ã
-ROM:EF4C		 fcb   0
-ROM:EF4D		 fcb $80 ; Ä
-ROM:EF4E		 fcb $B7 ; ∑
-ROM:EF4F		 fcb $D0 ; –
-ROM:EF50		 fcb   0
-ROM:EF51		 fcb $F7 ; ˜
-ROM:EF52		 fcb $D0 ; –
-ROM:EF53		 fcb   3
-ROM:EF54		 fcb $D7 ; ◊
-ROM:EF55		 fcb $A5 ; •
-ROM:EF56		 fcb $D7 ; ◊
-ROM:EF57		 fcb $AA ; ™
-ROM:EF58		 fcb $96 ; ñ
-ROM:EF59		 fcb   3
-ROM:EF5A		 fcb $88 ; à
-ROM:EF5B		 fcb $10
-ROM:EF5C		 fcb $97 ; ó
-ROM:EF5D		 fcb   3
-ROM:EF5E		 fcb $CE ; Œ
-ROM:EF5F		 fcb $E8 ; Ë
-ROM:EF60		 fcb   0
-ROM:EF61		 fcb $CC ; Ã
-ROM:EF62		 fcb   0
-ROM:EF63		 fcb   0
-ROM:EF64		 fcb $E3 ; „
-ROM:EF65		 fcb   0
-ROM:EF66		 fcb   8
-ROM:EF67		 fcb   8
-ROM:EF68		 fcb $26 ; &
-ROM:EF69		 fcb $FA ; ˙
-ROM:EF6A		 fcb $DD ; ›
-ROM:EF6B		 fcb $D2 ; “
-ROM:EF6C		 fcb $26 ; &
-ROM:EF6D		 fcb $FE ; ˛
-ROM:EF6E		 fcb $96 ; ñ
-ROM:EF6F		 fcb   3
-ROM:EF70		 fcb $88 ; à
-ROM:EF71		 fcb $10
-ROM:EF72		 fcb $97 ; ó
-ROM:EF73		 fcb   3
-ROM:EF74		 fcb $B6 ; ∂
-ROM:EF75		 fcb $80 ; Ä
-ROM:EF76		 fcb   0
-ROM:EF77		 fcb $81 ; Å
-ROM:EF78		 fcb $5A ; Z
-ROM:EF79		 fcb $26 ; &
-ROM:EF7A		 fcb   3
-ROM:EF7B		 fcb $BD ; Ω
-ROM:EF7C		 fcb $B0 ; ∞
-ROM:EF7D		 fcb   0
-ROM:EF7E		 fcb $D6 ; ÷
-ROM:EF7F		 fcb $A7 ; ß
-ROM:EF80		 fcb $86 ; Ü
-ROM:EF81		 fcb $2A ; *
-ROM:EF82		 fcb $BD ; Ω
-ROM:EF83		 fcb $F4 ; Ù
-ROM:EF84		 fcb $85 ; Ö
-ROM:EF85		 fcb $26 ; &
-ROM:EF86		 fcb   2
-ROM:EF87		 fcb $CA ;  
-ROM:EF88		 fcb $80 ; Ä
-ROM:EF89		 fcb $D7 ; ◊
-ROM:EF8A		 fcb $A7 ; ß
-ROM:EF8B		 fcb $BD ; Ω
-ROM:EF8C		 fcb $F3 ; Û
-ROM:EF8D		 fcb $B0 ; ∞
-ROM:EF8E		 fcb $DD ; ›
-ROM:EF8F		 fcb $76 ; v
-ROM:EF90		 fcb $DD ; ›
-ROM:EF91		 fcb $78 ; x
-ROM:EF92		 fcb $BD ; Ω
-ROM:EF93		 fcb $F1 ; Ò
-ROM:EF94		 fcb $EC ; Ï
-ROM:EF95		 fcb $BD ; Ω
-ROM:EF96		 fcb $F3 ; Û
-ROM:EF97		 fcb $42 ; B
-ROM:EF98		 fcb $BD ; Ω
-ROM:EF99		 fcb $F2 ; Ú
-ROM:EF9A		 fcb $6E ; n
-ROM:EF9B		 fcb $DC ; ‹
-ROM:EF9C		 fcb $C0 ; ¿
-ROM:EF9D		 fcb $DD ; ›
-ROM:EF9E		 fcb $60 ; `
-ROM:EF9F		 fcb $BD ; Ω
-ROM:EFA0		 fcb $F0 ; 
-ROM:EFA1		 fcb $F2 ; Ú
-ROM:EFA2		 fcb $DC ; ‹
-ROM:EFA3		 fcb $73 ; s
-ROM:EFA4		 fcb $DD ; ›
-ROM:EFA5		 fcb $71 ; q
-ROM:EFA6		 fcb $96 ; ñ
-ROM:EFA7		 fcb   8
-ROM:EFA8		 fcb $DC ; ‹
-ROM:EFA9		 fcb  $D
-ROM:EFAA		 fcb $96 ; ñ
-ROM:EFAB		 fcb $18
-ROM:EFAC		 fcb $DC ; ‹
-ROM:EFAD		 fcb $1D
-ROM:EFAE		 fcb $96 ; ñ
-ROM:EFAF		 fcb   3
-ROM:EFB0		 fcb $8A ; ä
-ROM:EFB1		 fcb   8
-ROM:EFB2		 fcb $97 ; ó
-ROM:EFB3		 fcb   3
-ROM:EFB4		 fcb $84 ; Ñ
-ROM:EFB5		 fcb $F7 ; ˜
-ROM:EFB6		 fcb $97 ; ó
-ROM:EFB7		 fcb   3
-ROM:EFB8		 fcb $86 ; Ü
-ROM:EFB9		 fcb $27 ; '
-ROM:EFBA		 fcb $BD ; Ω
-ROM:EFBB		 fcb $F4 ; Ù
-ROM:EFBC		 fcb $85 ; Ö
-ROM:EFBD		 fcb $26 ; &
-ROM:EFBE		 fcb   4
-ROM:EFBF		 fcb $86 ; Ü
-ROM:EFC0		 fcb $7F ; 
-ROM:EFC1		 fcb $97 ; ó
-ROM:EFC2		 fcb $A9 ; ©
-ROM:EFC3 X_EFC3:	 fcb  $E
-ROM:EFC4		 fcb $7E ; ~
-ROM:EFC5		 fcb $EC ; Ï
-ROM:EFC6		 fcb   0
+ROM:EEFD		 sei			 ; disable interrupts
+ROM:EEFE initialise ports
+ROM:EEFE		 ldx	 #$FC08		 ; Load	index register from memory
+ROM:EF01		 stx	 PORT1		 ; PORT1 = FC
+ROM:EF01					 ; PORT2 = 08 (WDogReset=1)
+ROM:EF03		 ldx	 #$FE1E		 ; Load	index register from memory
+ROM:EF06		 stx	 P1DDR		 ; P1DDR = FE
+ROM:EF06					 ; P2DDR = 1E
+ROM:EF08		 clra			 ; Clear
+ROM:EF09		 staa	 PORT2		 ; toggle WDogReset
+ROM:EF0B initialise timers
+ROM:EF0B		 ldd	 #$1B1B		 ; Load	double accumulator
+ROM:EF0E		 staa	 TCSR1		 ; TCSR1 = 1B
+ROM:EF0E					 ;
+ROM:EF10		 stab	 TCSR2		 ; TCSR1 = 1B
+ROM:EF10					 ;
+ROM:EF12		 ldd	 #$1E		 ; Load	double accumulator
+ROM:EF15		 addd	 FRCH		 ; set up a pulse 1E00h	long
+ROM:EF17		 std	 OCR1H		 ; init	OCR1 pulse
+ROM:EF19		 std	 OCR2H		 ; init	OCR2 pulse
+ROM:EF1B		 ldaa	 TCSR1		 ; clear any timer1 interrupt flags
+ROM:EF1D		 ldd	 ICR1H		 ; clear any timer1 interrupts part2
+ROM:EF1F		 ldaa	 TCSR2		 ; clear any timer2 interrupt flags
+ROM:EF21		 ldd	 ICR2H		 ; clear any timer2 interrupts part2
+ROM:EF23 Initialise and	test RAM from FF down
+ROM:EF23		 ldx	 #$BF ;	'¬ø'      ; test the length of RAM??
+ROM:EF26		 ldd	 #$FF00		 ; Load	double accumulator
+ROM:EF29
+ROM:EF29 testRAM:				 ; CODE	XREF: ROM:EF38j
+ROM:EF29		 staa	 $40,x		 ; test	for stuck at 1
+ROM:EF2B		 ldaa	 $40,x		 ; Load	accumulator from memory
+ROM:EF2D		 cmpa	 #$FF		 ; Compare accumulator with memory
+ROM:EF2F
+ROM:EF2F loc_EF2F:				 ; CODE	XREF: ROM:loc_EF2Fj
+ROM:EF2F		 bne	 loc_EF2F	 ; if RAM failed loop forever
+ROM:EF31		 stab	 $40,x		 ; test	for stuck at 0
+ROM:EF33		 ldab	 $40,x		 ; Load	accumulator from memory
+ROM:EF35
+ROM:EF35 loc_EF35:				 ; CODE	XREF: ROM:loc_EF35j
+ROM:EF35		 bne	 loc_EF35	 ; if RAM failed loop forever
+ROM:EF37		 dex			 ; Decrement index register
+ROM:EF38		 bne	 testRAM	 ; test	for stuck at 1
+ROM:EF3A initialise some more RAM variables
+ROM:EF3A		 ldd	 #$CCFF		 ; Load	double accumulator
+ROM:EF3D		 std	 byte_44	 ; Store accumulators in memory
+ROM:EF3F		 ldd	 #$33FF		 ; Load	double accumulator
+ROM:EF42		 std	 byte_4C	 ; Store accumulators in memory
+ROM:EF44		 ldd	 #$2F10		 ; Load	double accumulator
+ROM:EF47		 staa	 byte_91	 ; Store accumulator in	memory
+ROM:EF49		 stab	 byte_84	 ; Store accumulator in	memory
+ROM:EF4B initialise ADC
+ROM:EF4B		 ldd	 #$80 ;	'‚Ç¨'      ; Load double accumulator
+ROM:EF4E		 staa	 byte_D000	 ; start a conversion channel 0?
+ROM:EF51		 stab	 ADCResult	 ; write to the	result register?
+ROM:EF54 initialise some more RAM
+ROM:EF54		 stab	 byte_A5	 ; Store accumulator in	memory
+ROM:EF56		 stab	 byte_AA	 ; Store accumulator in	memory
+ROM:EF58 toggle	the watchdog reset line
+ROM:EF58		 ldaa	 PORT2		 ; Load	accumulator from memory
+ROM:EF5A		 eora	 #$10		 ; Excusive OR memory with accumulator
+ROM:EF5C		 staa	 PORT2		 ; toggle the watchdog
+ROM:EF5E test for nIRQ code?
+ROM:EF5E		 ldx	 #$E800		 ; Load	index register from memory
+ROM:EF61		 ldd	 #0		 ; Load	double accumulator
+ROM:EF64
+ROM:EF64 loc_EF64:				 ; CODE	XREF: ROM:EF68j
+ROM:EF64		 addd	 0,x		 ; Add 16-bit to D
+ROM:EF66		 inx			 ; Increment index register
+ROM:EF67		 inx			 ; Increment index register
+ROM:EF68		 bne	 loc_EF64	 ; Branch if not equal
+ROM:EF6A		 std	 byte_D2	 ; Store accumulators in memory
+ROM:EF6C
+ROM:EF6C loc_EF6C:				 ; CODE	XREF: ROM:loc_EF6Cj
+ROM:EF6C		 bne	 loc_EF6C	 ; loop	forever
+ROM:EF6E toggle	watchdog
+ROM:EF6E		 ldaa	 PORT2		 ; Load	accumulator from memory
+ROM:EF70		 eora	 #$10		 ; Excusive OR memory with accumulator
+ROM:EF72		 staa	 PORT2		 ; Store accumulator in	memory
+ROM:EF74 the following code only works if the memory section is	mirrored
+ROM:EF74		 ldaa	 $8000		 ; this	needs checking!!
+ROM:EF77		 cmpa	 #$5A ;	'Z'      ; Compare accumulator with memory
+ROM:EF79		 bne	 loc_EF7E	 ; Branch if not equal
+ROM:EF7B		 jsr	 $B000		 ; Jump	to subroutine
+ROM:EF7E
+ROM:EF7E loc_EF7E:				 ; CODE	XREF: ROM:EF79j
+ROM:EF7E		 ldab	 byte_A7	 ; Load	accumulator from memory
+ROM:EF80		 ldaa	 #$2A ;	'*'      ; Load accumulator from memory
+ROM:EF82		 jsr	 sub_F485	 ; Jump	to subroutine
+ROM:EF85		 bne	 loc_EF89	 ; Branch if not equal
+ROM:EF87		 orab	 #$80 ;	'‚Ç¨'      ; Inclusive OR memory with accumulator
+ROM:EF89
+ROM:EF89 loc_EF89:				 ; CODE	XREF: ROM:EF85j
+ROM:EF89		 stab	 byte_A7	 ; Store accumulator in	memory
+ROM:EF8B		 jsr	 sub_F3B0	 ; Jump	to subroutine
+ROM:EF8E		 std	 byte_76	 ; Store accumulators in memory
+ROM:EF90		 std	 byte_78	 ; Store accumulators in memory
+ROM:EF92		 jsr	 sub_F1EC	 ; Jump	to subroutine
+ROM:EF95		 jsr	 sub_F342	 ; Jump	to subroutine
+ROM:EF98		 jsr	 sub_F26E	 ; Jump	to subroutine
+ROM:EF9B		 ldd	 byte_C0	 ; Load	double accumulator
+ROM:EF9D		 std	 byte_60	 ; Store accumulators in memory
+ROM:EF9F		 jsr	 sub_F0F2	 ; Jump	to subroutine
+ROM:EFA2		 ldd	 byte_73	 ; Load	double accumulator
+ROM:EFA4		 std	 byte_71	 ; Store accumulators in memory
+ROM:EFA6		 ldaa	 TCSR1		 ; Load	accumulator from memory
+ROM:EFA8		 ldd	 ICR1H		 ; Load	double accumulator
+ROM:EFAA		 ldaa	 TCSR2		 ; Load	accumulator from memory
+ROM:EFAC		 ldd	 ICR2H		 ; Load	double accumulator
+ROM:EFAE		 ldaa	 PORT2		 ; Load	accumulator from memory
+ROM:EFB0		 oraa	 #8		 ; Inclusive OR	memory with accumulator
+ROM:EFB2		 staa	 PORT2		 ; Store accumulator in	memory
+ROM:EFB4		 anda	 #$F7 ;	'√∑'      ; Logical AND
+ROM:EFB6		 staa	 PORT2		 ; Store accumulator in	memory
+ROM:EFB8		 ldaa	 #$27 ;	'''      ; Load accumulator from memory
+ROM:EFBA		 jsr	 sub_F485	 ; Jump	to subroutine
+ROM:EFBD		 bne	 X_EFC3		 ; Branch if not equal
+ROM:EFBF		 ldaa	 #$7F ;	''      ; Load accumulator from memory
+ROM:EFC1		 staa	 byte_A9	 ; Store accumulator in	memory
+ROM:EFC3
+ROM:EFC3 X_EFC3:				 ; CODE	XREF: ROM:EFBDj
+ROM:EFC3		 cli			 ; Clear interrupt mask
+ROM:EFC4		 jmp	 loc_EC00	 ; Jump
+ROM:EFC4 ; ---------------------------------------------------------------------------
 ROM:EFC7		 fcb   1
 ROM:EFC8		 fcb   1
-ROM:EFC9		 fcb $EA ; Í
+ROM:EFC9		 fcb $EA ; √™
 ROM:EFCA		 fcb   0
 ROM:EFCB		 fcb   7
 ROM:EFCC		 fcb   4
-ROM:EFCD		 fcb $F2 ; Ú
-ROM:EFCE		 fcb $AC ; ¨
+ROM:EFCD		 fcb $F2 ; √≤
+ROM:EFCE		 fcb $AC ; ¬¨
 ROM:EFCF		 fcb $1F
 ROM:EFD0		 fcb $10
-ROM:EFD1		 fcb $F4 ; Ù
+ROM:EFD1		 fcb $F4 ; √¥
 ROM:EFD2		 fcb $7A ; z
 ROM:EFD3		 fcb $7F ; 
 ROM:EFD4		 fcb $40 ; @
-ROM:EFD5		 fcb $F1 ; Ò
-ROM:EFD6		 fcb $EC ; Ï
+ROM:EFD5		 fcb $F1 ; √±
+ROM:EFD6		 fcb $EC ; √¨
 ROM:EFD7		 fcb $FF
-ROM:EFD8		 fcb $80 ; Ä
-ROM:EFD9		 fcb $F5 ; ı
-ROM:EFDA		 fcb $E6 ; Ê
+ROM:EFD8		 fcb $80 ; ‚Ç¨
+ROM:EFD9		 fcb $F5 ; √µ
+ROM:EFDA		 fcb $E6 ; √¶
 ROM:EFDB		 fcb   0
 ROM:EFDC byte_EFDC:	 fcb 1			 ; CODE	XREF: sub_F0C7+7P
 ROM:EFDC					 ; DATA	XREF: sub_F0C7r
@@ -3133,15 +3100,15 @@ ROM:F000 ; ---------------------------------------------------------------------
 ROM:F000
 ROM:F000 Reset:					 ; Set interrupt mask bit
 ROM:F000		 sei
-ROM:F001		 lds	 #$FF		 ; Load	stack pointer
+ROM:F001		 lds	 #$FF		 ; end of stack	= FFh
 ROM:F004		 ldaa	 #$FF		 ; Load	accumulator from memory
 ROM:F006		 staa	 P4DDR		 ; Port	4 are all outputs
-ROM:F008		 ldaa	 byte_EEFD	 ; Load	accumulator from memory
+ROM:F008		 ldaa	 INIT		 ; is there code present in 'otherchip'?
 ROM:F00B		 cmpa	 #$F		 ; Compare accumulator with memory
 ROM:F00D
 ROM:F00D loc_F00D:				 ; CODE	XREF: ROM:loc_F00Dj
-ROM:F00D		 bne	 loc_F00D	 ; Branch if not equal
-ROM:F00F		 jmp	 byte_EEFD	 ; Jump
+ROM:F00D		 bne	 loc_F00D	 ; no looop forever!!
+ROM:F00F		 jmp	 INIT		 ; yes - execute the code
 ROM:F012 ; ---------------------------------------------------------------------------
 ROM:F012
 ROM:F012 loc_F012:				 ; CODE	XREF: ROM:F019j
@@ -3167,7 +3134,7 @@ ROM:F034		 bls	 loc_F058	 ; Branch if <=	(unsigned)
 ROM:F036		 cpx	 word_E002	 ; Compare index register 16 bit
 ROM:F039		 bcs	 loc_F05E	 ; Branch if carry bit set
 ROM:F03B		 ldab	 byte_A0	 ; Load	accumulator from memory
-ROM:F03D		 andb	 #$BF ;	'ø'      ; Logical AND
+ROM:F03D		 andb	 #$BF ;	'¬ø'      ; Logical AND
 ROM:F03F		 bra	 loc_F05C	 ; Branch always
 ROM:F041 ; ---------------------------------------------------------------------------
 ROM:F041
@@ -3239,7 +3206,7 @@ ROM:F098		 nop			 ; No Operation
 ROM:F099		 jsr	 sub_FF86	 ; Jump	to subroutine
 ROM:F09C		 jsr	 sub_FFC6	 ; Jump	to subroutine
 ROM:F09F		 ldab	 byte_E7A0	 ; Load	accumulator from memory
-ROM:F0A2		 cmpb	 #$B6 ;	'∂'      ; Compare accumulator with memory
+ROM:F0A2		 cmpb	 #$B6 ;	'¬∂'      ; Compare accumulator with memory
 ROM:F0A4		 bne	 loc_F0A9	 ; Branch if not equal
 ROM:F0A6		 jsr	 byte_E7A0	 ; Jump	to subroutine
 ROM:F0A9
@@ -3272,7 +3239,7 @@ ROM:F0D1		 sei			 ; Set interrupt mask bit
 ROM:F0D2		 ldaa	 byte_A2	 ; Load	accumulator from memory
 ROM:F0D4		 bita	 #2		 ; Bit test
 ROM:F0D6		 beq	 loc_F0ED	 ; Branch if equal
-ROM:F0D8		 anda	 #$FD ;	'˝'      ; Logical AND
+ROM:F0D8		 anda	 #$FD ;	'√Ω'      ; Logical AND
 ROM:F0DA		 staa	 byte_A2	 ; Store accumulator in	memory
 ROM:F0DC		 cli			 ; Clear interrupt mask
 ROM:F0DD		 jsr	 sub_FEE7	 ; Jump	to subroutine
@@ -3294,11 +3261,11 @@ ROM:F0F2 ; =============== S U B R O U T I N E =================================
 ROM:F0F2
 ROM:F0F2
 ROM:F0F2 sub_F0F2:				 ; CODE	XREF: ROM:loc_EA13P
-ROM:F0F2					 ; ROM:loc_F0A9P
-ROM:F0F2		 ldaa	 #$80 ;	'Ä'      ; Load accumulator from memory
+ROM:F0F2					 ; ROM:EF9FP ...
+ROM:F0F2		 ldaa	 #$80 ;	'‚Ç¨'      ; Load accumulator from memory
 ROM:F0F4		 jsr	 readADC	 ; Jump	to subroutine
 ROM:F0F7		 tba			 ; Transfer B to A
-ROM:F0F8		 ldx	 #$95 ;	'ï'      ; Load index register from memory
+ROM:F0F8		 ldx	 #$95 ;	'‚Ä¢'      ; Load index register from memory
 ROM:F0FB		 ldab	 #1		 ; Load	accumulator from memory
 ROM:F0FD		 jsr	 sub_F5F1	 ; Jump	to subroutine
 ROM:F100		 ldab	 byte_95	 ; Load	accumulator from memory
@@ -3311,10 +3278,10 @@ ROM:F10D
 ROM:F10D loc_F10D:				 ; CODE	XREF: sub_F0F2+10j
 ROM:F10D					 ; sub_F0F2+16j
 ROM:F10D		 staa	 byte_73	 ; Store accumulator in	memory
-ROM:F10F		 ldaa	 #$81 ;	'Å'      ; Load accumulator from memory
+ROM:F10F		 ldaa	 #$81 ;	'¬Å'      ; Load accumulator from memory
 ROM:F111		 jsr	 readADC	 ; Jump	to subroutine
 ROM:F114		 tba			 ; Transfer B to A
-ROM:F115		 ldx	 #$96 ;	'ñ'      ; Load index register from memory
+ROM:F115		 ldx	 #$96 ;	'‚Äì'      ; Load index register from memory
 ROM:F118		 ldab	 #0		 ; Load	accumulator from memory
 ROM:F11A		 jsr	 sub_F5F1	 ; Jump	to subroutine
 ROM:F11D		 ldab	 byte_96	 ; Load	accumulator from memory
@@ -3348,7 +3315,7 @@ ROM:F13A loc_F13A:				 ; CODE	XREF: sub_F12D+6j
 ROM:F13A		 ldab	 #$40 ;	'@'      ; Load accumulator from memory
 ROM:F13C		 ldaa	 byte_60	 ; Load	accumulator from memory
 ROM:F13E		 beq	 loc_F142	 ; Branch if equal
-ROM:F140		 addb	 #$80 ;	'Ä'      ; Add without carry
+ROM:F140		 addb	 #$80 ;	'‚Ç¨'      ; Add without carry
 ROM:F142
 ROM:F142 loc_F142:				 ; CODE	XREF: sub_F12D+11j
 ROM:F142		 ldaa	 byte_5E	 ; Load	accumulator from memory
@@ -3475,7 +3442,7 @@ ROM:F1D7		 addd	 #$23C6		 ; Add 16-bit to D
 ROM:F1DA		 sba			 ; Subtract B to A
 ROM:F1DB		 cmpa	 #$30 ;	'0'      ; Compare accumulator with memory
 ROM:F1DD		 bcs	 loc_F1EA	 ; Branch if carry bit set
-ROM:F1DF		 cmpa	 #$80 ;	'Ä'      ; Compare accumulator with memory
+ROM:F1DF		 cmpa	 #$80 ;	'‚Ç¨'      ; Compare accumulator with memory
 ROM:F1E1		 bcc	 loc_F1E8	 ; Branch if carry bit clear
 ROM:F1E3		 aslb			 ; Logical (or Ariphmetic) shift left
 ROM:F1E4		 mul			 ; Unsigned multiply
@@ -3491,21 +3458,25 @@ ROM:F1EA		 mul			 ; Unsigned multiply
 ROM:F1EB		 rts			 ; Return from subroutine
 ROM:F1EB ; End of function sub_F1CC
 ROM:F1EB
-ROM:F1EC ; ---------------------------------------------------------------------------
-ROM:F1EC		 ldaa	 #$83 ;	'É'      ; Load accumulator from memory
+ROM:F1EC
+ROM:F1EC ; =============== S U B R O U T I N E =======================================
+ROM:F1EC
+ROM:F1EC
+ROM:F1EC sub_F1EC:				 ; CODE	XREF: ROM:EF92P
+ROM:F1EC		 ldaa	 #$83 ;	'∆í'      ; Load accumulator from memory
 ROM:F1EE		 bsr	 readADC	 ; Branch to subroutine
 ROM:F1F0		 tba			 ; Transfer B to A
-ROM:F1F1		 ldx	 #$92 ;	'í'      ; Load index register from memory
+ROM:F1F1		 ldx	 #$92 ;	'‚Äô'      ; Load index register from memory
 ROM:F1F4		 ldab	 #4		 ; Load	accumulator from memory
 ROM:F1F6		 jsr	 sub_F5F1	 ; Jump	to subroutine
 ROM:F1F9		 staa	 byte_6F	 ; Store accumulator in	memory
 ROM:F1FB		 ldx	 #$E110		 ; Load	index register from memory
 ROM:F1FE		 jsr	 sub_FE99	 ; Jump	to subroutine
 ROM:F201		 staa	 byte_7D	 ; Store accumulator in	memory
-ROM:F203		 ldaa	 #$84 ;	'Ñ'      ; Load accumulator from memory
+ROM:F203		 ldaa	 #$84 ;	'‚Äû'      ; Load accumulator from memory
 ROM:F205		 bsr	 readADC	 ; Branch to subroutine
 ROM:F207		 tba			 ; Transfer B to A
-ROM:F208		 ldx	 #$93 ;	'ì'      ; Load index register from memory
+ROM:F208		 ldx	 #$93 ;	'‚Äú'      ; Load index register from memory
 ROM:F20B		 ldab	 #5		 ; Load	accumulator from memory
 ROM:F20D		 jsr	 sub_F5F1	 ; Jump	to subroutine
 ROM:F210		 staa	 byte_6E	 ; Store accumulator in	memory
@@ -3535,9 +3506,9 @@ ROM:F23D		 ldaa	 byte_A9	 ; Load	accumulator from memory
 ROM:F23F		 beq	 loc_F244	 ; Branch if equal
 ROM:F241		 ldx	 #$E0C0		 ; Load	index register from memory
 ROM:F244
-ROM:F244 loc_F244:				 ; CODE	XREF: ROM:F23Fj
+ROM:F244 loc_F244:				 ; CODE	XREF: sub_F1EC+53j
 ROM:F244		 ldaa	 byte_A7	 ; Load	accumulator from memory
-ROM:F246		 bita	 #$80 ;	'Ä'      ; Bit test
+ROM:F246		 bita	 #$80 ;	'‚Ç¨'      ; Bit test
 ROM:F248		 bne	 locret_F25F	 ; Branch if not equal
 ROM:F24A		 ldd	 byte_60	 ; Load	double accumulator
 ROM:F24C		 subb	 0,x		 ; Subtract
@@ -3547,15 +3518,17 @@ ROM:F252		 std	 byte_AF	 ; Store accumulators in memory
 ROM:F254		 subd	 byte_BE	 ; Subtract 16 bit
 ROM:F256		 bcc	 loc_F25A+1	 ; Branch if carry bit clear
 ROM:F258
-ROM:F258 loc_F258:				 ; CODE	XREF: ROM:F250j
+ROM:F258 loc_F258:				 ; CODE	XREF: sub_F1EC+64j
 ROM:F258		 ldd	 byte_BE	 ; Load	double accumulator
 ROM:F25A
-ROM:F25A loc_F25A:				 ; CODE	XREF: ROM:F256j
+ROM:F25A loc_F25A:				 ; CODE	XREF: sub_F1EC+6Aj
 ROM:F25A		 cpx	 #$DCAF		 ; Compare index register 16 bit
 ROM:F25D		 std	 byte_60	 ; Store accumulators in memory
 ROM:F25F
-ROM:F25F locret_F25F:				 ; CODE	XREF: ROM:F248j
+ROM:F25F locret_F25F:				 ; CODE	XREF: sub_F1EC+5Cj
 ROM:F25F		 rts			 ; Return from subroutine
+ROM:F25F ; End of function sub_F1EC
+ROM:F25F
 ROM:F260
 ROM:F260 ; =============== S U B R O U T I N E =======================================
 ROM:F260
@@ -3576,14 +3549,15 @@ ROM:F26E
 ROM:F26E ; =============== S U B R O U T I N E =======================================
 ROM:F26E
 ROM:F26E
-ROM:F26E sub_F26E:				 ; CODE	XREF: ROM:F2ACp
-ROM:F26E		 ldaa	 #$C3 ;	'√'      ; Load accumulator from memory
+ROM:F26E sub_F26E:				 ; CODE	XREF: ROM:EF98P
+ROM:F26E					 ; ROM:F2ACp
+ROM:F26E		 ldaa	 #$C3 ;	'√É'      ; Load accumulator from memory
 ROM:F270		 ldab	 byte_A9	 ; Load	accumulator from memory
 ROM:F272		 bne	 loc_F282	 ; Branch if not equal
-ROM:F274		 ldaa	 #$82 ;	'Ç'      ; Load accumulator from memory
+ROM:F274		 ldaa	 #$82 ;	'‚Äö'      ; Load accumulator from memory
 ROM:F276		 jsr	 readADC	 ; Jump	to subroutine
 ROM:F279		 tba			 ; Transfer B to A
-ROM:F27A		 ldx	 #$94 ;	'î'      ; Load index register from memory
+ROM:F27A		 ldx	 #$94 ;	'‚Äù'      ; Load index register from memory
 ROM:F27D		 ldab	 #3		 ; Load	accumulator from memory
 ROM:F27F		 jsr	 sub_F5F1	 ; Jump	to subroutine
 ROM:F282
@@ -3646,7 +3620,7 @@ ROM:F2D6		 rts			 ; Return from subroutine
 ROM:F2D7 ; ---------------------------------------------------------------------------
 ROM:F2D7
 ROM:F2D7 loc_F2D7:				 ; CODE	XREF: ROM:F2C6j
-ROM:F2D7		 bitb	 #$80 ;	'Ä'      ; Bit test
+ROM:F2D7		 bitb	 #$80 ;	'‚Ç¨'      ; Bit test
 ROM:F2D9		 bne	 loc_F32A	 ; Branch if not equal
 ROM:F2DB		 ldaa	 byte_90	 ; Load	accumulator from memory
 ROM:F2DD		 bne	 loc_F30B	 ; Branch if not equal
@@ -3678,7 +3652,7 @@ ROM:F2FF		 ldaa	 PORT1		 ; Load	accumulator from memory
 ROM:F301		 anda	 #$F		 ; Logical AND
 ROM:F303		 aba			 ; Add b to a
 ROM:F304		 ldab	 PORT2		 ; Load	accumulator from memory
-ROM:F306		 andb	 #$FB ;	'˚'      ; Logical AND
+ROM:F306		 andb	 #$FB ;	'√ª'      ; Logical AND
 ROM:F308		 std	 PORT1		 ; Store accumulators in memory
 ROM:F30A		 cli			 ; Clear interrupt mask
 ROM:F30B
@@ -3737,8 +3711,8 @@ ROM:F342 ; =============== S U B R O U T I N E =================================
 ROM:F342
 ROM:F342
 ROM:F342 sub_F342:				 ; CODE	XREF: ROM:EA19P
-ROM:F342					 ; ROM:F0AFP
-ROM:F342		 ldaa	 #$85 ;	'Ö'      ; Load accumulator from memory
+ROM:F342					 ; ROM:EF95P ...
+ROM:F342		 ldaa	 #$85 ;	'‚Ä¶'      ; Load accumulator from memory
 ROM:F344		 jsr	 readADC	 ; Jump	to subroutine
 ROM:F347		 stab	 byte_7B	 ; Store accumulator in	memory
 ROM:F349		 tba			 ; Transfer B to A
@@ -3788,7 +3762,7 @@ ROM:F393		 bne	 loc_F39B	 ; Branch if not equal
 ROM:F395
 ROM:F395 loc_F395:				 ; CODE	XREF: sub_F342+4Cj
 ROM:F395		 ldaa	 byte_A0	 ; Load	accumulator from memory
-ROM:F397		 anda	 #$F7 ;	'˜'      ; Logical AND
+ROM:F397		 anda	 #$F7 ;	'√∑'      ; Logical AND
 ROM:F399		 staa	 byte_A0	 ; Store accumulator in	memory
 ROM:F39B
 ROM:F39B loc_F39B:				 ; CODE	XREF: sub_F342+48j
@@ -3812,11 +3786,12 @@ ROM:F3B0
 ROM:F3B0 ; =============== S U B R O U T I N E =======================================
 ROM:F3B0
 ROM:F3B0
-ROM:F3B0 sub_F3B0:				 ; CODE	XREF: sub_F3C2+8p
-ROM:F3B0		 ldaa	 #$86 ;	'Ü'      ; Load accumulator from memory
+ROM:F3B0 sub_F3B0:				 ; CODE	XREF: ROM:EF8BP
+ROM:F3B0					 ; sub_F3C2+8p
+ROM:F3B0		 ldaa	 #$86 ;	'‚Ä†'      ; Load accumulator from memory
 ROM:F3B2		 jsr	 readADC	 ; Jump	to subroutine
 ROM:F3B5		 tba			 ; Transfer B to A
-ROM:F3B6		 ldx	 #$97 ;	'ó'      ; Load index register from memory
+ROM:F3B6		 ldx	 #$97 ;	'‚Äî'      ; Load index register from memory
 ROM:F3B9		 ldab	 #2		 ; Load	accumulator from memory
 ROM:F3BB		 jsr	 sub_F5F1	 ; Jump	to subroutine
 ROM:F3BE		 staa	 byte_75	 ; Store accumulator in	memory
@@ -3840,7 +3815,7 @@ ROM:F3CE		 subb	 byte_79	 ; Subtract
 ROM:F3D0		 bcc	 loc_F3DA	 ; Branch if carry bit clear
 ROM:F3D2
 ROM:F3D2 loc_F3D2:				 ; CODE	XREF: sub_F3C2+23j
-ROM:F3D2		 anda	 #$DF ;	'ﬂ'      ; Logical AND
+ROM:F3D2		 anda	 #$DF ;	'√ü'      ; Logical AND
 ROM:F3D4		 staa	 byte_A0	 ; Store accumulator in	memory
 ROM:F3D6
 ROM:F3D6 loc_F3D6:				 ; CODE	XREF: sub_F3C2+1Fj
@@ -3984,10 +3959,10 @@ ROM:F479		 rts			 ; Return from subroutine
 ROM:F479 ; End of function sub_F463
 ROM:F479
 ROM:F47A ; ---------------------------------------------------------------------------
-ROM:F47A		 ldaa	 byte_EEA6	 ; Load	accumulator from memory
-ROM:F47D		 cmpa	 #$86 ;	'Ü'      ; Compare accumulator with memory
+ROM:F47A		 ldaa	 loc_EEA6	 ; Load	accumulator from memory
+ROM:F47D		 cmpa	 #$86 ;	'‚Ä†'      ; Compare accumulator with memory
 ROM:F47F		 bne	 locret_F484	 ; Branch if not equal
-ROM:F481		 jsr	 byte_EEA6	 ; Jump	to subroutine
+ROM:F481		 jsr	 loc_EEA6	 ; Jump	to subroutine
 ROM:F484
 ROM:F484 locret_F484:				 ; CODE	XREF: ROM:F47Fj
 ROM:F484		 rts			 ; Return from subroutine
@@ -3995,7 +3970,8 @@ ROM:F485
 ROM:F485 ; =============== S U B R O U T I N E =======================================
 ROM:F485
 ROM:F485
-ROM:F485 sub_F485:				 ; CODE	XREF: sub_F660+7P
+ROM:F485 sub_F485:				 ; CODE	XREF: ROM:EE73P
+ROM:F485					 ; ROM:EEADP ...
 ROM:F485		 staa	 ADCCR		 ; Store accumulator in	memory
 ROM:F488
 ROM:F488 loc_F488:				 ; CODE	XREF: sub_F485+8j
@@ -4067,7 +4043,7 @@ ROM:F4DB		 jsr	 loc_ED01	 ; Jump	to subroutine
 ROM:F4DE
 ROM:F4DE loc_F4DE:				 ; CODE	XREF: ROM:F4B1j
 ROM:F4DE		 ldaa	 byte_A0	 ; Load	accumulator from memory
-ROM:F4E0		 anda	 #$EF ;	'Ô'      ; Logical AND
+ROM:F4E0		 anda	 #$EF ;	'√Ø'      ; Logical AND
 ROM:F4E2		 staa	 byte_A0	 ; Store accumulator in	memory
 ROM:F4E4
 ROM:F4E4 locret_F4E4:				 ; CODE	XREF: ROM:F4D6j
@@ -4156,7 +4132,7 @@ ROM:F541		 orab	 byte_A0	 ; Inclusive OR	memory with accumulator
 ROM:F543
 ROM:F543 loc_F543:				 ; CODE	XREF: sub_F511+Ej
 ROM:F543					 ; sub_F511+17j ...
-ROM:F543		 andb	 #$FB ;	'˚'      ; Logical AND
+ROM:F543		 andb	 #$FB ;	'√ª'      ; Logical AND
 ROM:F545		 stab	 byte_A0	 ; Store accumulator in	memory
 ROM:F547
 ROM:F547 locret_F547:				 ; CODE	XREF: sub_F511+2Ej
@@ -4183,11 +4159,11 @@ ROM:F55A		 ldd	 byte_86	 ; Load	double accumulator
 ROM:F55C		 jsr	 sub_FE88	 ; Jump	to subroutine
 ROM:F55C ; ---------------------------------------------------------------------------
 ROM:F55F		 fcb   3
-ROM:F560		 fcb $80 ; Ä
+ROM:F560		 fcb $80 ; ‚Ç¨
 ROM:F561		 fcb   0
 ROM:F562		 fcb $20
 ROM:F563		 fcb   5
-ROM:F564		 fcb $DD ; ›
+ROM:F564		 fcb $DD ; √ù
 ROM:F565 ; ---------------------------------------------------------------------------
 ROM:F565		 subd	 $8301		 ; Subtract 16 bit
 ROM:F568		 subb	 #$24 ;	'$'      ; Subtract
@@ -4286,10 +4262,10 @@ ROM:F5E3 loc_F5E3:				 ; CODE	XREF: ROM:F5DEj
 ROM:F5E3		 std	 byte_66	 ; Store accumulators in memory
 ROM:F5E5		 rts			 ; Return from subroutine
 ROM:F5E6 ; ---------------------------------------------------------------------------
-ROM:F5E6		 ldaa	 byte_EE63	 ; Load	accumulator from memory
-ROM:F5E9		 cmpa	 #$CC ;	'Ã'      ; Compare accumulator with memory
+ROM:F5E6		 ldaa	 loc_EE63	 ; Load	accumulator from memory
+ROM:F5E9		 cmpa	 #$CC ;	'√å'      ; Compare accumulator with memory
 ROM:F5EB		 bne	 locret_F5F0	 ; Branch if not equal
-ROM:F5ED		 jmp	 byte_EE63	 ; Jump
+ROM:F5ED		 jmp	 loc_EE63	 ; Jump
 ROM:F5F0 ; ---------------------------------------------------------------------------
 ROM:F5F0
 ROM:F5F0 locret_F5F0:				 ; CODE	XREF: ROM:F5EBj
@@ -4361,13 +4337,13 @@ ROM:F630		 sei			 ; Set interrupt mask bit
 ROM:F631		 ldab	 byte_A2	 ; Load	accumulator from memory
 ROM:F633		 bitb	 #4		 ; Bit test
 ROM:F635		 beq	 loc_F64C	 ; Branch if equal
-ROM:F637		 andb	 #$FB ;	'˚'      ; Logical AND
+ROM:F637		 andb	 #$FB ;	'√ª'      ; Logical AND
 ROM:F639		 stab	 byte_A2	 ; Store accumulator in	memory
 ROM:F63B		 ldaa	 byte_A8	 ; Load	accumulator from memory
 ROM:F63D		 bita	 #$10		 ; Bit test
 ROM:F63F		 bne	 loc_F649	 ; Branch if not equal
 ROM:F641		 ldd	 #$2840		 ; Load	double accumulator
-ROM:F644		 ldx	 #$9B ;	'õ'      ; Load index register from memory
+ROM:F644		 ldx	 #$9B ;	'‚Ä∫'      ; Load index register from memory
 ROM:F647		 bsr	 sub_F660	 ; Branch to subroutine
 ROM:F649
 ROM:F649 loc_F649:				 ; CODE	XREF: sub_F630+Fj
@@ -4377,13 +4353,13 @@ ROM:F64C
 ROM:F64C loc_F64C:				 ; CODE	XREF: sub_F630+5j
 ROM:F64C		 bitb	 #8		 ; Bit test
 ROM:F64E		 beq	 loc_F681	 ; Branch if equal
-ROM:F650		 andb	 #$F7 ;	'˜'      ; Logical AND
+ROM:F650		 andb	 #$F7 ;	'√∑'      ; Logical AND
 ROM:F652		 stab	 byte_A2	 ; Store accumulator in	memory
 ROM:F654		 ldaa	 byte_A8	 ; Load	accumulator from memory
 ROM:F656		 bita	 #$40 ;	'@'      ; Bit test
 ROM:F658		 bne	 loc_F681	 ; Branch if not equal
 ROM:F65A		 ldd	 #$2980		 ; Load	double accumulator
-ROM:F65D		 ldx	 #$9C ;	'ú'      ; Load index register from memory
+ROM:F65D		 ldx	 #$9C ;	'≈ì'      ; Load index register from memory
 ROM:F65D ; End of function sub_F630
 ROM:F65D
 ROM:F660
@@ -4392,7 +4368,7 @@ ROM:F660
 ROM:F660
 ROM:F660 sub_F660:				 ; CODE	XREF: sub_F630+17p
 ROM:F660		 psha			 ; Push	accumulator A into stack
-ROM:F661		 ldaa	 #$80 ;	'Ä'      ; Load accumulator from memory
+ROM:F661		 ldaa	 #$80 ;	'‚Ç¨'      ; Load accumulator from memory
 ROM:F663		 staa	 ADCResult	 ; Store accumulator in	memory
 ROM:F666		 pula			 ; Pull	accumulator A from stack
 ROM:F667		 jsr	 sub_F485	 ; Jump	to subroutine
@@ -4462,7 +4438,7 @@ ROM:F6A2		 staa	 0,x		 ; Store accumulator in	memory
 ROM:F6A4
 ROM:F6A4 loc_F6A4:				 ; CODE	XREF: sub_F686+33j
 ROM:F6A4		 ldab	 byte_A3	 ; Load	accumulator from memory
-ROM:F6A6		 andb	 #$FC ;	'¸'      ; Logical AND
+ROM:F6A6		 andb	 #$FC ;	'√º'      ; Logical AND
 ROM:F6A8		 addb	 byte_B7	 ; Add without carry
 ROM:F6AA		 orab	 #4		 ; Inclusive OR	memory with accumulator
 ROM:F6AC		 stab	 byte_A3	 ; Store accumulator in	memory
@@ -4497,7 +4473,7 @@ ROM:F6C9		 bra	 loc_F6EB	 ; Branch always
 ROM:F6CB ; ---------------------------------------------------------------------------
 ROM:F6CB
 ROM:F6CB loc_F6CB:				 ; CODE	XREF: sub_F6BB+4j
-ROM:F6CB		 andb	 #$F7 ;	'˜'      ; Logical AND
+ROM:F6CB		 andb	 #$F7 ;	'√∑'      ; Logical AND
 ROM:F6CD		 stab	 byte_A3	 ; Store accumulator in	memory
 ROM:F6CF		 cmpa	 byte_84	 ; Compare accumulator with memory
 ROM:F6D1		 beq	 loc_F6F2	 ; Branch if equal
@@ -4529,7 +4505,7 @@ ROM:F6F2 ; ---------------------------------------------------------------------
 ROM:F6F2
 ROM:F6F2 loc_F6F2:				 ; CODE	XREF: sub_F6BB+16j
 ROM:F6F2		 ldab	 byte_A6	 ; Load	accumulator from memory
-ROM:F6F4		 andb	 #$FE ;	'˛'      ; Logical AND
+ROM:F6F4		 andb	 #$FE ;	'√æ'      ; Logical AND
 ROM:F6F6		 stab	 byte_A6	 ; Store accumulator in	memory
 ROM:F6F8		 clrb			 ; Clear
 ROM:F6F9		 stab	 byte_98	 ; Store accumulator in	memory
@@ -4558,14 +4534,14 @@ ROM:F706 ; ---------------------------------------------------------------------
 ROM:F706		 ldaa	 PORT2		 ; Load	accumulator from memory
 ROM:F708		 oraa	 #8		 ; Inclusive OR	memory with accumulator
 ROM:F70A		 staa	 PORT2		 ; Store accumulator in	memory
-ROM:F70C		 anda	 #$F7 ;	'˜'      ; Logical AND
+ROM:F70C		 anda	 #$F7 ;	'√∑'      ; Logical AND
 ROM:F70E		 staa	 PORT2		 ; Store accumulator in	memory
 ROM:F710		 ldab	 byte_A3	 ; Load	accumulator from memory
 ROM:F712		 ldx	 byte_86	 ; Load	index register from memory
 ROM:F714		 cpx	 #$180		 ; Compare index register 16 bit
 ROM:F717		 bcs	 loc_F721+1	 ; Branch if carry bit set
-ROM:F719		 ldaa	 TRCSR2		 ; Load	accumulator from memory
-ROM:F71B		 bita	 #$80 ;	'Ä'      ; Bit test
+ROM:F719		 ldaa	 TCSR2		 ; Load	accumulator from memory
+ROM:F71B		 bita	 #$80 ;	'‚Ç¨'      ; Bit test
 ROM:F71D		 beq	 loc_F721+1	 ; Branch if equal
 ROM:F71F		 orab	 #$20 ;	' '      ; Inclusive OR memory with accumulator
 ROM:F721
@@ -4574,13 +4550,13 @@ ROM:F721					 ; ROM:F71Dj
 ROM:F721		 cpx	 #$C4DF		 ; Compare index register 16 bit
 ROM:F724		 stab	 byte_A3	 ; Store accumulator in	memory
 ROM:F726		 ldab	 #1		 ; Load	accumulator from memory
-ROM:F728		 ldx	 #$9A ;	'ö'      ; Load index register from memory
+ROM:F728		 ldx	 #$9A ;	'≈°'      ; Load index register from memory
 ROM:F72B		 jsr	 sub_F686	 ; Jump	to subroutine
 ROM:F72E		 bsr	 sub_F6FC	 ; Branch to subroutine
 ROM:F730		 bita	 #1		 ; Bit test
 ROM:F732		 beq	 loc_F73F	 ; Branch if equal
 ROM:F734		 ldaa	 byte_A3	 ; Load	accumulator from memory
-ROM:F736		 bita	 #$80 ;	'Ä'      ; Bit test
+ROM:F736		 bita	 #$80 ;	'‚Ç¨'      ; Bit test
 ROM:F738		 beq	 locret_F73E	 ; Branch if equal
 ROM:F73A		 ldaa	 #$F		 ; Load	accumulator from memory
 ROM:F73C		 staa	 byte_84	 ; Store accumulator in	memory
@@ -4595,12 +4571,12 @@ ROM:F741		 jsr	 sub_F6BB	 ; Jump	to subroutine
 ROM:F744		 rti			 ; Reset from interrupt
 ROM:F745 ; ---------------------------------------------------------------------------
 ROM:F745		 ldaa	 TCSR1		 ; Load	accumulator from memory
-ROM:F747		 bita	 #$80 ;	'Ä'      ; Bit test
+ROM:F747		 bita	 #$80 ;	'‚Ç¨'      ; Bit test
 ROM:F749		 beq	 loc_F77C	 ; Branch if equal
 ROM:F74B		 ldd	 ICR1H		 ; Load	double accumulator
 ROM:F74D		 ldab	 byte_A3	 ; Load	accumulator from memory
-ROM:F74F		 ldaa	 TRCSR2		 ; Load	accumulator from memory
-ROM:F751		 bita	 #$80 ;	'Ä'      ; Bit test
+ROM:F74F		 ldaa	 TCSR2		 ; Load	accumulator from memory
+ROM:F751		 bita	 #$80 ;	'‚Ç¨'      ; Bit test
 ROM:F753		 beq	 loc_F757+1	 ; Branch if equal
 ROM:F755		 orab	 #$20 ;	' '      ; Inclusive OR memory with accumulator
 ROM:F757
@@ -4608,13 +4584,13 @@ ROM:F757 loc_F757:				 ; CODE	XREF: ROM:F753j
 ROM:F757		 cpx	 #$C4DF		 ; Compare index register 16 bit
 ROM:F75A		 stab	 byte_A3	 ; Store accumulator in	memory
 ROM:F75C		 ldab	 #2		 ; Load	accumulator from memory
-ROM:F75E		 ldx	 #$99 ;	'ô'      ; Load index register from memory
+ROM:F75E		 ldx	 #$99 ;	'‚Ñ¢'      ; Load index register from memory
 ROM:F761		 jsr	 sub_F686	 ; Jump	to subroutine
 ROM:F764		 jsr	 sub_F6FC	 ; Jump	to subroutine
 ROM:F767		 bita	 #1		 ; Bit test
 ROM:F769		 beq	 loc_F776	 ; Branch if equal
 ROM:F76B		 ldaa	 byte_A3	 ; Load	accumulator from memory
-ROM:F76D		 bita	 #$80 ;	'Ä'      ; Bit test
+ROM:F76D		 bita	 #$80 ;	'‚Ç¨'      ; Bit test
 ROM:F76F		 beq	 locret_F77B	 ; Branch if equal
 ROM:F771		 ldaa	 #7		 ; Load	accumulator from memory
 ROM:F773		 staa	 byte_84	 ; Store accumulator in	memory
@@ -4634,13 +4610,13 @@ ROM:F77C					 ; ROM:F749j
 ROM:F77C		 ldab	 byte_A3	 ; Load	accumulator from memory
 ROM:F77E		 orab	 #8		 ; Inclusive OR	memory with accumulator
 ROM:F780		 stab	 byte_A3	 ; Store accumulator in	memory
-ROM:F782		 ldaa	 TRCSR2		 ; Load	accumulator from memory
-ROM:F784		 bita	 #$80 ;	'Ä'      ; Bit test
+ROM:F782		 ldaa	 TCSR2		 ; Load	accumulator from memory
+ROM:F784		 bita	 #$80 ;	'‚Ç¨'      ; Bit test
 ROM:F786		 beq	 locret_F799	 ; Branch if equal
 ROM:F788		 ldaa	 byte_A3	 ; Load	accumulator from memory
-ROM:F78A		 bita	 #$80 ;	'Ä'      ; Bit test
+ROM:F78A		 bita	 #$80 ;	'‚Ç¨'      ; Bit test
 ROM:F78C		 bne	 loc_F79A	 ; Branch if not equal
-ROM:F78E		 oraa	 #$80 ;	'Ä'      ; Inclusive OR memory with accumulator
+ROM:F78E		 oraa	 #$80 ;	'‚Ç¨'      ; Inclusive OR memory with accumulator
 ROM:F790		 staa	 byte_A3	 ; Store accumulator in	memory
 ROM:F792		 ldx	 ICR2H		 ; Load	index register from memory
 ROM:F794		 stx	 byte_82	 ; Store index register	in memory
@@ -4736,7 +4712,7 @@ ROM:F812		 bne	 loc_F853	 ; Branch if not equal
 ROM:F814		 cpx	 word_E025	 ; Compare index register 16 bit
 ROM:F817		 bcc	 loc_F82A	 ; Branch if carry bit clear
 ROM:F819		 ldaa	 byte_A4	 ; Load	accumulator from memory
-ROM:F81B		 bita	 #$C0 ;	'¿'      ; Bit test
+ROM:F81B		 bita	 #$C0 ;	'√Ä'      ; Bit test
 ROM:F81D		 bne	 loc_F82A	 ; Branch if not equal
 ROM:F81F		 cpx	 word_E027	 ; Compare index register 16 bit
 ROM:F822		 bcc	 loc_F830	 ; Branch if carry bit clear
@@ -4748,7 +4724,7 @@ ROM:F82A
 ROM:F82A loc_F82A:				 ; CODE	XREF: ROM:F817j
 ROM:F82A					 ; ROM:F81Dj
 ROM:F82A		 ldaa	 byte_AC	 ; Load	accumulator from memory
-ROM:F82C		 oraa	 #$80 ;	'Ä'      ; Inclusive OR memory with accumulator
+ROM:F82C		 oraa	 #$80 ;	'‚Ç¨'      ; Inclusive OR memory with accumulator
 ROM:F82E
 ROM:F82E loc_F82E:				 ; CODE	XREF: ROM:F828j
 ROM:F82E		 staa	 byte_AC	 ; Store accumulator in	memory
@@ -4775,13 +4751,13 @@ ROM:F84C		 cpx	 word_E006	 ; Compare index register 16 bit
 ROM:F84F		 bcc	 loc_F853	 ; Branch if carry bit clear
 ROM:F851
 ROM:F851 loc_F851:				 ; CODE	XREF: ROM:F838j
-ROM:F851		 andb	 #$BF ;	'ø'      ; Logical AND
+ROM:F851		 andb	 #$BF ;	'¬ø'      ; Logical AND
 ROM:F853
 ROM:F853 loc_F853:				 ; CODE	XREF: ROM:F812j
 ROM:F853					 ; ROM:F841j ...
 ROM:F853		 tsta			 ; Test	for negative or	zero
 ROM:F854		 beq	 loc_F85C	 ; Branch if equal
-ROM:F856		 bitb	 #$80 ;	'Ä'      ; Bit test
+ROM:F856		 bitb	 #$80 ;	'‚Ç¨'      ; Bit test
 ROM:F858		 beq	 loc_F86C	 ; Branch if equal
 ROM:F85A		 bra	 loc_F87C	 ; Branch always
 ROM:F85C ; ---------------------------------------------------------------------------
@@ -4796,7 +4772,7 @@ ROM:F865
 ROM:F865 loc_F865:				 ; CODE	XREF: ROM:F85Fj
 ROM:F865		 cpx	 word_E023	 ; Compare index register 16 bit
 ROM:F868		 bcc	 loc_F86C	 ; Branch if carry bit clear
-ROM:F86A		 andb	 #$DF ;	'ﬂ'      ; Logical AND
+ROM:F86A		 andb	 #$DF ;	'√ü'      ; Logical AND
 ROM:F86C
 ROM:F86C loc_F86C:				 ; CODE	XREF: ROM:F858j
 ROM:F86C					 ; ROM:F868j
@@ -4805,7 +4781,7 @@ ROM:F86E		 cmpa	 #$75 ;	'u'      ; Compare accumulator with memory
 ROM:F870		 bcs	 loc_F876	 ; Branch if carry bit set
 ROM:F872
 ROM:F872 loc_F872:				 ; CODE	XREF: ROM:F80Aj
-ROM:F872		 orab	 #$80 ;	'Ä'      ; Inclusive OR memory with accumulator
+ROM:F872		 orab	 #$80 ;	'‚Ç¨'      ; Inclusive OR memory with accumulator
 ROM:F874		 bra	 loc_F87C	 ; Branch always
 ROM:F876 ; ---------------------------------------------------------------------------
 ROM:F876
@@ -4905,14 +4881,14 @@ ROM:F8F6		 ldx	 0,x		 ; Load	index register from memory
 ROM:F8F8		 jmp	 0,x		 ; Jump
 ROM:F8FA ; ---------------------------------------------------------------------------
 ROM:F8FA		 adcb	 $1DF9		 ; Add with carry
-ROM:F8FD		 stab	 #$F9 ;	'˘'      ; Store accumulator in memory
+ROM:F8FD		 stab	 #$F9 ;	'√π'      ; Store accumulator in memory
 ROM:F8FF		 ldd	 byte_F9	 ; Load	double accumulator
 ROM:F901		 sbcb	 $F9,x		 ; Subtract with carry
 ROM:F903		 orab	 byte_FA56	 ; Inclusive OR	memory with accumulator
 ROM:F906		 orab	 $56FA		 ; Inclusive OR	memory with accumulator
 ROM:F909		 incb			 ; Increment
 ROM:F90A		 orab	 $64F9		 ; Inclusive OR	memory with accumulator
-ROM:F90D		 stab	 #$F9 ;	'˘'      ; Store accumulator in memory
+ROM:F90D		 stab	 #$F9 ;	'√π'      ; Store accumulator in memory
 ROM:F90F		 ldd	 byte_F9	 ; Load	double accumulator
 ROM:F911		 sbcb	 $F9,x		 ; Subtract with carry
 ROM:F913		 addb	 $FA,x		 ; Add without carry
@@ -4923,7 +4899,7 @@ ROM:F91A		 adcb	 $1C3B		 ; Add with carry
 ROM:F91D		 ldaa	 byte_A3	 ; Load	accumulator from memory
 ROM:F91F		 bita	 #4		 ; Bit test
 ROM:F921		 bne	 loc_F933	 ; Branch if not equal
-ROM:F923		 ldx	 #$99 ;	'ô'      ; Load index register from memory
+ROM:F923		 ldx	 #$99 ;	'‚Ñ¢'      ; Load index register from memory
 ROM:F926		 ldab	 #2		 ; Load	accumulator from memory
 ROM:F928		 jsr	 loc_F699	 ; Jump	to subroutine
 ROM:F92B		 inx			 ; Increment index register
@@ -4932,7 +4908,7 @@ ROM:F92E		 jsr	 loc_F699	 ; Jump	to subroutine
 ROM:F931		 ldaa	 byte_A3	 ; Load	accumulator from memory
 ROM:F933
 ROM:F933 loc_F933:				 ; CODE	XREF: ROM:F921j
-ROM:F933		 anda	 #$FB ;	'˚'      ; Logical AND
+ROM:F933		 anda	 #$FB ;	'√ª'      ; Logical AND
 ROM:F935		 staa	 byte_A3	 ; Store accumulator in	memory
 ROM:F937		 ldaa	 byte_A2	 ; Load	accumulator from memory
 ROM:F939		 bita	 #$20 ;	' '      ; Bit test
@@ -4948,7 +4924,7 @@ ROM:F945 loc_F945:				 ; CODE	XREF: ROM:F940j
 ROM:F945		 ldaa	 #8		 ; Load	accumulator from memory
 ROM:F947		 staa	 byte_4D	 ; Store accumulator in	memory
 ROM:F949		 ldaa	 byte_9E	 ; Load	accumulator from memory
-ROM:F94B		 anda	 #$CC ;	'Ã'      ; Logical AND
+ROM:F94B		 anda	 #$CC ;	'√å'      ; Logical AND
 ROM:F94D		 staa	 byte_9E	 ; Store accumulator in	memory
 ROM:F94F		 ldab	 byte_84	 ; Load	accumulator from memory
 ROM:F951		 bne	 loc_F995	 ; Branch if not equal
@@ -5042,7 +5018,7 @@ ROM:F9D1		 bita	 #$40 ;	'@'      ; Bit test
 ROM:F9D3		 bne	 loc_F9D7+1	 ; Branch if not equal
 ROM:F9D5
 ROM:F9D5 loc_F9D5:				 ; CODE	XREF: ROM:F9CDj
-ROM:F9D5		 andb	 #$BF ;	'ø'      ; Logical AND
+ROM:F9D5		 andb	 #$BF ;	'¬ø'      ; Logical AND
 ROM:F9D7
 ROM:F9D7 loc_F9D7:				 ; CODE	XREF: ROM:F9D3j
 ROM:F9D7		 cpx	 #$CA40		 ; Compare index register 16 bit
@@ -5127,31 +5103,31 @@ ROM:FA53					 ; ROM:FA31j
 ROM:FA53		 jmp	 loc_FAEB	 ; Jump
 ROM:FA53 ; ---------------------------------------------------------------------------
 ROM:FA56 byte_FA56:	 fcb $96		 ; DATA	XREF: ROM:F903r
-ROM:FA57		 fcb $A2 ; ¢
+ROM:FA57		 fcb $A2 ; ¬¢
 ROM:FA58		 fcb $2A ; *
-ROM:FA59		 fcb $B3 ; ≥
+ROM:FA59		 fcb $B3 ; ¬≥
 ROM:FA5A		 fcb $20
-ROM:FA5B		 fcb $F7 ; ˜
-ROM:FA5C		 fcb $96 ; ñ
-ROM:FA5D		 fcb $A2 ; ¢
+ROM:FA5B		 fcb $F7 ; √∑
+ROM:FA5C		 fcb $96 ; ‚Äì
+ROM:FA5D		 fcb $A2 ; ¬¢
 ROM:FA5E		 fcb $2A ; *
-ROM:FA5F		 fcb $AD ; ≠
-ROM:FA60		 fcb $8D ; ç
+ROM:FA5F		 fcb $AD ; ¬≠
+ROM:FA60		 fcb $8D ; ¬ç
 ROM:FA61		 fcb $34 ; 4
 ROM:FA62		 fcb $20
-ROM:FA63		 fcb $EF ; Ô
-ROM:FA64		 fcb $96 ; ñ
-ROM:FA65		 fcb $A2 ; ¢
-ROM:FA66		 fcb $85 ; Ö
+ROM:FA63		 fcb $EF ; √Ø
+ROM:FA64		 fcb $96 ; ‚Äì
+ROM:FA65		 fcb $A2 ; ¬¢
+ROM:FA66		 fcb $85 ; ‚Ä¶
 ROM:FA67		 fcb $20
 ROM:FA68		 fcb $26 ; &
 ROM:FA69		 fcb   3
-ROM:FA6A		 fcb $BD ; Ω
-ROM:FA6B		 fcb $FA ; ˙
-ROM:FA6C		 fcb $BB ; ª
+ROM:FA6A		 fcb $BD ; ¬Ω
+ROM:FA6B		 fcb $FA ; √∫
+ROM:FA6C		 fcb $BB ; ¬ª
 ROM:FA6D		 fcb $4F ; O
 ROM:FA6E		 fcb $7E ; ~
-ROM:FA6F		 fcb $F9 ; ˘
+ROM:FA6F		 fcb $F9 ; √π
 ROM:FA70		 fcb $47 ; G
 ROM:FA71
 ROM:FA71 ; =============== S U B R O U T I N E =======================================
@@ -5162,21 +5138,23 @@ ROM:FA71					 ; ROM:loc_F8BFP ...
 ROM:FA71		 ldab	 #$40 ;	'@'      ; Load accumulator from memory
 ROM:FA73		 ldaa	 byte_AC	 ; Load	accumulator from memory
 ROM:FA75		 bne	 loc_FA8A	 ; Branch if not equal
-ROM:FA77		 ldaa	 TRCSR2		 ; Load	accumulator from memory
-ROM:FA79		 anda	 #$F6 ;	'ˆ'      ; Logical AND
+ROM:FA77		 ldaa	 TCSR2		 ; Load	accumulator from memory
+ROM:FA79		 anda	 #$F6 ;	'√∂'      ; Logical AND
 ROM:FA7B		 bra	 loc_FA88	 ; Branch always
 ROM:FA7D ; ---------------------------------------------------------------------------
+ROM:FA7D
+ROM:FA7D loc_FA7D:				 ; CODE	XREF: ROM:EEF1P
 ROM:FA7D		 ldab	 PORT1		 ; Load	accumulator from memory
 ROM:FA7F		 bitb	 #2		 ; Bit test
 ROM:FA81		 bne	 locret_FA95	 ; Branch if not equal
 ROM:FA83
 ROM:FA83 loc_FA83:				 ; CODE	XREF: ROM:FA08P
 ROM:FA83		 clrb			 ; Clear
-ROM:FA84		 ldaa	 TRCSR2		 ; Load	accumulator from memory
+ROM:FA84		 ldaa	 TCSR2		 ; Load	accumulator from memory
 ROM:FA86		 oraa	 #1		 ; Inclusive OR	memory with accumulator
 ROM:FA88
 ROM:FA88 loc_FA88:				 ; CODE	XREF: sub_FA71+Aj
-ROM:FA88		 staa	 TRCSR2		 ; Store accumulator in	memory
+ROM:FA88		 staa	 TCSR2		 ; Store accumulator in	memory
 ROM:FA8A
 ROM:FA8A loc_FA8A:				 ; CODE	XREF: sub_FA71+4j
 ROM:FA8A		 orab	 byte_9E	 ; Inclusive OR	memory with accumulator
@@ -5199,9 +5177,11 @@ ROM:FA96		 ldab	 #$10		 ; Load	accumulator from memory
 ROM:FA98		 ldaa	 byte_AC	 ; Load	accumulator from memory
 ROM:FA9A		 bne	 loc_FAAF	 ; Branch if not equal
 ROM:FA9C		 ldaa	 TCSR1		 ; Load	accumulator from memory
-ROM:FA9E		 anda	 #$F6 ;	'ˆ'      ; Logical AND
+ROM:FA9E		 anda	 #$F6 ;	'√∂'      ; Logical AND
 ROM:FAA0		 bra	 loc_FAAD	 ; Branch always
 ROM:FAA2 ; ---------------------------------------------------------------------------
+ROM:FAA2
+ROM:FAA2 loc_FAA2:				 ; CODE	XREF: ROM:EEF4P
 ROM:FAA2		 ldab	 PORT2		 ; Load	accumulator from memory
 ROM:FAA4		 bitb	 #2		 ; Bit test
 ROM:FAA6		 bne	 locret_FABA	 ; Branch if not equal
@@ -5406,7 +5386,7 @@ ROM:FB84
 ROM:FB84 sub_FB84:				 ; CODE	XREF: ROM:loc_F9BBP
 ROM:FB84					 ; ROM:loc_FA29P
 ROM:FB84		 ldaa	 4,x		 ; Load	accumulator from memory
-ROM:FB86		 anda	 #$A0 ;	'†'      ; Logical AND
+ROM:FB86		 anda	 #$A0 ;	'¬†'      ; Logical AND
 ROM:FB88		 bita	 byte_9E	 ; Bit test
 ROM:FB8A		 bne	 locret_FBC7	 ; Branch if not equal
 ROM:FB8C		 pshx			 ; Push	index register into stack (low first)
@@ -5426,7 +5406,7 @@ ROM:FB96		 jsr	 sub_FD60	 ; Jump	to subroutine
 ROM:FB99		 pulx			 ; Pull	index register from stack (hi first)
 ROM:FB9A		 ldaa	 byte_9E	 ; Load	accumulator from memory
 ROM:FB9C		 anda	 4,x		 ; Logical AND
-ROM:FB9E		 bita	 #$A0 ;	'†'      ; Bit test
+ROM:FB9E		 bita	 #$A0 ;	'¬†'      ; Bit test
 ROM:FBA0		 bne	 locret_FBC7	 ; Branch if not equal
 ROM:FBA2		 ldaa	 byte_A2	 ; Load	accumulator from memory
 ROM:FBA4		 bita	 #$40 ;	'@'      ; Bit test
@@ -5567,7 +5547,7 @@ ROM:FC2A		 clra
 ROM:FC2B		 staa	 byte_B9	 ; Store accumulator in	memory
 ROM:FC2D		 ldaa	 TCSR1		 ; Load	accumulator from memory
 ROM:FC2F		 anda	 #$48 ;	'H'      ; Logical AND
-ROM:FC31		 ldab	 TRCSR2		 ; Load	accumulator from memory
+ROM:FC31		 ldab	 TCSR2		 ; Load	accumulator from memory
 ROM:FC33		 andb	 #$48 ;	'H'      ; Logical AND
 ROM:FC35		 cmpb	 #$48 ;	'H'      ; Compare accumulator with memory
 ROM:FC37		 bne	 loc_FC85	 ; Branch if not equal
@@ -5592,7 +5572,7 @@ ROM:FC56		 ldaa	 byte_9E	 ; Load	accumulator from memory
 ROM:FC58		 bita	 #2		 ; Bit test
 ROM:FC5A		 beq	 loc_FC65	 ; Branch if equal
 ROM:FC5C		 jsr	 sub_FCA7	 ; Jump	to subroutine
-ROM:FC5F		 ldaa	 #$CC ;	'Ã'      ; Load accumulator from memory
+ROM:FC5F		 ldaa	 #$CC ;	'√å'      ; Load accumulator from memory
 ROM:FC61		 oraa	 byte_B9	 ; Inclusive OR	memory with accumulator
 ROM:FC63		 staa	 byte_B9	 ; Store accumulator in	memory
 ROM:FC65
@@ -5661,7 +5641,7 @@ ROM:FCAB		 bitb	 #2		 ; Bit test
 ROM:FCAD		 bne	 loc_FCBF	 ; Branch if not equal
 ROM:FCAF
 ROM:FCAF loc_FCAF:				 ; CODE	XREF: sub_FCA7+1Ej
-ROM:FCAF		 anda	 #$FE ;	'˛'      ; Logical AND
+ROM:FCAF		 anda	 #$FE ;	'√æ'      ; Logical AND
 ROM:FCB1		 oraa	 #$10		 ; Inclusive OR	memory with accumulator
 ROM:FCB3		 bita	 #2		 ; Bit test
 ROM:FCB5		 beq	 loc_FCE8	 ; Branch if equal
@@ -5678,7 +5658,7 @@ ROM:FCC3		 ldab	 byte_AC	 ; Load	accumulator from memory
 ROM:FCC5		 bne	 loc_FCAF	 ; Branch if not equal
 ROM:FCC7		 ldx	 byte_48	 ; Load	index register from memory
 ROM:FCC9		 ldab	 TCSR1		 ; Load	accumulator from memory
-ROM:FCCB		 andb	 #$FE ;	'˛'      ; Logical AND
+ROM:FCCB		 andb	 #$FE ;	'√æ'      ; Logical AND
 ROM:FCCD
 ROM:FCCD loc_FCCD:				 ; CODE	XREF: sub_FCA7+16j
 ROM:FCCD		 stx	 OCR1H		 ; Store index register	in memory
@@ -5696,7 +5676,7 @@ ROM:FCE0
 ROM:FCE0 loc_FCE0:				 ; CODE	XREF: sub_FCA7+1Aj
 ROM:FCE0		 bita	 #$10		 ; Bit test
 ROM:FCE2		 beq	 loc_FCE8	 ; Branch if equal
-ROM:FCE4		 anda	 #$FD ;	'˝'      ; Logical AND
+ROM:FCE4		 anda	 #$FD ;	'√Ω'      ; Logical AND
 ROM:FCE6		 oraa	 #$20 ;	' '      ; Inclusive OR memory with accumulator
 ROM:FCE8
 ROM:FCE8 loc_FCE8:				 ; CODE	XREF: sub_FCA7+Ej
@@ -5722,12 +5702,12 @@ ROM:FCF3		 bitb	 #2		 ; Bit test
 ROM:FCF5		 bne	 loc_FD07	 ; Branch if not equal
 ROM:FCF7
 ROM:FCF7 loc_FCF7:				 ; CODE	XREF: sub_FCEF+1Ej
-ROM:FCF7		 anda	 #$FB ;	'˚'      ; Logical AND
+ROM:FCF7		 anda	 #$FB ;	'√ª'      ; Logical AND
 ROM:FCF9		 oraa	 #$40 ;	'@'      ; Inclusive OR memory with accumulator
 ROM:FCFB		 bita	 #8		 ; Bit test
 ROM:FCFD		 beq	 loc_FD30	 ; Branch if equal
 ROM:FCFF		 ldx	 byte_42	 ; Load	index register from memory
-ROM:FD01		 ldab	 TRCSR2		 ; Load	accumulator from memory
+ROM:FD01		 ldab	 TCSR2		 ; Load	accumulator from memory
 ROM:FD03		 orab	 #1		 ; Inclusive OR	memory with accumulator
 ROM:FD05		 bra	 loc_FD15	 ; Branch always
 ROM:FD07 ; ---------------------------------------------------------------------------
@@ -5738,13 +5718,13 @@ ROM:FD09		 beq	 loc_FD28	 ; Branch if equal
 ROM:FD0B		 ldab	 byte_AC	 ; Load	accumulator from memory
 ROM:FD0D		 bne	 loc_FCF7	 ; Branch if not equal
 ROM:FD0F		 ldx	 byte_40	 ; Load	index register from memory
-ROM:FD11		 ldab	 TRCSR2		 ; Load	accumulator from memory
-ROM:FD13		 andb	 #$FE ;	'˛'      ; Logical AND
+ROM:FD11		 ldab	 TCSR2		 ; Load	accumulator from memory
+ROM:FD13		 andb	 #$FE ;	'√æ'      ; Logical AND
 ROM:FD15
 ROM:FD15 loc_FD15:				 ; CODE	XREF: sub_FCEF+16j
 ROM:FD15		 stx	 OCR2H		 ; Store index register	in memory
 ROM:FD17		 orab	 #8		 ; Inclusive OR	memory with accumulator
-ROM:FD19		 stab	 TRCSR2		 ; Store accumulator in	memory
+ROM:FD19		 stab	 TCSR2		 ; Store accumulator in	memory
 ROM:FD1B		 cpx	 FRCH		 ; Compare index register 16 bit
 ROM:FD1D		 bpl	 loc_FD34	 ; Branch if plus
 ROM:FD1F		 ldab	 #$C		 ; Load	accumulator from memory
@@ -5757,8 +5737,8 @@ ROM:FD28
 ROM:FD28 loc_FD28:				 ; CODE	XREF: sub_FCEF+1Aj
 ROM:FD28		 bita	 #$40 ;	'@'      ; Bit test
 ROM:FD2A		 beq	 loc_FD30	 ; Branch if equal
-ROM:FD2C		 anda	 #$F7 ;	'˜'      ; Logical AND
-ROM:FD2E		 oraa	 #$80 ;	'Ä'      ; Inclusive OR memory with accumulator
+ROM:FD2C		 anda	 #$F7 ;	'√∑'      ; Logical AND
+ROM:FD2E		 oraa	 #$80 ;	'‚Ç¨'      ; Inclusive OR memory with accumulator
 ROM:FD30
 ROM:FD30 loc_FD30:				 ; CODE	XREF: sub_FCEF+Ej
 ROM:FD30					 ; sub_FCEF+3Bj
@@ -5845,7 +5825,7 @@ ROM:FD8E		 bne	 loc_FD9A	 ; Branch if not equal
 ROM:FD90		 oraa	 #8		 ; Inclusive OR	memory with accumulator
 ROM:FD92		 staa	 byte_A2	 ; Store accumulator in	memory
 ROM:FD94		 ldaa	 #8		 ; Load	accumulator from memory
-ROM:FD96		 ldab	 #$BF ;	'ø'      ; Load accumulator from memory
+ROM:FD96		 ldab	 #$BF ;	'¬ø'      ; Load accumulator from memory
 ROM:FD98		 bra	 loc_FDA2	 ; Branch always
 ROM:FD9A ; ---------------------------------------------------------------------------
 ROM:FD9A
@@ -5853,7 +5833,7 @@ ROM:FD9A loc_FD9A:				 ; CODE	XREF: sub_FD78+16j
 ROM:FD9A		 oraa	 #4		 ; Inclusive OR	memory with accumulator
 ROM:FD9C		 staa	 byte_A2	 ; Store accumulator in	memory
 ROM:FD9E		 ldaa	 #4		 ; Load	accumulator from memory
-ROM:FDA0		 ldab	 #$EF ;	'Ô'      ; Load accumulator from memory
+ROM:FDA0		 ldab	 #$EF ;	'√Ø'      ; Load accumulator from memory
 ROM:FDA2
 ROM:FDA2 loc_FDA2:				 ; CODE	XREF: sub_FD78+20j
 ROM:FDA2		 pshb			 ; Push	accumulator B into stack
@@ -5913,142 +5893,142 @@ ROM:FDDB		 fcb $4F ; O
 ROM:FDDC		 fcb $29 ; )
 ROM:FDDD		 fcb $4D ; M
 ROM:FDDE		 fcb $38 ; 8
-ROM:FDDF		 fcb $DC ; ‹
+ROM:FDDF		 fcb $DC ; √ú
 ROM:FDE0		 fcb   9
-ROM:FDE1		 fcb $8C ; å
+ROM:FDE1		 fcb $8C ; ≈í
 ROM:FDE2		 fcb   0
 ROM:FDE3		 fcb $40 ; @
 ROM:FDE4		 fcb $26 ; &
 ROM:FDE5		 fcb   3
-ROM:FDE6		 fcb $DD ; ›
+ROM:FDE6		 fcb $DD ; √ù
 ROM:FDE7		 fcb $1B
 ROM:FDE8		 fcb $39 ; 9
-ROM:FDE9		 fcb $DD ; ›
+ROM:FDE9		 fcb $DD ; √ù
 ROM:FDEA		 fcb  $B
 ROM:FDEB		 fcb $39 ; 9
 ROM:FDEC		 fcb $38 ; 8
 ROM:FDED		 fcb $39 ; 9
 ROM:FDEE		 fcb $38 ; 8
-ROM:FDEF		 fcb $EC ; Ï
+ROM:FDEF		 fcb $EC ; √¨
 ROM:FDF0		 fcb   6
-ROM:FDF1		 fcb $B3 ; ≥
-ROM:FDF2		 fcb $EE ; Ó
+ROM:FDF1		 fcb $B3 ; ¬≥
+ROM:FDF2		 fcb $EE ; √Æ
 ROM:FDF3		 fcb   0
-ROM:FDF4		 fcb $DD ; ›
-ROM:FDF5		 fcb $B7 ; ∑
-ROM:FDF6		 fcb $8C ; å
+ROM:FDF4		 fcb $DD ; √ù
+ROM:FDF5		 fcb $B7 ; ¬∑
+ROM:FDF6		 fcb $8C ; ≈í
 ROM:FDF7		 fcb   0
 ROM:FDF8		 fcb $40 ; @
 ROM:FDF9		 fcb $26 ; &
 ROM:FDFA		 fcb   5
-ROM:FDFB		 fcb $CE ; Œ
+ROM:FDFB		 fcb $CE ; √é
 ROM:FDFC		 fcb   0
 ROM:FDFD		 fcb $18
 ROM:FDFE		 fcb $20
 ROM:FDFF		 fcb $4E ; N
-ROM:FE00		 fcb $CE ; Œ
+ROM:FE00		 fcb $CE ; √é
 ROM:FE01		 fcb   0
 ROM:FE02		 fcb   8
 ROM:FE03		 fcb $20
 ROM:FE04		 fcb $49 ; I
 ROM:FE05		 fcb $38 ; 8
-ROM:FE06		 fcb $EC ; Ï
+ROM:FE06		 fcb $EC ; √¨
 ROM:FE07		 fcb   6
-ROM:FE08		 fcb $DD ; ›
-ROM:FE09		 fcb $B7 ; ∑
-ROM:FE0A		 fcb $8C ; å
+ROM:FE08		 fcb $DD ; √ù
+ROM:FE09		 fcb $B7 ; ¬∑
+ROM:FE0A		 fcb $8C ; ≈í
 ROM:FE0B		 fcb   0
 ROM:FE0C		 fcb $40 ; @
 ROM:FE0D		 fcb $26 ; &
 ROM:FE0E		 fcb   5
-ROM:FE0F		 fcb $CE ; Œ
+ROM:FE0F		 fcb $CE ; √é
 ROM:FE10		 fcb   0
 ROM:FE11		 fcb $18
 ROM:FE12		 fcb $20
 ROM:FE13		 fcb   3
-ROM:FE14		 fcb $CE ; Œ
+ROM:FE14		 fcb $CE ; √é
 ROM:FE15		 fcb   0
 ROM:FE16		 fcb   8
-ROM:FE17		 fcb $A3 ; £
+ROM:FE17		 fcb $A3 ; ¬£
 ROM:FE18		 fcb   3
 ROM:FE19		 fcb $2A ; *
-ROM:FE1A		 fcb $D2 ; “
-ROM:FE1B		 fcb $DC ; ‹
-ROM:FE1C		 fcb $B7 ; ∑
-ROM:FE1D		 fcb $B3 ; ≥
-ROM:FE1E		 fcb $EE ; Ó
+ROM:FE1A		 fcb $D2 ; √í
+ROM:FE1B		 fcb $DC ; √ú
+ROM:FE1C		 fcb $B7 ; ¬∑
+ROM:FE1D		 fcb $B3 ; ¬≥
+ROM:FE1E		 fcb $EE ; √Æ
 ROM:FE1F		 fcb   0
-ROM:FE20		 fcb $DD ; ›
-ROM:FE21		 fcb $B7 ; ∑
-ROM:FE22		 fcb $A6 ; ¶
+ROM:FE20		 fcb $DD ; √ù
+ROM:FE21		 fcb $B7 ; ¬∑
+ROM:FE22		 fcb $A6 ; ¬¶
 ROM:FE23		 fcb   0
-ROM:FE24		 fcb $84 ; Ñ
-ROM:FE25		 fcb $FE ; ˛
-ROM:FE26		 fcb $A7 ; ß
+ROM:FE24		 fcb $84 ; ‚Äû
+ROM:FE25		 fcb $FE ; √æ
+ROM:FE26		 fcb $A7 ; ¬ß
 ROM:FE27		 fcb   0
 ROM:FE28		 fcb $20
 ROM:FE29		 fcb $24 ; $
 ROM:FE2A		 fcb $38 ; 8
-ROM:FE2B		 fcb $EC ; Ï
+ROM:FE2B		 fcb $EC ; √¨
 ROM:FE2C		 fcb   6
-ROM:FE2D		 fcb $B3 ; ≥
-ROM:FE2E		 fcb $EE ; Ó
+ROM:FE2D		 fcb $B3 ; ¬≥
+ROM:FE2E		 fcb $EE ; √Æ
 ROM:FE2F		 fcb   0
-ROM:FE30		 fcb $DD ; ›
-ROM:FE31		 fcb $B7 ; ∑
-ROM:FE32		 fcb $8C ; å
+ROM:FE30		 fcb $DD ; √ù
+ROM:FE31		 fcb $B7 ; ¬∑
+ROM:FE32		 fcb $8C ; ≈í
 ROM:FE33		 fcb   0
 ROM:FE34		 fcb $40 ; @
 ROM:FE35		 fcb $26 ; &
 ROM:FE36		 fcb   5
-ROM:FE37		 fcb $CE ; Œ
+ROM:FE37		 fcb $CE ; √é
 ROM:FE38		 fcb   0
 ROM:FE39		 fcb $18
 ROM:FE3A		 fcb $20
 ROM:FE3B		 fcb   3
-ROM:FE3C		 fcb $CE ; Œ
+ROM:FE3C		 fcb $CE ; √é
 ROM:FE3D		 fcb   0
 ROM:FE3E		 fcb   8
-ROM:FE3F		 fcb $A3 ; £
+ROM:FE3F		 fcb $A3 ; ¬£
 ROM:FE40		 fcb   3
 ROM:FE41		 fcb $2A ; *
 ROM:FE42		 fcb $24 ; $
-ROM:FE43		 fcb $F3 ; Û
-ROM:FE44		 fcb $EE ; Ó
+ROM:FE43		 fcb $F3 ; √≥
+ROM:FE44		 fcb $EE ; √Æ
 ROM:FE45		 fcb   0
 ROM:FE46		 fcb $2A ; *
 ROM:FE47		 fcb   6
-ROM:FE48		 fcb $A6 ; ¶
+ROM:FE48		 fcb $A6 ; ¬¶
 ROM:FE49		 fcb   0
-ROM:FE4A		 fcb $8A ; ä
+ROM:FE4A		 fcb $8A ; ≈†
 ROM:FE4B		 fcb   1
-ROM:FE4C		 fcb $A7 ; ß
+ROM:FE4C		 fcb $A7 ; ¬ß
 ROM:FE4D		 fcb   0
-ROM:FE4E		 fcb $A6 ; ¶
+ROM:FE4E		 fcb $A6 ; ¬¶
 ROM:FE4F		 fcb   0
-ROM:FE50		 fcb $8A ; ä
+ROM:FE50		 fcb $8A ; ≈†
 ROM:FE51		 fcb   8
-ROM:FE52		 fcb $A7 ; ß
+ROM:FE52		 fcb $A7 ; ¬ß
 ROM:FE53		 fcb   0
-ROM:FE54		 fcb $DC ; ‹
-ROM:FE55		 fcb $B7 ; ∑
-ROM:FE56		 fcb $ED ; Ì
+ROM:FE54		 fcb $DC ; √ú
+ROM:FE55		 fcb $B7 ; ¬∑
+ROM:FE56		 fcb $ED ; √≠
 ROM:FE57		 fcb   3
-ROM:FE58		 fcb $93 ; ì
+ROM:FE58		 fcb $93 ; ‚Äú
 ROM:FE59		 fcb   9
 ROM:FE5A		 fcb $2A ; *
 ROM:FE5B		 fcb   7
-ROM:FE5C		 fcb $CC ; Ã
+ROM:FE5C		 fcb $CC ; √å
 ROM:FE5D		 fcb   0
 ROM:FE5E		 fcb $14
-ROM:FE5F		 fcb $D3 ; ”
+ROM:FE5F		 fcb $D3 ; √ì
 ROM:FE60		 fcb   9
-ROM:FE61		 fcb $ED ; Ì
+ROM:FE61		 fcb $ED ; √≠
 ROM:FE62		 fcb   3
-ROM:FE63		 fcb $DE ; ﬁ
-ROM:FE64		 fcb $B5 ; µ
-ROM:FE65		 fcb $DF ; ﬂ
-ROM:FE66		 fcb $AA ; ™
+ROM:FE63		 fcb $DE ; √û
+ROM:FE64		 fcb $B5 ; ¬µ
+ROM:FE65		 fcb $DF ; √ü
+ROM:FE66		 fcb $AA ; ¬™
 ROM:FE67		 fcb $39 ; 9
 ROM:FE68		 fcb $3F ; ?
 ROM:FE69		 fcb $3F ; ?
@@ -6115,8 +6095,8 @@ ROM:FE99
 ROM:FE99 ; =============== S U B R O U T I N E =======================================
 ROM:FE99
 ROM:FE99
-ROM:FE99 sub_FE99:				 ; CODE	XREF: ROM:F1FEP
-ROM:FE99					 ; ROM:F215P ...
+ROM:FE99 sub_FE99:				 ; CODE	XREF: sub_F1EC+12P
+ROM:FE99					 ; sub_F1EC+29P ...
 ROM:FE99		 pshx			 ; Push	index register into stack (low first)
 ROM:FE9A		 jsr	 sub_FE7A	 ; Jump	to subroutine
 ROM:FE9D		 subb	 RMCR		 ; Subtract
@@ -6165,7 +6145,7 @@ ROM:FEBF ; =============== S U B R O U T I N E =================================
 ROM:FEBF
 ROM:FEBF
 ROM:FEBF tableLU_3Da:				 ; CODE	XREF: ROM:EB45P
-ROM:FEBF					 ; sub_EB68+4P	...
+ROM:FEBF					 ; tableLU_3Db+4P ...
 ROM:FEBF		 pshb			 ; Push	accumulator B into stack
 ROM:FEC0		 ldab	 #$10		 ; Load	accumulator from memory
 ROM:FEC2		 mul			 ; Unsigned multiply
@@ -6185,7 +6165,7 @@ ROM:FED8		 abx			 ; Add b to index register
 ROM:FED9		 ldd	 byte_AF	 ; Load	double accumulator
 ROM:FEDB		 bsr	 tableLU_2D	 ; Branch to subroutine
 ROM:FEDD		 staa	 byte_B2	 ; Store accumulator in	memory
-ROM:FEDF		 ldx	 #$B1 ;	'±'      ; Load index register from memory
+ROM:FEDF		 ldx	 #$B1 ;	'¬±'      ; Load index register from memory
 ROM:FEE2		 pula			 ; Pull	accumulator A from stack
 ROM:FEE3		 bra	 loc_FEAF	 ; Branch always
 ROM:FEE5 ; ---------------------------------------------------------------------------
@@ -6227,7 +6207,7 @@ ROM:FF07		 ldaa	 #8		 ; Load	accumulator from memory
 ROM:FF09
 ROM:FF09 loc_FF09:				 ; CODE	XREF: sub_FEE7+1Ej
 ROM:FF09					 ; sub_FEE7+28j
-ROM:FF09		 bita	 #$F0 ;	''      ; Bit test
+ROM:FF09		 bita	 #$F0 ;	'√∞'      ; Bit test
 ROM:FF0B		 beq	 loc_FF11	 ; Branch if equal
 ROM:FF0D		 lsrd			 ; Logical shift right double
 ROM:FF0E		 dex			 ; Decrement index register
@@ -6284,7 +6264,7 @@ ROM:FF45		 des			 ; Decrement stack pointer
 ROM:FF46		 tsx			 ; Transfer SP to index	reg
 ROM:FF47		 ldaa	 4,x		 ; Load	accumulator from memory
 ROM:FF49		 mul			 ; Unsigned multiply
-ROM:FF4A		 addd	 #$80 ;	'Ä'      ; Add 16-bit to D
+ROM:FF4A		 addd	 #$80 ;	'‚Ç¨'      ; Add 16-bit to D
 ROM:FF4D		 staa	 0,x		 ; Store accumulator in	memory
 ROM:FF4F		 ldaa	 1,x		 ; Load	accumulator from memory
 ROM:FF51		 ldab	 4,x		 ; Load	accumulator from memory
@@ -6344,13 +6324,13 @@ ROM:FF86					 ; ROM:F099P
 ROM:FF86		 ldaa	 byte_C000	 ; Load	accumulator from memory
 ROM:FF89		 cmpa	 #$56 ;	'V'      ; Compare accumulator with memory
 ROM:FF8B		 bne	 locret_FFC5	 ; Branch if not equal
-ROM:FF8D		 ldab	 byte_C001	 ; Load	accumulator from memory
+ROM:FF8D		 ldab	 byte_C001	 ; read/write
 ROM:FF90		 rorb			 ; Rotate right	trough carry
 ROM:FF91		 bcc	 locret_FFC5	 ; Branch if carry bit clear
 ROM:FF93		 andb	 #$7E ;	'~'      ; Logical AND
-ROM:FF95		 stab	 byte_C001	 ; Store accumulator in	memory
-ROM:FF98		 ldx	 byte_C004	 ; Load	index register from memory
-ROM:FF9B		 ldd	 word_C002	 ; Load	double accumulator
+ROM:FF95		 stab	 byte_C001	 ; read/write
+ROM:FF98		 ldx	 byte_C004	 ; read	only used as a ptr to upper addresses in this chip?
+ROM:FF9B		 ldd	 word_C002	 ; read	only shift and test (RTC like?)
 ROM:FF9E		 rora			 ; Rotate right	trough carry
 ROM:FF9F		 bcs	 loc_FFA6	 ; Branch if carry bit set
 ROM:FFA1		 rorb			 ; Rotate right	trough carry
@@ -6379,9 +6359,9 @@ ROM:FFB8		 ldab	 0,x		 ; Load	accumulator from memory
 ROM:FFBA
 ROM:FFBA loc_FFBA:				 ; CODE	XREF: sub_FF86+2Aj
 ROM:FFBA		 std	 word_C006	 ; Store accumulators in memory
-ROM:FFBD		 ldaa	 byte_C001	 ; Load	accumulator from memory
-ROM:FFC0		 oraa	 #$80 ;	'Ä'      ; Inclusive OR memory with accumulator
-ROM:FFC2		 staa	 byte_C001	 ; Store accumulator in	memory
+ROM:FFBD		 ldaa	 byte_C001	 ; read/write
+ROM:FFC0		 oraa	 #$80 ;	'‚Ç¨'      ; Inclusive OR memory with accumulator
+ROM:FFC2		 staa	 byte_C001	 ; read/write
 ROM:FFC5
 ROM:FFC5 locret_FFC5:				 ; CODE	XREF: sub_FF86+5j
 ROM:FFC5					 ; sub_FF86+Bj
