@@ -16,7 +16,7 @@ RAM:0000 ; 1985	Honda GL1200 ECU
 RAM:0000 ; This	ECU appears to use a Toshiba TMP76C40 processor.
 RAM:0000 ; A second 40-pin chip	contains an ADC	and some other
 RAM:0000 ; (TBD	- timer	and port expander?) functions
-RAM:0000 ; Date: 26th November 2023
+RAM:0000 ; Date: 28th November 2023
 RAM:0000
 RAM:0000 ; Processor:	     6301 []
 RAM:0000 ; Target assembler: Motorola FreeWare Assembler
@@ -229,7 +229,7 @@ RAM:0073 MAPL:		 rmb 1			 ; DATA	XREF: ROM:EFA2r
 RAM:0073					 ; Get_MAP:store_MAPLw	...
 RAM:0074 MAPR:		 rmb 1			 ; DATA	XREF: Get_MAP+12r
 RAM:0074					 ; Get_MAP:store_MAPRw	...
-RAM:0075 byte_75:	 rmb 1			 ; DATA	XREF: ROM:EA92r
+RAM:0075 TPS:		 rmb 1			 ; DATA	XREF: ROM:EA92r
 RAM:0075					 ; ROM:EA9Ar ...
 RAM:0076 byte_76:	 rmb 1			 ; DATA	XREF: ROM:EF8Ew
 RAM:0076					 ; sub_F3C2+6w
@@ -288,9 +288,9 @@ RAM:0095 MAPL_Raw:	 rmb 1			 ; DATA	XREF: ROM:EB56r
 RAM:0095					 ; ROM:loc_EBD3r ...
 RAM:0096 MAPR_Raw:	 rmb 1			 ; DATA	XREF: ROM:loc_EB5Fr
 RAM:0096					 ; ROM:loc_EBDBr ...
-RAM:0097 byte_97:	 rmb 1			 ; DATA	XREF: sub_F511+8r
-RAM:0097					 ; sub_F511:loc_F521r
-RAM:0098 byte_98:	 rmb 1			 ; DATA	XREF: sub_E880+20r
+RAM:0097 TPS_Raw:	 rmb 1			 ; DATA	XREF: sub_F511+8r
+RAM:0097					 ; sub_F511:MAP_fault_F521r
+RAM:0098 count_98:	 rmb 1			 ; DATA	XREF: sub_E880+20r
 RAM:0098					 ; sub_E880+28w ...
 RAM:0099		 rmb 1
 RAM:009A		 rmb 1
@@ -302,7 +302,7 @@ RAM:009E byte_9E:	 rmb 1			 ; DATA	XREF: ROM:ED26r
 RAM:009E					 ; ROM:ED8Br ...
 RAM:009F byte_9F:	 rmb 1			 ; DATA	XREF: ROM:ED6Dr
 RAM:009F					 ; ROM:ED71w ...
-RAM:00A0 byte_A0:	 rmb 1			 ; DATA	XREF: ROM:EB15r
+RAM:00A0 status_A0:	 rmb 1			 ; DATA	XREF: ROM:EB15r
 RAM:00A0					 ; ROM:loc_EB74r ...
 RAM:00A1 count_A1:	 rmb 1			 ; DATA	XREF: ROM:EC4Ew
 RAM:00A1					 ; ROM:F04Fw ...
@@ -435,9 +435,9 @@ PE:C000
 PE:C000	; Segment type:	Regular
 PE:C000			; segment PE
 PE:C000			org $C000
-PE:C000	byte_C000:	rmb 1			; DATA XREF: sub_FF86r
-PE:C000						; sub_FFC6r
-PE:C000						; only read compared to	56h
+PE:C000	byte_C000:	rmb 1			; DATA XREF: sub_E7A0r
+PE:C000						; sub_FF86r ...
+PE:C000						; only read compared to	56h or A9h
 PE:C000						; bit7 is ctrl bit
 PE:C000						; bit0 is status - action on 1
 PE:C001	byte_C001:	rmb 1			; DATA XREF: sub_FF86+7r
@@ -482,7 +482,7 @@ ADC:D001 ; bit 2 (0x04): ADC Channel Select bit	2
 ADC:D001 ; bit 1 (0x02): ADC Channel Select bit	1
 ADC:D001 ; bit 0 (0x01): ADC Channel Select bit	0
 ADC:D001 PIA_Ctrl:	 rmb 1			 ; DATA	XREF: readADCw
-ADC:D001					 ; ADC_F485w
+ADC:D001					 ; PIA_F485w
 ADC:D002 ;
 ADC:D002 ; ADC Status Register
 ADC:D002 ; bit 7 (0x80): Done
@@ -494,7 +494,7 @@ ADC:D002 ; bit 2 (0x04): Unknown/unimplemented
 ADC:D002 ; bit 1 (0x02): Unknown/unimplemented
 ADC:D002 ; bit 0 (0x01): Unknown/unimplemented
 ADC:D002 PIA_Status:	 rmb 1			 ; DATA	XREF: readADC:loc_F263r
-ADC:D002					 ; ADC_F485:loc_F488r
+ADC:D002					 ; PIA_F485:loc_F488r
 ADC:D003 ;
 ADC:D003 ; ADC Result Register
 ADC:D003 ; returns an 8-bit result
@@ -524,7 +524,7 @@ ROM:E011 byte_E011:	 fcb $10		 ; DATA	XREF: sub_F5E6-753r
 ROM:E012 byte_E012:	 fcb $54		 ; DATA	XREF: get_BARO+2Br
 ROM:E012					 ; ROM:loc_F4B5r
 ROM:E013		 fcb $13
-ROM:E014		 fcb $88 ; 
+ROM:E014		 fcb $88 ; ˆ
 ROM:E015 X_E015:	 fcb   0
 ROM:E016		 fcb   0
 ROM:E017		 fcb   4
@@ -1377,84 +1377,75 @@ ROM:E79C		 fcb $3F ; ?
 ROM:E79D		 fcb $3F ; ?
 ROM:E79E		 fcb $3F ; ?
 ROM:E79F		 fcb $3F ; ?
-ROM:E7A0 byte_E7A0:	 fcb $B6		 ; CODE	XREF: ROM:EA10P
+ROM:E7A0 sub_E7A0:
+ROM:E7A0 There isn't anything at C000h so this should never be executed.
+ROM:E7A0
+ROM:E7A0 ; =============== S U B R O U T I N E =======================================
+ROM:E7A0
+ROM:E7A0
+ROM:E7A0 sub_E7A0:				 ; CODE	XREF: ROM:EA10P
 ROM:E7A0					 ; ROM:F0A6P
 ROM:E7A0					 ; DATA	XREF: ...
-ROM:E7A1		 fcb $C0 ; À
-ROM:E7A2		 fcb   0
-ROM:E7A3		 fcb $81 ; 
-ROM:E7A4		 fcb $A9 ; ©
-ROM:E7A5		 fcb $26 ; &
-ROM:E7A6		 fcb $44 ; D
-ROM:E7A7		 fcb $30 ; 0
-ROM:E7A8		 fcb   9
-ROM:E7A9		 fcb   9
-ROM:E7AA		 fcb $35 ; 5
-ROM:E7AB		 fcb $4F ; O
-ROM:E7AC		 fcb $A7 ; §
-ROM:E7AD		 fcb   1
-ROM:E7AE		 fcb $E6 ; æ
-ROM:E7AF		 fcb   1
-ROM:E7B0		 fcb $CE ; Î
-ROM:E7B1		 fcb $C0 ; À
-ROM:E7B2		 fcb $20
-ROM:E7B3		 fcb $3A ; :
-ROM:E7B4		 fcb $A6 ; ¦
-ROM:E7B5		 fcb   1
-ROM:E7B6		 fcb $84 ; 
-ROM:E7B7		 fcb  $F
-ROM:E7B8		 fcb $30 ; 0
-ROM:E7B9		 fcb $A7 ; §
-ROM:E7BA		 fcb   0
-ROM:E7BB		 fcb $CE ; Î
-ROM:E7BC		 fcb $C0 ; À
-ROM:E7BD		 fcb $20
-ROM:E7BE		 fcb $3A ; :
-ROM:E7BF		 fcb $E6 ; æ
-ROM:E7C0		 fcb   0
-ROM:E7C1		 fcb $CE ; Î
-ROM:E7C2		 fcb   0
-ROM:E7C3		 fcb   0
-ROM:E7C4		 fcb $3A ; :
-ROM:E7C5		 fcb $EC ; ì
-ROM:E7C6		 fcb   0
-ROM:E7C7		 fcb $30 ; 0
-ROM:E7C8		 fcb $6D ; m
-ROM:E7C9		 fcb   0
-ROM:E7CA		 fcb $27 ; '
-ROM:E7CB		 fcb   5
-ROM:E7CC		 fcb   4
-ROM:E7CD		 fcb $6A ; j
-ROM:E7CE		 fcb   0
-ROM:E7CF		 fcb $20
-ROM:E7D0		 fcb $F7 ; ÷
-ROM:E7D1		 fcb $17
-ROM:E7D2		 fcb $E6 ; æ
-ROM:E7D3		 fcb   1
-ROM:E7D4		 fcb $CE ; Î
-ROM:E7D5		 fcb $C0 ; À
-ROM:E7D6		 fcb $20
-ROM:E7D7		 fcb $3A ; :
-ROM:E7D8		 fcb $A7 ; §
-ROM:E7D9		 fcb   1
-ROM:E7DA		 fcb $30 ; 0
-ROM:E7DB		 fcb $A6 ; ¦
-ROM:E7DC		 fcb   1
-ROM:E7DD		 fcb $81 ; 
-ROM:E7DE		 fcb   6
-ROM:E7DF		 fcb $2C ; ,
-ROM:E7E0		 fcb   6
-ROM:E7E1		 fcb $6C ; l
-ROM:E7E2		 fcb   1
-ROM:E7E3		 fcb $6C ; l
-ROM:E7E4		 fcb   1
-ROM:E7E5		 fcb $20
-ROM:E7E6		 fcb $C7 ; Ç
-ROM:E7E7		 fcb $30 ; 0
-ROM:E7E8		 fcb   8
-ROM:E7E9		 fcb   8
-ROM:E7EA		 fcb $35 ; 5
-ROM:E7EB		 fcb $39 ; 9
+ROM:E7A0		 ldaa	 byte_C000
+ROM:E7A3		 cmpa	 #$A9 ;	'©'      ; what is at C000h?
+ROM:E7A5		 bne	 locret_E7EB
+ROM:E7A7		 tsx
+ROM:E7A8		 dex
+ROM:E7A9		 dex
+ROM:E7AA		 txs
+ROM:E7AB		 clra
+ROM:E7AC		 staa	 1,x
+ROM:E7AE
+ROM:E7AE loc_E7AE:				 ; CODE	XREF: sub_E7A0+45j
+ROM:E7AE		 ldab	 1,x
+ROM:E7B0		 ldx	 #$C020
+ROM:E7B3		 abx
+ROM:E7B4		 ldaa	 1,x
+ROM:E7B6		 anda	 #$F
+ROM:E7B8		 tsx
+ROM:E7B9		 staa	 0,x
+ROM:E7BB		 ldx	 #$C020
+ROM:E7BE		 abx
+ROM:E7BF		 ldab	 0,x
+ROM:E7C1		 ldx	 #0
+ROM:E7C4		 abx
+ROM:E7C5		 ldd	 0,x
+ROM:E7C7		 tsx
+ROM:E7C8
+ROM:E7C8 loc_E7C8:				 ; CODE	XREF: sub_E7A0+2Fj
+ROM:E7C8		 tst	 0,x
+ROM:E7CA		 beq	 loc_E7D1
+ROM:E7CC		 lsrd
+ROM:E7CD		 dec	 0,x
+ROM:E7CF		 bra	 loc_E7C8
+ROM:E7D1 ; ---------------------------------------------------------------------------
+ROM:E7D1
+ROM:E7D1 loc_E7D1:				 ; CODE	XREF: sub_E7A0+2Aj
+ROM:E7D1		 tba
+ROM:E7D2		 ldab	 1,x
+ROM:E7D4		 ldx	 #$C020
+ROM:E7D7		 abx
+ROM:E7D8		 staa	 1,x
+ROM:E7DA		 tsx
+ROM:E7DB		 ldaa	 1,x
+ROM:E7DD		 cmpa	 #6
+ROM:E7DF		 bge	 loc_E7E7
+ROM:E7E1		 inc	 1,x
+ROM:E7E3		 inc	 1,x
+ROM:E7E5		 bra	 loc_E7AE
+ROM:E7E7 ; ---------------------------------------------------------------------------
+ROM:E7E7
+ROM:E7E7 loc_E7E7:				 ; CODE	XREF: sub_E7A0+3Fj
+ROM:E7E7		 tsx
+ROM:E7E8		 inx
+ROM:E7E9		 inx
+ROM:E7EA		 txs
+ROM:E7EB
+ROM:E7EB locret_E7EB:				 ; CODE	XREF: sub_E7A0+5j
+ROM:E7EB		 rts
+ROM:E7EB ; End of function sub_E7A0
+ROM:E7EB
+ROM:E7EB ; ---------------------------------------------------------------------------
 ROM:E7EC		 fcb $3F ; ?
 ROM:E7ED		 fcb $3F ; ?
 ROM:E7EE		 fcb $3F ; ?
@@ -1488,7 +1479,7 @@ ROM:E80C		 ldx	 byte_86
 ROM:E80E		 cpx	 #$180
 ROM:E811		 bcs	 loc_E81B+1
 ROM:E813		 ldaa	 TCSR2
-ROM:E815		 bita	 #$80 ;	''      ; test IC2IF
+ROM:E815		 bita	 #$80 ;	'€'      ; test IC2IF
 ROM:E817		 beq	 loc_E81B+1	 ; bra if no IC2 interrupt
 ROM:E819		 orab	 #$20 ;	' '
 ROM:E81B
@@ -1497,13 +1488,13 @@ ROM:E81B					 ; ROM:E817j
 ROM:E81B		 cpx	 #$C4DF
 ROM:E81E		 stab	 byte_A3
 ROM:E820		 ldab	 #1
-ROM:E822		 ldx	 #$9A ;	''
+ROM:E822		 ldx	 #$9A ;	'š'
 ROM:E825		 jsr	 sub_F686
 ROM:E828		 jsr	 sub_F6FC
 ROM:E82B		 bita	 #1
 ROM:E82D		 beq	 loc_E83D
 ROM:E82F		 ldaa	 byte_A3
-ROM:E831		 bita	 #$80 ;	''
+ROM:E831		 bita	 #$80 ;	'€'
 ROM:E833		 beq	 loc_E839
 ROM:E835		 ldaa	 #$F
 ROM:E837		 staa	 byte_84	 ; byte_84!!!
@@ -1610,11 +1601,11 @@ ROM:E89D		 inca
 ROM:E89E
 ROM:E89E loc_E89E:				 ; CODE	XREF: sub_E880+8j
 ROM:E89E		 staa	 byte_84
-ROM:E8A0		 ldaa	 byte_98
+ROM:E8A0		 ldaa	 count_98
 ROM:E8A2		 inca
 ROM:E8A3		 cmpa	 byte_E058
 ROM:E8A6		 bcc	 loc_E8AB
-ROM:E8A8		 staa	 byte_98
+ROM:E8A8		 staa	 count_98
 ROM:E8AA		 rts
 ROM:E8AB ; ---------------------------------------------------------------------------
 ROM:E8AB
@@ -1630,7 +1621,7 @@ ROM:E8B2		 ldab	 byte_A6
 ROM:E8B4		 andb	 #$FE ;	'þ'
 ROM:E8B6		 stab	 byte_A6
 ROM:E8B8		 clrb
-ROM:E8B9		 stab	 byte_98
+ROM:E8B9		 stab	 count_98
 ROM:E8BB
 ROM:E8BB locret_E8BB:				 ; CODE	XREF: sub_E880+1Bj
 ROM:E8BB		 rts
@@ -1712,7 +1703,7 @@ ROM:E900 ; IC2 is ???
 ROM:E900
 ROM:E900 IC_IntHandler:
 ROM:E900		 ldaa	 TCSR1
-ROM:E902		 bita	 #$80 ;	''      ; test IC1 IF
+ROM:E902		 bita	 #$80 ;	'€'      ; test IC1 IF
 ROM:E904		 bne	 loc_E909	 ; bra if no IC1 interrupt
 ROM:E906		 jmp	 loc_F77C
 ROM:E909 ; ---------------------------------------------------------------------------
@@ -1721,7 +1712,7 @@ ROM:E909 loc_E909:				 ; CODE	XREF: ROM:E904j
 ROM:E909		 ldd	 ICR1H		 ; clear interrupt flags
 ROM:E90B		 ldab	 byte_A3
 ROM:E90D		 ldaa	 TCSR2
-ROM:E90F		 bita	 #$80 ;	''
+ROM:E90F		 bita	 #$80 ;	'€'
 ROM:E911		 beq	 loc_E915+1
 ROM:E913		 orab	 #$20 ;	' '
 ROM:E915
@@ -1729,13 +1720,13 @@ ROM:E915 loc_E915:				 ; CODE	XREF: ROM:E911j
 ROM:E915		 cpx	 #$C4DF
 ROM:E918		 stab	 byte_A3
 ROM:E91A		 ldab	 #2
-ROM:E91C		 ldx	 #$99 ;	''
+ROM:E91C		 ldx	 #$99 ;	'™'
 ROM:E91F		 jsr	 sub_F686
 ROM:E922		 jsr	 sub_F6FC
 ROM:E925		 bita	 #1
 ROM:E927		 beq	 loc_E937
 ROM:E929		 ldaa	 byte_A3
-ROM:E92B		 bita	 #$80 ;	''
+ROM:E92B		 bita	 #$80 ;	'€'
 ROM:E92D		 beq	 loc_E933
 ROM:E92F		 ldaa	 #7
 ROM:E931		 staa	 byte_84
@@ -1956,10 +1947,10 @@ ROM:EA01		 nop
 ROM:EA02		 nop
 ROM:EA03		 jsr	 sub_FF86
 ROM:EA06		 jsr	 sub_FFC6
-ROM:EA09		 ldab	 byte_E7A0
-ROM:EA0C		 cmpb	 #$B6 ;	'¶'
+ROM:EA09		 ldab	 sub_E7A0	 ; E7A0	= B6h
+ROM:EA0C		 cmpb	 #$B6 ;	'¶'      ; There isn't anything at C000?
 ROM:EA0E		 bne	 loc_EA13
-ROM:EA10		 jsr	 byte_E7A0
+ROM:EA10		 jsr	 sub_E7A0	 ; always call
 ROM:EA13
 ROM:EA13 loc_EA13:				 ; CODE	XREF: ROM:EA0Ej
 ROM:EA13		 jsr	 Get_MAP
@@ -1993,7 +1984,7 @@ ROM:EA41 loc_EA41:				 ; CODE	XREF: sub_EA34+6j
 ROM:EA41		 ldab	 #$40 ;	'@'
 ROM:EA43		 ldaa	 byte_60
 ROM:EA45		 beq	 loc_EA49
-ROM:EA47		 addb	 #$80 ;	''
+ROM:EA47		 addb	 #$80 ;	'€'
 ROM:EA49
 ROM:EA49 loc_EA49:				 ; CODE	XREF: sub_EA34+11j
 ROM:EA49		 ldaa	 Baro_IAT_5E
@@ -2056,11 +2047,11 @@ ROM:EA8B loc_EA8B:				 ; CODE	XREF: ROM:EA1FP
 ROM:EA8B		 ldd	 byte_86
 ROM:EA8D		 subd	 word_E019
 ROM:EA90		 bcc	 loc_EAB7+1
-ROM:EA92		 ldaa	 byte_75
+ROM:EA92		 ldaa	 TPS
 ROM:EA94		 cmpa	 byte_E01B
 ROM:EA97		 bcc	 loc_EAB7+1
 ROM:EA99		 clrb
-ROM:EA9A		 ldaa	 byte_75
+ROM:EA9A		 ldaa	 TPS
 ROM:EA9C		 suba	 byte_79
 ROM:EA9E		 bls	 loc_EAB9
 ROM:EAA0		 ldx	 #$E1C0
@@ -2171,12 +2162,12 @@ ROM:EB10		 nega
 ROM:EB11		 lsld
 ROM:EB12		 lsld
 ROM:EB13		 std	 byte_B3
-ROM:EB15		 ldaa	 byte_A0
+ROM:EB15		 ldaa	 status_A0
 ROM:EB17
 ROM:EB17 loc_EB17:				 ; CODE	XREF: ROM:loc_EAB7j
 ROM:EB17		 bita	 #1
 ROM:EB19		 beq	 loc_EB39
-ROM:EB1B		 ldaa	 byte_75
+ROM:EB1B		 ldaa	 TPS
 ROM:EB1D		 jsr	 sub_FE7A
 ROM:EB20		 adcb	 $11,x
 ROM:EB22		 ldab	 #$10
@@ -2246,7 +2237,7 @@ ROM:EB73
 ROM:EB74 ; ---------------------------------------------------------------------------
 ROM:EB74
 ROM:EB74 loc_EB74:				 ; CODE	XREF: ROM:EA2DP
-ROM:EB74		 ldaa	 byte_A0
+ROM:EB74		 ldaa	 status_A0
 ROM:EB76		 bita	 #4
 ROM:EB78		 beq	 loc_EB7F
 ROM:EB7A		 ldaa	 byte_E03C
@@ -2261,7 +2252,7 @@ ROM:EB87		 ldd	 byte_86
 ROM:EB89		 jsr	 sub_FE88
 ROM:EB89 ; ---------------------------------------------------------------------------
 ROM:EB8C		 fcb   3
-ROM:EB8D		 fcb $80 ; 
+ROM:EB8D		 fcb $80 ; €
 ROM:EB8E		 fcb   0
 ROM:EB8F ; ---------------------------------------------------------------------------
 ROM:EB8F		 bra	 loc_EB96
@@ -2293,10 +2284,10 @@ ROM:EBAE
 ROM:EBAE loc_EBAE:				 ; CODE	XREF: ROM:EB9Cj
 ROM:EBAE					 ; ROM:EBAAj
 ROM:EBAE		 std	 byte_B3
-ROM:EBB0		 ldab	 byte_A0
+ROM:EBB0		 ldab	 status_A0
 ROM:EBB2		 bitb	 #2
 ROM:EBB4		 beq	 loc_EBD3
-ROM:EBB6		 ldaa	 byte_75
+ROM:EBB6		 ldaa	 TPS
 ROM:EBB8		 jsr	 sub_FE7A
 ROM:EBBB		 adcb	 $11,x
 ROM:EBBD		 ldab	 #$10
@@ -2398,7 +2389,7 @@ ROM:EC30 loc_EC30:				 ; CODE	XREF: ROM:EC2Cj
 ROM:EC30		 ldx	 0,x
 ROM:EC32		 cpx	 byte_86
 ROM:EC34		 bcc	 loc_EC5D
-ROM:EC36		 ldab	 byte_A0
+ROM:EC36		 ldab	 status_A0
 ROM:EC38		 andb	 #$BF ;	'¿'
 ROM:EC3A		 bra	 loc_EC5B
 ROM:EC3C ; ---------------------------------------------------------------------------
@@ -2409,24 +2400,24 @@ ROM:EC3C		 ldaa	 #$10
 ROM:EC3E		 staa	 byte_84
 ROM:EC40		 ldaa	 byte_A3
 ROM:EC42		 bmi	 loc_EC4A
-ROM:EC44		 ldaa	 byte_A0
+ROM:EC44		 ldaa	 status_A0
 ROM:EC46		 bita	 #$40 ;	'@'
 ROM:EC48		 bne	 loc_EC5D
 ROM:EC4A
 ROM:EC4A loc_EC4A:				 ; CODE	XREF: ROM:EC42j
 ROM:EC4A		 clra
 ROM:EC4B		 clrb
-ROM:EC4C		 std	 byte_86
+ROM:EC4C		 std	 byte_86	 ; clear byte_86
 ROM:EC4E		 staa	 count_A1
 ROM:EC50		 ldaa	 byte_A3
 ROM:EC52		 anda	 #7
 ROM:EC54		 staa	 byte_A3
 ROM:EC56		 cli
-ROM:EC57		 ldab	 byte_A0
+ROM:EC57		 ldab	 status_A0
 ROM:EC59		 orab	 #$40 ;	'@'
 ROM:EC5B
 ROM:EC5B loc_EC5B:				 ; CODE	XREF: ROM:EC3Aj
-ROM:EC5B		 stab	 byte_A0
+ROM:EC5B		 stab	 status_A0
 ROM:EC5D
 ROM:EC5D loc_EC5D:				 ; CODE	XREF: ROM:EC34j
 ROM:EC5D					 ; ROM:EC48j
@@ -2441,17 +2432,17 @@ ROM:EC69 loc_EC69:				 ; CODE	XREF: ROM:EC61j
 ROM:EC69		 sei
 ROM:EC6A		 ldaa	 PORT1
 ROM:EC6C		 oraa	 #$C
-ROM:EC6E		 staa	 PORT1
+ROM:EC6E		 staa	 PORT1		 ; clear LED3 and LED2
 ROM:EC70		 clra
 ROM:EC71		 clrb
-ROM:EC72		 std	 byte_86
-ROM:EC74		 staa	 byte_AD
+ROM:EC72		 std	 byte_86	 ; clear byte_86
+ROM:EC74		 staa	 byte_AD	 ; clear byte_AD
 ROM:EC76
 ROM:EC76 loc_EC76:				 ; CODE	XREF: ROM:EC67j
 ROM:EC76		 sei
 ROM:EC77		 ldaa	 PORT2
 ROM:EC79		 eora	 #$10
-ROM:EC7B		 staa	 PORT2
+ROM:EC7B		 staa	 PORT2		 ; toggle watchdog reset
 ROM:EC7D		 cli
 ROM:EC7E		 ldab	 #4
 ROM:EC80		 ldx	 #$EFC3
@@ -2857,14 +2848,14 @@ ROM:EE63 loc_EE63:				 ; CODE	XREF: sub_F5E6+7J
 ROM:EE63					 ; DATA	XREF: sub_F5E6r
 ROM:EE63		 ldd	 #1
 ROM:EE66		 std	 byte_AF	 ; temporary register (Heap)?
-ROM:EE68		 ldaa	 #$80 ;	''
+ROM:EE68		 ldaa	 #$80 ;	'€'
 ROM:EE6A		 staa	 PIA_Result
 ROM:EE6D		 ldaa	 #$2C ;	','
 ROM:EE6F
 ROM:EE6F loc_EE6F:				 ; CODE	XREF: sub_F5E6-75Dj
 ROM:EE6F		 staa	 byte_B1
 ROM:EE71		 ldab	 byte_B0
-ROM:EE73		 jsr	 ADC_F485
+ROM:EE73		 jsr	 PIA_F485
 ROM:EE76		 beq	 loc_EE7C
 ROM:EE78		 orab	 byte_AF	 ; temporary register (Heap)?
 ROM:EE7A		 bra	 loc_EE7F
@@ -2905,10 +2896,10 @@ ROM:EEA6
 ROM:EEA6
 ROM:EEA6 sub_EEA6:				 ; CODE	XREF: sub_F47A+7P
 ROM:EEA6					 ; DATA	XREF: sub_F47Ar
-ROM:EEA6		 ldaa	 #$80 ;	''
+ROM:EEA6		 ldaa	 #$80 ;	'€'
 ROM:EEA8		 staa	 PIA_Result
 ROM:EEAB		 ldaa	 #$2A ;	'*'
-ROM:EEAD		 jsr	 ADC_F485
+ROM:EEAD		 jsr	 PIA_F485
 ROM:EEB0		 bne	 loc_EEC8
 ROM:EEB2		 ldab	 byte_A7
 ROM:EEB4		 bmi	 loc_EEC2
@@ -2931,10 +2922,10 @@ ROM:EECC		 stab	 byte_A7
 ROM:EECE
 ROM:EECE loc_EECE:				 ; CODE	XREF: sub_EEA6+14j
 ROM:EECE					 ; sub_EEA6+20j
-ROM:EECE		 ldaa	 #$80 ;	''
+ROM:EECE		 ldaa	 #$80 ;	'€'
 ROM:EED0		 staa	 PIA_Result
 ROM:EED3		 ldaa	 #$27 ;	'''
-ROM:EED5		 jsr	 ADC_F485
+ROM:EED5		 jsr	 PIA_F485
 ROM:EED8		 beq	 loc_EEDD
 ROM:EEDA		 clra
 ROM:EEDB		 staa	 byte_A9
@@ -3021,7 +3012,7 @@ ROM:EF44		 ldd	 #$2F10
 ROM:EF47		 staa	 count_91
 ROM:EF49		 stab	 byte_84
 ROM:EF4B initialise ADC
-ROM:EF4B		 ldd	 #$80 ;	''
+ROM:EF4B		 ldd	 #$80 ;	'€'
 ROM:EF4E		 staa	 PIA_Base	 ; start a conversion channel 0?
 ROM:EF51		 stab	 PIA_Result	 ; write to the	result register?
 ROM:EF54 initialise some more RAM
@@ -3057,9 +3048,9 @@ ROM:EF7E
 ROM:EF7E loc_EF7E:				 ; CODE	XREF: ROM:EF79j
 ROM:EF7E		 ldab	 byte_A7
 ROM:EF80		 ldaa	 #$2A ;	'*'
-ROM:EF82		 jsr	 ADC_F485
+ROM:EF82		 jsr	 PIA_F485
 ROM:EF85		 bne	 loc_EF89
-ROM:EF87		 orab	 #$80 ;	''
+ROM:EF87		 orab	 #$80 ;	'€'
 ROM:EF89
 ROM:EF89 loc_EF89:				 ; CODE	XREF: ROM:EF85j
 ROM:EF89		 stab	 byte_A7
@@ -3084,7 +3075,7 @@ ROM:EFB2		 staa	 PORT2
 ROM:EFB4		 anda	 #$F7 ;	'÷'
 ROM:EFB6		 staa	 PORT2
 ROM:EFB8		 ldaa	 #$27 ;	'''
-ROM:EFBA		 jsr	 ADC_F485	 ; do something
+ROM:EFBA		 jsr	 PIA_F485	 ; do something
 ROM:EFBD		 bne	 X_EFC3		 ; if not zero jump
 ROM:EFBF		 ldaa	 #$7F ;	''      ; else byte_A9 = 7F
 ROM:EFC1		 staa	 byte_A9
@@ -3106,7 +3097,7 @@ ROM:EFD3		 fcb $7F ; 
 ROM:EFD4		 fcb $40 ; @
 ROM:EFD5		 fdb $F1EC		 ; jump	to address F1EC
 ROM:EFD7		 fcb $FF
-ROM:EFD8		 fcb $80 ; 
+ROM:EFD8		 fcb $80 ; €
 ROM:EFD9		 fdb $F5E6		 ; jump	to address F5E6
 ROM:EFDB		 fcb   0
 ROM:EFDC byte_EFDC:	 fcb 1			 ; CODE	XREF: sub_F0C7+7P
@@ -3187,14 +3178,14 @@ ROM:F031		 cpx	 X_E000
 ROM:F034		 bls	 loc_F058
 ROM:F036		 cpx	 word_E002
 ROM:F039		 bcs	 loc_F05E
-ROM:F03B		 ldab	 byte_A0
+ROM:F03B		 ldab	 status_A0
 ROM:F03D		 andb	 #$BF ;	'¿'
 ROM:F03F		 bra	 loc_F05C
 ROM:F041 ; ---------------------------------------------------------------------------
 ROM:F041
 ROM:F041 loc_F041:				 ; CODE	XREF: ROM:F028j
 ROM:F041					 ; ROM:F02Cj
-ROM:F041		 ldaa	 byte_A0
+ROM:F041		 ldaa	 status_A0
 ROM:F043		 bita	 #$40 ;	'@'
 ROM:F045		 bne	 loc_F05E
 ROM:F047		 ldaa	 #$10
@@ -3209,11 +3200,11 @@ ROM:F055		 staa	 byte_A3
 ROM:F057		 cli
 ROM:F058
 ROM:F058 loc_F058:				 ; CODE	XREF: ROM:F034j
-ROM:F058		 ldab	 byte_A0
+ROM:F058		 ldab	 status_A0
 ROM:F05A		 orab	 #$40 ;	'@'
 ROM:F05C
 ROM:F05C loc_F05C:				 ; CODE	XREF: ROM:F03Fj
-ROM:F05C		 stab	 byte_A0
+ROM:F05C		 stab	 status_A0
 ROM:F05E
 ROM:F05E loc_F05E:				 ; CODE	XREF: ROM:F039j
 ROM:F05E					 ; ROM:F045j
@@ -3262,10 +3253,10 @@ ROM:F097		 nop
 ROM:F098		 nop
 ROM:F099		 jsr	 sub_FF86
 ROM:F09C		 jsr	 sub_FFC6
-ROM:F09F		 ldab	 byte_E7A0
+ROM:F09F		 ldab	 sub_E7A0	 ; E7A0	= B6h
 ROM:F0A2		 cmpb	 #$B6 ;	'¶'
 ROM:F0A4		 bne	 loc_F0A9
-ROM:F0A6		 jsr	 byte_E7A0
+ROM:F0A6		 jsr	 sub_E7A0	 ; always call
 ROM:F0A9
 ROM:F0A9 loc_F0A9:				 ; CODE	XREF: ROM:F0A4j
 ROM:F0A9		 jsr	 Get_MAP
@@ -3323,12 +3314,12 @@ ROM:F0F2
 ROM:F0F2
 ROM:F0F2 Get_MAP:				 ; CODE	XREF: ROM:loc_EA13P
 ROM:F0F2					 ; ROM:EF9FP ...
-ROM:F0F2		 ldaa	 #$80 ;	''      ; 80h = MAPL
+ROM:F0F2		 ldaa	 #$80 ;	'€'      ; 80h = MAPL
 ROM:F0F4
 ROM:F0F4 get_MAPL:
 ROM:F0F4		 jsr	 readADC
 ROM:F0F7		 tba
-ROM:F0F8		 ldx	 #$95 ;	''      ; return address = 95
+ROM:F0F8		 ldx	 #$95 ;	'•'      ; return address = 95
 ROM:F0FB		 ldab	 #1		 ; pointer to limits
 ROM:F0FD		 jsr	 limits_F5F1	 ; apply limits
 ROM:F100		 ldab	 MAPL_Raw
@@ -3346,7 +3337,7 @@ ROM:F10F get_MAPR:				 ; 81h = MAPR
 ROM:F10F		 ldaa	 #$81 ;	''
 ROM:F111		 jsr	 readADC
 ROM:F114		 tba
-ROM:F115		 ldx	 #$96 ;	''
+ROM:F115		 ldx	 #$96 ;	'–'
 ROM:F118		 ldab	 #0		 ; pointer to limits
 ROM:F11A		 jsr	 limits_F5F1	 ; apply limits
 ROM:F11D		 ldab	 MAPR_Raw
@@ -3380,7 +3371,7 @@ ROM:F13A loc_F13A:				 ; CODE	XREF: sub_F12D+6j
 ROM:F13A		 ldab	 #$40 ;	'@'
 ROM:F13C		 ldaa	 byte_60
 ROM:F13E		 beq	 loc_F142
-ROM:F140		 addb	 #$80 ;	''
+ROM:F140		 addb	 #$80 ;	'€'
 ROM:F142
 ROM:F142 loc_F142:				 ; CODE	XREF: sub_F12D+11j
 ROM:F142		 ldaa	 Baro_IAT_5E
@@ -3436,10 +3427,10 @@ ROM:F17E		 nega
 ROM:F17F		 lsld
 ROM:F180		 lsld
 ROM:F181		 std	 byte_B3
-ROM:F183		 ldaa	 byte_A0
+ROM:F183		 ldaa	 status_A0
 ROM:F185		 bita	 #1
 ROM:F187		 beq	 loc_F1A7
-ROM:F189		 ldaa	 byte_75
+ROM:F189		 ldaa	 TPS
 ROM:F18B		 jsr	 sub_FE7A
 ROM:F18E		 adcb	 $11,x
 ROM:F190		 ldab	 #$10
@@ -3507,7 +3498,7 @@ ROM:F1D7		 addd	 #$23C6
 ROM:F1DA		 sba
 ROM:F1DB		 cmpa	 #$30 ;	'0'
 ROM:F1DD		 bcs	 loc_F1EA
-ROM:F1DF		 cmpa	 #$80 ;	''
+ROM:F1DF		 cmpa	 #$80 ;	'€'
 ROM:F1E1		 bcc	 loc_F1E8
 ROM:F1E3		 aslb
 ROM:F1E4		 mul
@@ -3531,20 +3522,20 @@ ROM:F1EC ; =============== S U B R O U T I N E =================================
 ROM:F1EC
 ROM:F1EC
 ROM:F1EC get_Temps:				 ; CODE	XREF: ROM:EF92P
-ROM:F1EC		 ldaa	 #$83 ;	''      ; 83h = IAT
+ROM:F1EC		 ldaa	 #$83 ;	'ƒ'      ; 83h = IAT
 ROM:F1EE		 bsr	 readADC
 ROM:F1F0		 tba
-ROM:F1F1		 ldx	 #$92 ;	''      ; IAT_RAW
+ROM:F1F1		 ldx	 #$92 ;	'’'      ; IAT_RAW
 ROM:F1F4		 ldab	 #4		 ; pointer to limits
 ROM:F1F6		 jsr	 limits_F5F1	 ; test	against	limits
 ROM:F1F9		 staa	 IAT
 ROM:F1FB		 ldx	 #$E110
 ROM:F1FE		 jsr	 sub_FE99
 ROM:F201		 staa	 IAT_7D
-ROM:F203		 ldaa	 #$84 ;	''      ; 84h = CTS
+ROM:F203		 ldaa	 #$84 ;	'„'      ; 84h = CTS
 ROM:F205		 bsr	 readADC
 ROM:F207		 tba
-ROM:F208		 ldx	 #$93 ;	''      ; CTS_Raw
+ROM:F208		 ldx	 #$93 ;	'“'      ; CTS_Raw
 ROM:F20B		 ldab	 #5		 ; pointer to limits
 ROM:F20D		 jsr	 limits_F5F1
 ROM:F210		 staa	 CTS
@@ -3576,7 +3567,7 @@ ROM:F241		 ldx	 #$E0C0
 ROM:F244
 ROM:F244 loc_F244:				 ; CODE	XREF: get_Temps+53j
 ROM:F244		 ldaa	 byte_A7
-ROM:F246		 bita	 #$80 ;	''
+ROM:F246		 bita	 #$80 ;	'€'
 ROM:F248		 bne	 locret_F25F
 ROM:F24A		 ldd	 byte_60
 ROM:F24C		 subb	 0,x
@@ -3625,10 +3616,10 @@ ROM:F26E					 ; sub_F2ACp
 ROM:F26E		 ldaa	 #$C3 ;	'Ã'
 ROM:F270		 ldab	 byte_A9
 ROM:F272		 bne	 loc_F282
-ROM:F274		 ldaa	 #$82 ;	''      ; Baro = AN2
+ROM:F274		 ldaa	 #$82 ;	'‚'      ; Baro = AN2
 ROM:F276		 jsr	 readADC
 ROM:F279		 tba
-ROM:F27A		 ldx	 #$94 ;	''      ; 94 = Baro
+ROM:F27A		 ldx	 #$94 ;	'”'      ; 94 = Baro
 ROM:F27D		 ldab	 #3
 ROM:F27F		 jsr	 limits_F5F1
 ROM:F282
@@ -3697,7 +3688,7 @@ ROM:F2D6		 rts
 ROM:F2D7 ; ---------------------------------------------------------------------------
 ROM:F2D7
 ROM:F2D7 loc_F2D7:				 ; CODE	XREF: sub_F2AC+1Aj
-ROM:F2D7		 bitb	 #$80 ;	''      ; test P27
+ROM:F2D7		 bitb	 #$80 ;	'€'      ; test P27
 ROM:F2D9		 bne	 loc_F32A
 ROM:F2DB		 ldaa	 byte_90
 ROM:F2DD		 bne	 loc_F30B
@@ -3791,7 +3782,7 @@ ROM:F342
 ROM:F342
 ROM:F342 get_VBatt:				 ; CODE	XREF: ROM:EA19P
 ROM:F342					 ; ROM:EF95P ...
-ROM:F342		 ldaa	 #$85 ;	''      ; VBAtt = AN5
+ROM:F342		 ldaa	 #$85 ;	'…'      ; VBAtt = AN5
 ROM:F344		 jsr	 readADC
 ROM:F347		 stab	 VBatt		 ; VBatt = B+ *	0.2857
 ROM:F349		 tba
@@ -3820,16 +3811,16 @@ ROM:F371		 lsrd
 ROM:F372		 std	 VBatt_69	 ; from	the LUT	at E190
 ROM:F374
 ROM:F374 code_F374:
-ROM:F374		 ldaa	 byte_75
+ROM:F374		 ldaa	 TPS
 ROM:F376		 suba	 byte_79
 ROM:F378		 bcs	 loc_F38C
 ROM:F37A		 cmpa	 byte_E03B
 ROM:F37D		 bcs	 loc_F38C
 ROM:F37F		 ldaa	 byte_E039
 ROM:F382		 staa	 count_6D
-ROM:F384		 ldaa	 byte_A0
+ROM:F384		 ldaa	 status_A0
 ROM:F386		 oraa	 #8
-ROM:F388		 staa	 byte_A0
+ROM:F388		 staa	 status_A0
 ROM:F38A		 bra	 loc_F39B
 ROM:F38C ; ---------------------------------------------------------------------------
 ROM:F38C
@@ -3842,16 +3833,16 @@ ROM:F391		 staa	 count_6D
 ROM:F393		 bne	 loc_F39B
 ROM:F395
 ROM:F395 loc_F395:				 ; CODE	XREF: get_VBatt+4Cj
-ROM:F395		 ldaa	 byte_A0
+ROM:F395		 ldaa	 status_A0
 ROM:F397		 anda	 #$F7 ;	'÷'
-ROM:F399		 staa	 byte_A0
+ROM:F399		 staa	 status_A0
 ROM:F39B
 ROM:F39B loc_F39B:				 ; CODE	XREF: get_VBatt+48j
 ROM:F39B					 ; get_VBatt+51j
 ROM:F39B		 ldd	 byte_86
 ROM:F39D		 subd	 word_E036
 ROM:F3A0		 bcc	 loc_F3AB+1	 ; 3-cyle NOP, modified	code or	duff binary?
-ROM:F3A2		 ldaa	 byte_A0
+ROM:F3A2		 ldaa	 status_A0
 ROM:F3A4		 bita	 #8
 ROM:F3A6		 beq	 loc_F3AB+1	 ; 3-cyle NOP, modified	code or	duff binary?
 ROM:F3A8		 ldaa	 byte_E03A
@@ -3869,13 +3860,13 @@ ROM:F3B0
 ROM:F3B0
 ROM:F3B0 maybe_TPS?:				 ; CODE	XREF: ROM:EF8BP
 ROM:F3B0					 ; sub_F3C2+8p
-ROM:F3B0		 ldaa	 #$86 ;	''
+ROM:F3B0		 ldaa	 #$86 ;	'†'
 ROM:F3B2		 jsr	 readADC
 ROM:F3B5		 tba
-ROM:F3B6		 ldx	 #$97 ;	''
+ROM:F3B6		 ldx	 #$97 ;	'—'
 ROM:F3B9		 ldab	 #2
 ROM:F3BB		 jsr	 limits_F5F1
-ROM:F3BE		 staa	 byte_75
+ROM:F3BE		 staa	 TPS
 ROM:F3C0		 tab
 ROM:F3C1		 rts
 ROM:F3C1 ; End of function maybe_TPS?
@@ -3888,16 +3879,16 @@ ROM:F3C2 sub_F3C2:				 ; CODE	XREF: ROM:EA1CP
 ROM:F3C2					 ; ROM:F0B2P
 ROM:F3C2		 ldd	 byte_77
 ROM:F3C4		 std	 byte_78
-ROM:F3C6		 ldd	 byte_75
+ROM:F3C6		 ldd	 TPS
 ROM:F3C8		 std	 byte_76
 ROM:F3CA		 bsr	 maybe_TPS?
-ROM:F3CC		 ldaa	 byte_A0
+ROM:F3CC		 ldaa	 status_A0
 ROM:F3CE		 subb	 byte_79
 ROM:F3D0		 bcc	 loc_F3DA
 ROM:F3D2
 ROM:F3D2 loc_F3D2:				 ; CODE	XREF: sub_F3C2+23j
 ROM:F3D2		 anda	 #$DF ;	'ß'
-ROM:F3D4		 staa	 byte_A0
+ROM:F3D4		 staa	 status_A0
 ROM:F3D6
 ROM:F3D6 loc_F3D6:				 ; CODE	XREF: sub_F3C2+1Fj
 ROM:F3D6		 clr	 Count_9D
@@ -3933,7 +3924,7 @@ ROM:F3FB loc_F3FB:				 ; CODE	XREF: get_VBatt:loc_F3ABj
 ROM:F3FB		 ldd	 byte_86
 ROM:F3FD		 subd	 word_E019
 ROM:F400		 bcc	 locret_F424
-ROM:F402		 ldaa	 byte_75
+ROM:F402		 ldaa	 TPS
 ROM:F404		 cmpa	 byte_E01B
 ROM:F407		 bcc	 locret_F424
 ROM:F409		 ldaa	 count_C2
@@ -3942,11 +3933,11 @@ ROM:F40D		 ldaa	 byte_E02D
 ROM:F410		 staa	 count_C2
 ROM:F412		 ldaa	 byte_E020
 ROM:F415		 staa	 Count_9D
-ROM:F417		 ldaa	 byte_A0
+ROM:F417		 ldaa	 status_A0
 ROM:F419		 bita	 #$20 ;	' '
 ROM:F41B		 bne	 locret_F424
 ROM:F41D		 oraa	 #$20 ;	' '
-ROM:F41F		 staa	 byte_A0
+ROM:F41F		 staa	 status_A0
 ROM:F421		 jsr	 loc_ED01
 ROM:F424
 ROM:F424 locret_F424:				 ; CODE	XREF: sub_F3C2+3Ej
@@ -4047,7 +4038,7 @@ ROM:F47A
 ROM:F47A
 ROM:F47A sub_F47A:
 ROM:F47A		 ldaa	 sub_EEA6
-ROM:F47D		 cmpa	 #$86 ;	''
+ROM:F47D		 cmpa	 #$86 ;	'†'
 ROM:F47F		 bne	 locret_F484
 ROM:F481		 jsr	 sub_EEA6
 ROM:F484
@@ -4055,24 +4046,24 @@ ROM:F484 locret_F484:				 ; CODE	XREF: sub_F47A+5j
 ROM:F484		 rts
 ROM:F484 ; End of function sub_F47A
 ROM:F484
-ROM:F485 ADC_F484:
-ROM:F485 Wait for ADC? called with 27, 2A, 2B or 2C
-ROM:F485 sets A	bit2 when complete
+ROM:F485 PIA_F484:
+ROM:F485 Called	with 27, 2A, 2B	or 2C
+ROM:F485 returns a value in A
 ROM:F485
 ROM:F485 ; =============== S U B R O U T I N E =======================================
 ROM:F485
 ROM:F485
-ROM:F485 ADC_F485:				 ; CODE	XREF: sub_F5E6-773P
+ROM:F485 PIA_F485:				 ; CODE	XREF: sub_F5E6-773P
 ROM:F485					 ; sub_EEA6+7P	...
 ROM:F485		 staa	 PIA_Ctrl
 ROM:F488
-ROM:F488 loc_F488:				 ; CODE	XREF: ADC_F485+8j
-ROM:F488		 ldaa	 PIA_Status
-ROM:F48B		 bita	 #$40 ;	'@'
-ROM:F48D		 bne	 loc_F488
-ROM:F48F		 anda	 #$20 ;	' '
+ROM:F488 loc_F488:				 ; CODE	XREF: PIA_F485+8j
+ROM:F488		 ldaa	 PIA_Status	 ; get status
+ROM:F48B		 bita	 #$40 ;	'@'      ; test bit6
+ROM:F48D		 bne	 loc_F488	 ; loop	back if	not done
+ROM:F48F		 anda	 #$20 ;	' '      ; clear all but bit5
 ROM:F491		 rts
-ROM:F491 ; End of function ADC_F485
+ROM:F491 ; End of function PIA_F485
 ROM:F491
 ROM:F492 ; ---------------------------------------------------------------------------
 ROM:F492
@@ -4110,13 +4101,13 @@ ROM:F4BB		 mul
 ROM:F4BC		 lsld
 ROM:F4BD		 lsld
 ROM:F4BE		 tab
-ROM:F4BF		 ldaa	 byte_A0
+ROM:F4BF		 ldaa	 status_A0
 ROM:F4C1		 bita	 #$10
 ROM:F4C3		 bne	 loc_F4CE
 ROM:F4C5		 subb	 byte_AF	 ; temporary register (Heap)?
 ROM:F4C7		 bcc	 locret_F4CD
 ROM:F4C9		 oraa	 #$10
-ROM:F4CB		 staa	 byte_A0
+ROM:F4CB		 staa	 status_A0
 ROM:F4CD
 ROM:F4CD locret_F4CD:				 ; CODE	XREF: ROM:F4C7j
 ROM:F4CD		 rts
@@ -4134,9 +4125,9 @@ ROM:F4D8		 ldx	 #$E015
 ROM:F4DB		 jsr	 loc_ED01
 ROM:F4DE
 ROM:F4DE loc_F4DE:				 ; CODE	XREF: ROM:F4B1j
-ROM:F4DE		 ldaa	 byte_A0
+ROM:F4DE		 ldaa	 status_A0
 ROM:F4E0		 anda	 #$EF ;	'ï'
-ROM:F4E2		 staa	 byte_A0
+ROM:F4E2		 staa	 status_A0
 ROM:F4E4
 ROM:F4E4 locret_F4E4:				 ; CODE	XREF: ROM:F4D6j
 ROM:F4E4		 rts
@@ -4149,7 +4140,7 @@ ROM:F4E5					 ; ROM:F0C3P
 ROM:F4E5		 ldd	 byte_86
 ROM:F4E7		 subd	 word_E032
 ROM:F4EA		 bcc	 loc_F4FA+1
-ROM:F4EC		 ldaa	 byte_75
+ROM:F4EC		 ldaa	 TPS
 ROM:F4EE		 suba	 byte_79
 ROM:F4F0		 bcs	 loc_F4FA+1
 ROM:F4F2		 cmpa	 byte_E034
@@ -4175,57 +4166,63 @@ ROM:F50E		 stab	 byte_62
 ROM:F510		 rts
 ROM:F510 ; End of function sub_F4E5
 ROM:F510
+ROM:F511 sub_F511:
+ROM:F511  called with X	= E00Eh, B=1h
+ROM:F511  or	      X	= E030h, B=2h
+ROM:F511  sets (fault?)	flags in status_A0
 ROM:F511
 ROM:F511 ; =============== S U B R O U T I N E =======================================
 ROM:F511
 ROM:F511
 ROM:F511 sub_F511:				 ; CODE	XREF: ROM:EB05P
 ROM:F511					 ; ROM:EB84P ...
-ROM:F511		 ldaa	 MAPL_Raw
-ROM:F513		 beq	 loc_F521
-ROM:F515		 ldaa	 MAPR_Raw
-ROM:F517		 beq	 loc_F521
-ROM:F519		 ldaa	 byte_97
-ROM:F51B		 bne	 loc_F52A
-ROM:F51D		 orab	 byte_A0
+ROM:F511		 ldaa	 MAPL_Raw	 ; get MAPL
+ROM:F513		 beq	 MAP_fault_F521
+ROM:F515		 ldaa	 MAPR_Raw	 ; get MAPR
+ROM:F517		 beq	 MAP_fault_F521
+ROM:F519		 ldaa	 TPS_Raw	 ; get TPS
+ROM:F51B		 bne	 loc_F52A	 ; bra if no fault
+ROM:F51D
+ROM:F51D TPS_fault:				 ; else	set bit1 or bit0
+ROM:F51D		 orab	 status_A0
 ROM:F51F		 bra	 loc_F543
 ROM:F521 ; ---------------------------------------------------------------------------
 ROM:F521
-ROM:F521 loc_F521:				 ; CODE	XREF: sub_F511+2j
+ROM:F521 MAP_fault_F521:			 ; CODE	XREF: sub_F511+2j
 ROM:F521					 ; sub_F511+6j
-ROM:F521		 ldaa	 byte_97
-ROM:F523		 beq	 loc_F532
-ROM:F525		 comb
-ROM:F526		 andb	 byte_A0
+ROM:F521		 ldaa	 TPS_Raw
+ROM:F523		 beq	 loc_F532	 ; bra if fault
+ROM:F525		 comb			 ; elase clear flags
+ROM:F526		 andb	 status_A0	 ; clear flags?
 ROM:F528		 bra	 loc_F543
 ROM:F52A ; ---------------------------------------------------------------------------
 ROM:F52A
 ROM:F52A loc_F52A:				 ; CODE	XREF: sub_F511+Aj
-ROM:F52A		 pulx
-ROM:F52B		 ldab	 byte_A0
+ROM:F52A		 pulx			 ; retrieve table pointer
+ROM:F52B		 ldab	 status_A0
 ROM:F52D		 orab	 #4
-ROM:F52F		 stab	 byte_A0
+ROM:F52F		 stab	 status_A0	 ; set status_A0 bit2
 ROM:F531		 rts
 ROM:F532 ; ---------------------------------------------------------------------------
 ROM:F532
 ROM:F532 loc_F532:				 ; CODE	XREF: sub_F511+12j
-ROM:F532		 ldaa	 byte_75
-ROM:F534		 cmpa	 0,x
-ROM:F536		 bcc	 loc_F53D
-ROM:F538		 comb
-ROM:F539		 andb	 byte_A0
+ROM:F532		 ldaa	 TPS
+ROM:F534		 cmpa	 0,x		 ; TPS - table value 1
+ROM:F536		 bcc	 loc_F53D	 ; bra if TPS>table value
+ROM:F538		 comb			 ; else	clear flags
+ROM:F539		 andb	 status_A0
 ROM:F53B		 bra	 loc_F543
 ROM:F53D ; ---------------------------------------------------------------------------
 ROM:F53D
 ROM:F53D loc_F53D:				 ; CODE	XREF: sub_F511+25j
-ROM:F53D		 cmpa	 1,x
-ROM:F53F		 bls	 locret_F547
-ROM:F541		 orab	 byte_A0
+ROM:F53D		 cmpa	 1,x		 ; TPS - table value 2
+ROM:F53F		 bls	 locret_F547	 ; bra if TPS< table value 2
+ROM:F541		 orab	 status_A0	 ; else	set status_A0 bit0 or 1
 ROM:F543
 ROM:F543 loc_F543:				 ; CODE	XREF: sub_F511+Ej
 ROM:F543					 ; sub_F511+17j ...
 ROM:F543		 andb	 #$FB ;	'û'
-ROM:F545		 stab	 byte_A0
+ROM:F545		 stab	 status_A0	 ; clear status_A0 flags
 ROM:F547
 ROM:F547 locret_F547:				 ; CODE	XREF: sub_F511+2Ej
 ROM:F547		 rts
@@ -4234,7 +4231,7 @@ ROM:F547
 ROM:F548 ; ---------------------------------------------------------------------------
 ROM:F548
 ROM:F548 loc_F548:				 ; CODE	XREF: ROM:F0C0P
-ROM:F548		 ldaa	 byte_A0
+ROM:F548		 ldaa	 status_A0
 ROM:F54A
 ROM:F54A loc_F54A:				 ; CODE	XREF: sub_F4E5:loc_F4FAj
 ROM:F54A		 bita	 #4
@@ -4251,7 +4248,7 @@ ROM:F55A		 ldd	 byte_86
 ROM:F55C		 jsr	 sub_FE88
 ROM:F55C ; ---------------------------------------------------------------------------
 ROM:F55F		 fcb   3
-ROM:F560		 fcb $80 ; 
+ROM:F560		 fcb $80 ; €
 ROM:F561		 fcb   0
 ROM:F562		 fcb $20
 ROM:F563		 fcb   5
@@ -4280,10 +4277,10 @@ ROM:F581
 ROM:F581 loc_F581:				 ; CODE	XREF: ROM:F56Fj
 ROM:F581					 ; ROM:F57Dj
 ROM:F581		 std	 byte_B3
-ROM:F583		 ldab	 byte_A0
+ROM:F583		 ldab	 status_A0
 ROM:F585		 bitb	 #2
 ROM:F587		 beq	 loc_F5A6
-ROM:F589		 ldaa	 byte_75
+ROM:F589		 ldaa	 TPS
 ROM:F58B		 jsr	 sub_FE7A
 ROM:F58E		 adcb	 $11,x
 ROM:F590		 ldab	 #$10
@@ -4449,7 +4446,7 @@ ROM:F63B		 ldaa	 byte_A8
 ROM:F63D		 bita	 #$10
 ROM:F63F		 bne	 loc_F649
 ROM:F641		 ldd	 #$2840
-ROM:F644		 ldx	 #$9B ;	''
+ROM:F644		 ldx	 #$9B ;	'›'
 ROM:F647		 bsr	 sub_F660
 ROM:F649
 ROM:F649 loc_F649:				 ; CODE	XREF: sub_F630+Fj
@@ -4465,7 +4462,7 @@ ROM:F654		 ldaa	 byte_A8
 ROM:F656		 bita	 #$40 ;	'@'
 ROM:F658		 bne	 loc_F681
 ROM:F65A		 ldd	 #$2980
-ROM:F65D		 ldx	 #$9C ;	''
+ROM:F65D		 ldx	 #$9C ;	'œ'
 ROM:F65D ; End of function sub_F630
 ROM:F65D
 ROM:F660
@@ -4474,10 +4471,10 @@ ROM:F660
 ROM:F660
 ROM:F660 sub_F660:				 ; CODE	XREF: sub_F630+17p
 ROM:F660		 psha
-ROM:F661		 ldaa	 #$80 ;	''
+ROM:F661		 ldaa	 #$80 ;	'€'
 ROM:F663		 staa	 PIA_Result
 ROM:F666		 pula
-ROM:F667		 jsr	 ADC_F485
+ROM:F667		 jsr	 PIA_F485
 ROM:F66A		 cli
 ROM:F66B		 beq	 loc_F679
 ROM:F66D		 ldaa	 0,x
@@ -4593,11 +4590,11 @@ ROM:F6DE
 ROM:F6DE loc_F6DE:				 ; CODE	XREF: sub_F6BB+1Bj
 ROM:F6DE		 inca
 ROM:F6DF		 staa	 byte_84
-ROM:F6E1		 ldaa	 byte_98
+ROM:F6E1		 ldaa	 count_98
 ROM:F6E3		 inca
 ROM:F6E4		 cmpa	 #4
 ROM:F6E6		 bcc	 loc_F6EB
-ROM:F6E8		 staa	 byte_98
+ROM:F6E8		 staa	 count_98
 ROM:F6EA		 rts
 ROM:F6EB ; ---------------------------------------------------------------------------
 ROM:F6EB
@@ -4614,7 +4611,7 @@ ROM:F6F2		 ldab	 byte_A6
 ROM:F6F4		 andb	 #$FE ;	'þ'
 ROM:F6F6		 stab	 byte_A6
 ROM:F6F8		 clrb
-ROM:F6F9		 stab	 byte_98
+ROM:F6F9		 stab	 count_98
 ROM:F6FB
 ROM:F6FB locret_F6FB:				 ; CODE	XREF: sub_F6BB+21j
 ROM:F6FB		 rts
@@ -4649,7 +4646,7 @@ ROM:F712		 ldx	 byte_86
 ROM:F714		 cpx	 #$180
 ROM:F717		 bcs	 loc_F721+1
 ROM:F719		 ldaa	 TCSR2
-ROM:F71B		 bita	 #$80 ;	''
+ROM:F71B		 bita	 #$80 ;	'€'
 ROM:F71D		 beq	 loc_F721+1
 ROM:F71F		 orab	 #$20 ;	' '
 ROM:F721
@@ -4658,13 +4655,13 @@ ROM:F721					 ; ROM:F71Dj
 ROM:F721		 cpx	 #$C4DF
 ROM:F724		 stab	 byte_A3
 ROM:F726		 ldab	 #1
-ROM:F728		 ldx	 #$9A ;	''
+ROM:F728		 ldx	 #$9A ;	'š'
 ROM:F72B		 jsr	 sub_F686
 ROM:F72E		 bsr	 sub_F6FC
 ROM:F730		 bita	 #1
 ROM:F732		 beq	 loc_F73F
 ROM:F734		 ldaa	 byte_A3
-ROM:F736		 bita	 #$80 ;	''
+ROM:F736		 bita	 #$80 ;	'€'
 ROM:F738		 beq	 locret_F73E
 ROM:F73A		 ldaa	 #$F
 ROM:F73C		 staa	 byte_84
@@ -4679,12 +4676,12 @@ ROM:F741		 jsr	 sub_F6BB
 ROM:F744		 rti
 ROM:F745 ; ---------------------------------------------------------------------------
 ROM:F745		 ldaa	 TCSR1
-ROM:F747		 bita	 #$80 ;	''
+ROM:F747		 bita	 #$80 ;	'€'
 ROM:F749		 beq	 loc_F77C
 ROM:F74B		 ldd	 ICR1H
 ROM:F74D		 ldab	 byte_A3
 ROM:F74F		 ldaa	 TCSR2
-ROM:F751		 bita	 #$80 ;	''      ; test IC2 IF
+ROM:F751		 bita	 #$80 ;	'€'      ; test IC2 IF
 ROM:F753		 beq	 IC2_F757?+1	 ; bra if ??
 ROM:F755		 orab	 #$20 ;	' '
 ROM:F757
@@ -4692,13 +4689,13 @@ ROM:F757 IC2_F757?:				 ; CODE	XREF: ROM:F753j
 ROM:F757		 cpx	 #$C4DF
 ROM:F75A		 stab	 byte_A3
 ROM:F75C		 ldab	 #2
-ROM:F75E		 ldx	 #$99 ;	''
+ROM:F75E		 ldx	 #$99 ;	'™'
 ROM:F761		 jsr	 sub_F686
 ROM:F764		 jsr	 sub_F6FC
 ROM:F767		 bita	 #1
 ROM:F769		 beq	 loc_F776
 ROM:F76B		 ldaa	 byte_A3
-ROM:F76D		 bita	 #$80 ;	''
+ROM:F76D		 bita	 #$80 ;	'€'
 ROM:F76F		 beq	 locret_F77B
 ROM:F771		 ldaa	 #7
 ROM:F773		 staa	 byte_84
@@ -4719,12 +4716,12 @@ ROM:F77C		 ldab	 byte_A3
 ROM:F77E		 orab	 #8
 ROM:F780		 stab	 byte_A3
 ROM:F782		 ldaa	 TCSR2
-ROM:F784		 bita	 #$80 ;	''
+ROM:F784		 bita	 #$80 ;	'€'
 ROM:F786		 beq	 locret_F799
 ROM:F788		 ldaa	 byte_A3
-ROM:F78A		 bita	 #$80 ;	''
+ROM:F78A		 bita	 #$80 ;	'€'
 ROM:F78C		 bne	 loc_F79A
-ROM:F78E		 oraa	 #$80 ;	''
+ROM:F78E		 oraa	 #$80 ;	'€'
 ROM:F790		 staa	 byte_A3
 ROM:F792		 ldx	 ICR2H
 ROM:F794		 stx	 byte_82
@@ -4832,7 +4829,7 @@ ROM:F82A
 ROM:F82A loc_F82A:				 ; CODE	XREF: ROM:F817j
 ROM:F82A					 ; ROM:F81Dj
 ROM:F82A		 ldaa	 byte_AC
-ROM:F82C		 oraa	 #$80 ;	''
+ROM:F82C		 oraa	 #$80 ;	'€'
 ROM:F82E
 ROM:F82E loc_F82E:				 ; CODE	XREF: ROM:F828j
 ROM:F82E		 staa	 byte_AC
@@ -4865,7 +4862,7 @@ ROM:F853 loc_F853:				 ; CODE	XREF: ROM:F812j
 ROM:F853					 ; ROM:F841j ...
 ROM:F853		 tsta
 ROM:F854		 beq	 loc_F85C
-ROM:F856		 bitb	 #$80 ;	''
+ROM:F856		 bitb	 #$80 ;	'€'
 ROM:F858		 beq	 loc_F86C
 ROM:F85A		 bra	 loc_F87C
 ROM:F85C ; ---------------------------------------------------------------------------
@@ -4889,7 +4886,7 @@ ROM:F86E		 cmpa	 #$75 ;	'u'
 ROM:F870		 bcs	 loc_F876
 ROM:F872
 ROM:F872 loc_F872:				 ; CODE	XREF: ROM:F80Aj
-ROM:F872		 orab	 #$80 ;	''
+ROM:F872		 orab	 #$80 ;	'€'
 ROM:F874		 bra	 loc_F87C
 ROM:F876 ; ---------------------------------------------------------------------------
 ROM:F876
@@ -5007,7 +5004,7 @@ ROM:F91A		 adcb	 $1C3B
 ROM:F91D		 ldaa	 byte_A3
 ROM:F91F		 bita	 #4
 ROM:F921		 bne	 loc_F933
-ROM:F923		 ldx	 #$99 ;	''
+ROM:F923		 ldx	 #$99 ;	'™'
 ROM:F926		 ldab	 #2
 ROM:F928		 jsr	 loc_F699
 ROM:F92B		 inx
@@ -5121,7 +5118,7 @@ ROM:F9C7		 ldab	 byte_AC
 ROM:F9C9		 ldaa	 count_A1
 ROM:F9CB		 bita	 #2
 ROM:F9CD		 beq	 loc_F9D5
-ROM:F9CF		 ldaa	 byte_A0
+ROM:F9CF		 ldaa	 status_A0
 ROM:F9D1		 bita	 #$40 ;	'@'
 ROM:F9D3		 bne	 loc_F9D7+1
 ROM:F9D5
@@ -5216,7 +5213,7 @@ ROM:FA58		 fcb $2A ; *
 ROM:FA59		 fcb $B3 ; ³
 ROM:FA5A		 fcb $20
 ROM:FA5B		 fcb $F7 ; ÷
-ROM:FA5C		 fcb $96 ; 
+ROM:FA5C		 fcb $96 ; –
 ROM:FA5D		 fcb $A2 ; ¢
 ROM:FA5E		 fcb $2A ; *
 ROM:FA5F		 fcb $AD ; ­
@@ -5224,9 +5221,9 @@ ROM:FA60		 fcb $8D ; 
 ROM:FA61		 fcb $34 ; 4
 ROM:FA62		 fcb $20
 ROM:FA63		 fcb $EF ; ï
-ROM:FA64		 fcb $96 ; 
+ROM:FA64		 fcb $96 ; –
 ROM:FA65		 fcb $A2 ; ¢
-ROM:FA66		 fcb $85 ; 
+ROM:FA66		 fcb $85 ; …
 ROM:FA67		 fcb $20
 ROM:FA68		 fcb $26 ; &
 ROM:FA69		 fcb   3
@@ -5441,7 +5438,7 @@ ROM:FB39					 ; ROM:F8ECP
 ROM:FB39		 staa	 byte_B5
 ROM:FB3B		 ldaa	 byte_AC
 ROM:FB3D		 bne	 locret_FB83
-ROM:FB3F		 ldaa	 byte_A0
+ROM:FB3F		 ldaa	 status_A0
 ROM:FB41		 bita	 #$10
 ROM:FB43		 bne	 locret_FB83
 ROM:FB45		 ldaa	 count_A1
@@ -5848,7 +5845,7 @@ ROM:FD28 loc_FD28:				 ; CODE	XREF: sub_FCEF+1Aj
 ROM:FD28		 bita	 #$40 ;	'@'
 ROM:FD2A		 beq	 loc_FD30
 ROM:FD2C		 anda	 #$F7 ;	'÷'
-ROM:FD2E		 oraa	 #$80 ;	''
+ROM:FD2E		 oraa	 #$80 ;	'€'
 ROM:FD30
 ROM:FD30 loc_FD30:				 ; CODE	XREF: sub_FCEF+Ej
 ROM:FD30					 ; sub_FCEF+3Bj
@@ -6172,7 +6169,7 @@ ROM:FE99 sub_FE99:				 ; CODE	XREF: get_Temps+12P
 ROM:FE99					 ; get_Temps+29P ...
 ROM:FE99		 pshx
 ROM:FE9A		 jsr	 sub_FE7A
-ROM:FE9D		 subb	 RMCR
+ROM:FE9D		 subb	 RMCR		 ; memory error	- this should be 10h = 4.096ms
 ROM:FE9F		 pulx
 ROM:FEA0		 cmpa	 #$20 ;	' '
 ROM:FEA2		 bcs	 loc_FEA6+1
@@ -6337,7 +6334,7 @@ ROM:FF45		 des
 ROM:FF46		 tsx
 ROM:FF47		 ldaa	 4,x
 ROM:FF49		 mul
-ROM:FF4A		 addd	 #$80 ;	''
+ROM:FF4A		 addd	 #$80 ;	'€'
 ROM:FF4D		 staa	 0,x
 ROM:FF4F		 ldaa	 1,x
 ROM:FF51		 ldab	 4,x
@@ -6433,7 +6430,7 @@ ROM:FFBA
 ROM:FFBA loc_FFBA:				 ; CODE	XREF: sub_FF86+2Aj
 ROM:FFBA		 std	 word_C006
 ROM:FFBD		 ldaa	 byte_C001	 ; read/write
-ROM:FFC0		 oraa	 #$80 ;	''
+ROM:FFC0		 oraa	 #$80 ;	'€'
 ROM:FFC2		 staa	 byte_C001	 ; read/write
 ROM:FFC5
 ROM:FFC5 locret_FFC5:				 ; CODE	XREF: sub_FF86+5j
