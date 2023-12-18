@@ -1,0 +1,6 @@
+open Windows Powershell
+use the following format to open a graph
+
+./qwingraph.exe aco.gdl
+
+once open other graphs can be loaded from the File menu.
