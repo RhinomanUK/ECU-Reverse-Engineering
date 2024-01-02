@@ -20,7 +20,7 @@ RAM:0000 ;	    some misaligned branches
 RAM:0000 ; A second 40-pin chip	contains an ADC	and some other
 RAM:0000 ; (TBD	- timer	and port expander?) functions
 RAM:0000 ; There are a total of	5202 bytes of code
-RAM:0000 ; Date: 22nd December 2023
+RAM:0000 ; Date: 30th December 2023
 RAM:0000
 RAM:0000 ; Processor:	     6301 []
 RAM:0000 ; Target assembler: Motorola FreeWare Assembler
@@ -190,7 +190,7 @@ RAM:005E Baro_IAT_5E:	 rmb 1			 ; DATA	XREF: sub_EA34:loc_EA49r
 RAM:005E					 ; sub_EA34+1Ar ...
 RAM:005F byte_5F:	 rmb 1			 ; DATA	XREF: sub_EA34+29r
 RAM:005F					 ; ROM:loc_EAB9w
-RAM:0060 CTS_60:	 rmb 1			 ; DATA	XREF: sub_EA34+Fr
+RAM:0060 CTS_65ms:	 rmb 1			 ; DATA	XREF: sub_EA34+Fr
 RAM:0060					 ; sub_EEA6+1Ew ...
 RAM:0060					 ; a copy of CTS_C0 or CTS_BE
 RAM:0061 byte_61:	 rmb 1			 ; DATA	XREF: sub_EA34+1Cr
@@ -248,7 +248,7 @@ RAM:007A					 ; doTick_524ms-74Dr
 RAM:007B VBatt:		 rmb 1			 ; DATA	XREF: get_VBatt+5w
 RAM:007B					 ; sub_F34F+Fr
 RAM:007B					 ; VBatt = B+ *	0.2857
-RAM:007C Baro_7C:	 rmb 1			 ; DATA	XREF: MAP_F1CCr
+RAM:007C Baro_7C:	 rmb 1			 ; DATA	XREF: BAROxMAP_F1CCr
 RAM:007C					 ; sub_F289+9w
 RAM:007D IAT_7D:	 rmb 1			 ; DATA	XREF: doTick_262ms+15w
 RAM:007D					 ; sub_F289+Br
@@ -2086,20 +2086,22 @@ ROM:EA33
 ROM:EA34
 ROM:EA34 ; =============== S U B R O U T I N E =======================================
 ROM:EA34
+ROM:EA34 ; sub_EA34:
+ROM:EA34 ;   called with X=52 and then X=54
 ROM:EA34
 ROM:EA34 sub_EA34:				 ; CODE	XREF: doTick_4ms+25P
 ROM:EA34					 ; doTick_4ms+2AP
 ROM:EA34		 ldaa	 byte_A4
-ROM:EA36		 anda	 #7
-ROM:EA38		 eora	 #7
-ROM:EA3A		 bne	 loc_EA41
-ROM:EA3C		 ldd	 word_E00C
-ROM:EA3F		 bra	 loc_EA88
+ROM:EA36		 anda	 #7		 ; isolate bits	2:0
+ROM:EA38		 eora	 #7		 ; XOR with 111h
+ROM:EA3A		 bne	 loc_EA41	 ; bra if any bits =0
+ROM:EA3C		 ldd	 word_E00C	 ; else	D = FA0h
+ROM:EA3F		 bra	 loc_EA88	 ; and branch
 ROM:EA41 ; ---------------------------------------------------------------------------
 ROM:EA41
 ROM:EA41 loc_EA41:				 ; CODE	XREF: sub_EA34+6j
 ROM:EA41		 ldab	 #$40 ;	'@'
-ROM:EA43		 ldaa	 CTS_60		 ; a copy of CTS_C0 or CTS_BE
+ROM:EA43		 ldaa	 CTS_65ms	 ; a copy of CTS_C0 or CTS_BE
 ROM:EA45		 beq	 loc_EA49
 ROM:EA47		 addb	 #$80 ;	'€'
 ROM:EA49
@@ -2340,7 +2342,7 @@ ROM:EB39 ; START OF FUNCTION CHUNK FOR sub_EB11
 ROM:EB39
 ROM:EB39 loc_EB39:				 ; CODE	XREF: sub_EB11+8j
 ROM:EB39		 ldaa	 MAPL_Tn	 ; MAPL_Tn =
-ROM:EB3B		 jsr	 MAP_F1CC	 ; MAP_F1CC:
+ROM:EB3B		 jsr	 BAROxMAP_F1CC	 ; MAP_F1CC:
 ROM:EB3B					 ;   called with A= MAP	value
 ROM:EB3E		 std	 byte_AF	 ; temporary register (Heap)?
 ROM:EB40		 ldd	 byte_B3
@@ -2352,7 +2354,7 @@ ROM:EB4A		 std	 byte_56
 ROM:EB4C
 ROM:EB4C MAPR_LU:				 ; MAPR_T1 lookup
 ROM:EB4C		 ldaa	 MAPR_T1
-ROM:EB4E		 jsr	 MAP_F1CC	 ; MAP_F1CC:
+ROM:EB4E		 jsr	 BAROxMAP_F1CC	 ; MAP_F1CC:
 ROM:EB4E					 ;   called with A= MAP	value
 ROM:EB51		 ldx	 #$E200
 ROM:EB54		 bsr	 tableLU_3Db
@@ -2513,7 +2515,7 @@ ROM:EBE6		 rora			 ;  MAP	average	= (L+R)/2
 ROM:EBE7
 ROM:EBE7 loc_EBE7:				 ; CODE	XREF: sub_EB90+49j
 ROM:EBE7					 ; sub_EB90+51j
-ROM:EBE7		 jsr	 MAP_F1CC	 ; MAP_F1CC:
+ROM:EBE7		 jsr	 BAROxMAP_F1CC	 ; MAP_F1CC:
 ROM:EBE7					 ;   called with A= MAP	value
 ROM:EBEA		 std	 byte_AF	 ; temporary register (Heap)?
 ROM:EBEC		 ldx	 #$E500
@@ -2557,10 +2559,10 @@ ROM:EC12		 sei
 ROM:EC13		 ldaa	 count_4ms_B
 ROM:EC15		 inca
 ROM:EC16		 beq	 loc_EC3C
-ROM:EC18		 staa	 count_4ms_B
+ROM:EC18		 staa	 count_4ms_B	 ; increment count
 ROM:EC1A		 ldx	 #$E02E
 ROM:EC1D		 ldab	 byte_A7
-ROM:EC1F		 bmi	 loc_EC22
+ROM:EC1F		 bmi	 loc_EC22	 ; test	MSB
 ROM:EC21		 inx
 ROM:EC22
 ROM:EC22 loc_EC22:				 ; CODE	XREF: Main_Loop+1Fj
@@ -2764,7 +2766,7 @@ ROM:ED00					 ; ROM:ED09j
 ROM:ED00		 rts
 ROM:ED01 ; ---------------------------------------------------------------------------
 ROM:ED01
-ROM:ED01 loc_ED01:				 ; CODE	XREF: sub_EEA6+19P
+ROM:ED01 schedule_IGN_INJ:			 ; CODE	XREF: sub_EEA6+19P
 ROM:ED01					 ; do_TPS+5FP ...
 ROM:ED01		 ldd	 0,x
 ROM:ED03		 beq	 locret_ED00
@@ -2833,7 +2835,7 @@ ROM:ED69		 subd	 byte_B1
 ROM:ED6B		 bpl	 loc_ED73
 ROM:ED6D		 ldaa	 byte_9F
 ROM:ED6F		 anda	 #$EF ;	'ï'
-ROM:ED71		 staa	 byte_9F
+ROM:ED71		 staa	 byte_9F	 ; clear bit4
 ROM:ED73
 ROM:ED73 loc_ED73:				 ; CODE	XREF: ROM:ED39j
 ROM:ED73					 ; ROM:ED53j ...
@@ -2892,7 +2894,7 @@ ROM:EDCE		 subd	 byte_B1	 ; else	dCPS_Count - byte_B1
 ROM:EDD0		 bpl	 loc_EDD8
 ROM:EDD2		 ldaa	 byte_9F
 ROM:EDD4		 anda	 #$BF ;	'¿'
-ROM:EDD6		 staa	 byte_9F
+ROM:EDD6		 staa	 byte_9F	 ; clear bit6
 ROM:EDD8
 ROM:EDD8 loc_EDD8:				 ; CODE	XREF: ROM:ED9Ej
 ROM:EDD8					 ; ROM:EDB8j ...
@@ -3099,21 +3101,21 @@ ROM:EEB0		 bne	 loc_EEC8
 ROM:EEB2		 ldab	 byte_A7
 ROM:EEB4		 bmi	 loc_EEC2
 ROM:EEB6		 addb	 #$40 ;	'@'
-ROM:EEB8		 stab	 byte_A7
-ROM:EEBA		 bpl	 loc_EECE
+ROM:EEB8		 stab	 byte_A7	 ; add 40h
+ROM:EEBA		 bpl	 loc_EECE	 ; bra if >80h
 ROM:EEBC		 ldx	 #$E013
-ROM:EEBF		 jsr	 loc_ED01
+ROM:EEBF		 jsr	 schedule_IGN_INJ
 ROM:EEC2
 ROM:EEC2 loc_EEC2:				 ; CODE	XREF: sub_EEA6+Ej
 ROM:EEC2		 ldd	 CTS_C0
-ROM:EEC4		 std	 CTS_60		 ; a copy of CTS_C0 or CTS_BE
+ROM:EEC4		 std	 CTS_65ms	 ; a copy of CTS_C0 or CTS_BE
 ROM:EEC6		 bra	 loc_EECE
 ROM:EEC8 ; ---------------------------------------------------------------------------
 ROM:EEC8
 ROM:EEC8 loc_EEC8:				 ; CODE	XREF: sub_EEA6+Aj
 ROM:EEC8		 ldab	 byte_A7
 ROM:EECA		 andb	 #$7F ;	''
-ROM:EECC		 stab	 byte_A7
+ROM:EECC		 stab	 byte_A7	 ; clear MSB
 ROM:EECE
 ROM:EECE loc_EECE:				 ; CODE	XREF: sub_EEA6+14j
 ROM:EECE					 ; sub_EEA6+20j
@@ -3255,7 +3257,7 @@ ROM:EF92		 jsr	 doTick_262ms
 ROM:EF95		 jsr	 get_VBatt
 ROM:EF98		 jsr	 get_BARO
 ROM:EF9B		 ldd	 CTS_C0
-ROM:EF9D		 std	 CTS_60		 ; a copy of CTS_C0 or CTS_BE
+ROM:EF9D		 std	 CTS_65ms	 ; a copy of CTS_C0 or CTS_BE
 ROM:EF9F		 jsr	 Get_MAP
 ROM:EFA2		 ldd	 MAPL
 ROM:EFA4		 std	 MAPL_Tn	 ; MAPL_Tn =
@@ -3574,7 +3576,7 @@ ROM:F13A ; ---------------------------------------------------------------------
 ROM:F13A
 ROM:F13A loc_F13A:				 ; CODE	XREF: sub_F12D+6j
 ROM:F13A		 ldab	 #$40 ;	'@'
-ROM:F13C		 ldaa	 CTS_60		 ; a copy of CTS_C0 or CTS_BE
+ROM:F13C		 ldaa	 CTS_65ms	 ; a copy of CTS_C0 or CTS_BE
 ROM:F13E		 beq	 loc_F142
 ROM:F140		 addb	 #$80 ;	'€'
 ROM:F142
@@ -3687,7 +3689,7 @@ ROM:F1A7 ; START OF FUNCTION CHUNK FOR sub_F17F
 ROM:F1A7
 ROM:F1A7 loc_F1A7:				 ; CODE	XREF: sub_F17F+8j
 ROM:F1A7		 ldaa	 MAPL_Tn	 ; MAPL_Tn =
-ROM:F1A9		 bsr	 MAP_F1CC	 ; MAP_F1CC:
+ROM:F1A9		 bsr	 BAROxMAP_F1CC	 ; MAP_F1CC:
 ROM:F1A9					 ;   called with A= MAP	value
 ROM:F1AB		 std	 byte_AF	 ; temporary register (Heap)?
 ROM:F1AD		 ldd	 byte_B3
@@ -3697,7 +3699,7 @@ ROM:F1B5		 lsrd
 ROM:F1B6		 lsrd
 ROM:F1B7		 std	 byte_56
 ROM:F1B9		 ldaa	 MAPR_T1
-ROM:F1BB		 bsr	 MAP_F1CC	 ; MAP_F1CC:
+ROM:F1BB		 bsr	 BAROxMAP_F1CC	 ; MAP_F1CC:
 ROM:F1BB					 ;   called with A= MAP	value
 ROM:F1BD		 ldx	 #$E200
 ROM:F1BD ; END OF FUNCTION CHUNK FOR sub_F17F
@@ -3727,17 +3729,19 @@ ROM:F1CC
 ROM:F1CC ; MAP_F1CC:
 ROM:F1CC ;   called with A= MAP	value
 ROM:F1CC
-ROM:F1CC MAP_F1CC:				 ; CODE	XREF: sub_EB11+2AP
+ROM:F1CC BAROxMAP_F1CC:				 ; CODE	XREF: sub_EB11+2AP
 ROM:F1CC					 ; sub_EB11+3DP ...
 ROM:F1CC		 ldab	 Baro_7C	 ; calculate Baro correction
 ROM:F1CE		 mul			 ; MAP * Baro
 ROM:F1CF		 lsld			 ; (MAP*Baro)*2
 ROM:F1D0		 bcc	 loc_F1D4
 ROM:F1D2		 ldaa	 #$FF		 ; set to max. if overflow
+ROM:F1D2 ; End of function BAROxMAP_F1CC
+ROM:F1D2
 ROM:F1D4
-ROM:F1D4 loc_F1D4:				 ; CODE	XREF: MAP_F1CC+4j
+ROM:F1D4 loc_F1D4:				 ; CODE	XREF: BAROxMAP_F1CC+4j
 ROM:F1D4		 jsr	 limits_FE7A	 ; limits_FE7A:
-ROM:F1D4 ; End of function MAP_F1CC		 ;   call with:
+ROM:F1D4					 ;   call with:
 ROM:F1D4					 ;	 Value in A
 ROM:F1D4					 ;	 Table address = return	address	from stack
 ROM:F1D4					 ;	 return	address	= table	address	+2
@@ -3820,7 +3824,7 @@ ROM:F244 loc_F244:				 ; CODE	XREF: doTick_262ms+53j
 ROM:F244		 ldaa	 byte_A7
 ROM:F246		 bita	 #$80 ;	'€'
 ROM:F248		 bne	 locret_F25F
-ROM:F24A		 ldd	 CTS_60		 ; a copy of CTS_C0 or CTS_BE
+ROM:F24A		 ldd	 CTS_65ms	 ; a copy of CTS_C0 or CTS_BE
 ROM:F24C		 subb	 0,x
 ROM:F24E		 sbca	 #0
 ROM:F250		 bcs	 loc_F258
@@ -3833,7 +3837,7 @@ ROM:F258		 ldd	 CTS_BE
 ROM:F25A
 ROM:F25A loc_F25A:				 ; CODE	XREF: doTick_262ms+6Aj
 ROM:F25A		 cpx	 #$DCAF
-ROM:F25D		 std	 CTS_60		 ; a copy of CTS_C0 or CTS_BE
+ROM:F25D		 std	 CTS_65ms	 ; a copy of CTS_C0 or CTS_BE
 ROM:F25F
 ROM:F25F locret_F25F:				 ; CODE	XREF: doTick_262ms+5Cj
 ROM:F25F		 rts
@@ -4214,7 +4218,7 @@ ROM:F419		 bita	 #$20 ;	' '
 ROM:F41B		 bne	 locret_F424	 ; quit	if status_A0 bit5 = 0
 ROM:F41D		 oraa	 #$20 ;	' '
 ROM:F41F		 staa	 status_A0	 ; set bit5
-ROM:F421		 jsr	 loc_ED01
+ROM:F421		 jsr	 schedule_IGN_INJ
 ROM:F424
 ROM:F424 locret_F424:				 ; CODE	XREF: do_TPS+3Ej
 ROM:F424					 ; do_TPS+45j ...
@@ -4408,7 +4412,7 @@ ROM:F4D4 loc_F4D4:				 ; CODE	XREF: sub_F49B+36j
 ROM:F4D4		 subb	 byte_AF	 ; temporary register (Heap)?
 ROM:F4D6		 bcs	 locret_F4E4
 ROM:F4D8		 ldx	 #$E015
-ROM:F4DB		 jsr	 loc_ED01
+ROM:F4DB		 jsr	 schedule_IGN_INJ
 ROM:F4DE
 ROM:F4DE loc_F4DE:				 ; CODE	XREF: sub_F49B+16j
 ROM:F4DE		 ldaa	 status_A0
@@ -4621,7 +4625,7 @@ ROM:F5A6 MAP_F5A6:				 ; CODE	XREF: sub_F563+24j
 ROM:F5A6		 ldd	 MAPL_Tn	 ; MAPL_Tn =
 ROM:F5A8		 aba
 ROM:F5A9		 rora
-ROM:F5AA		 jsr	 MAP_F1CC	 ; MAP_F1CC:
+ROM:F5AA		 jsr	 BAROxMAP_F1CC	 ; MAP_F1CC:
 ROM:F5AA					 ;   called with A= MAP	value
 ROM:F5AD		 std	 byte_AF	 ; temporary register (Heap)?
 ROM:F5AF		 ldx	 #$E500
@@ -6756,14 +6760,14 @@ ROM:FF2F		 std	 byte_86
 ROM:FF31		 rts
 ROM:FF32 ; ---------------------------------------------------------------------------
 ROM:FF32
-ROM:FF32 mult_FF32:
+ROM:FF32 mult_FF32:				 ; CCR to A
 ROM:FF32		 tpa
-ROM:FF33		 comb
-ROM:FF34		 tap
-ROM:FF35		 subd	 #$5DC
+ROM:FF33		 comb			 ; !B
+ROM:FF34		 tap			 ; A to	CCR
+ROM:FF35		 subd	 #$5DC		 ; D - 1500
 ROM:FF38		 lsld
 ROM:FF39		 lsrb
-ROM:FF3A		 lsrd
+ROM:FF3A		 lsrd			 ; D/8
 ROM:FF3B		 sbcb	 4,x
 ROM:FF3D		 sbca	 #4
 ROM:FF3F		 ble	 mult_FF43+1
