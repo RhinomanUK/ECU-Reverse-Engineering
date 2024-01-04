@@ -1,0 +1,136 @@
+graph: {
+title: "Graph of sub_FEE7"
+manhattan_edges: yes
+layoutalgorithm: mindepth
+finetuning: no
+layout_downfactor: 100
+layout_upfactor: 0
+layout_nearfactor: 0
+xlspace: 12
+yspace: 30
+// IDA palette
+colorentry 32: 0 0 0
+colorentry 33: 0 0 255
+colorentry 34: 0 0 255
+colorentry 35: 128 128 128
+colorentry 36: 128 128 128
+colorentry 37: 0 0 128
+colorentry 38: 0 0 128
+colorentry 39: 0 0 255
+colorentry 40: 0 0 255
+colorentry 41: 0 0 128
+colorentry 42: 0 128 0
+colorentry 43: 0 255 0
+colorentry 44: 0 128 0
+colorentry 45: 255 128 0
+colorentry 46: 0 128 0
+colorentry 47: 128 128 255
+colorentry 48: 255 0 0
+colorentry 49: 128 128 0
+colorentry 50: 1 1 1
+colorentry 51: 192 192 192
+colorentry 52: 0 0 255
+colorentry 53: 0 0 255
+colorentry 54: 0 0 255
+colorentry 55: 128 128 128
+colorentry 56: 128 128 255
+colorentry 57: 0 128 0
+colorentry 58: 0 0 128
+colorentry 59: 0 0 255
+colorentry 60: 128 0 128
+colorentry 61: 0 128 0
+colorentry 62: 0 128 0
+colorentry 63: 0 128 64
+colorentry 64: 0 0 128
+colorentry 65: 0 0 128
+colorentry 66: 255 0 255
+colorentry 67: 128 128 0
+colorentry 68: 0 0 128
+colorentry 69: 0 0 255
+colorentry 70: 0 0 128
+colorentry 71: 0 0 255
+colorentry 72: 0 0 0
+colorentry 73: 255 255 255
+colorentry 74: 192 192 192
+colorentry 75: 0 255 255
+colorentry 76: 0 0 0
+colorentry 77: 128 0 0
+colorentry 78: 128 128 128
+colorentry 79: 128 128 0
+colorentry 80: 255 0 255
+colorentry 81: 0 0 0
+colorentry 82: 0 0 255
+colorentry 83: 0 0 0
+node: { title: "0" label: "58sub_FEE731:
+ldx     #$FF2F
+ldd     dCPS_Av_2M      ; D = 89:90
+tst     dCPS_Av_2H      ; high byte
+beq     loc_FF03" vertical_order: 0 }
+node: { title: "1" label: "76FEF131:
+ldd     dCPS_Av_2H      ; high byte
+cmpa    #8              ; byte_88 - 100h
+bcs     loc_FEFA        ; bra if byte_88<100h" }
+node: { title: "2" label: "76FEF731:
+ldd     #$7FF           ; else load default !100h" }
+node: { title: "3" label: "58loc_FEFA31:
+ldx     #$FF27" }
+node: { title: "4" label: "55loop_FEFD31:
+inx                     ; local loop
+lsld
+bita    #8
+beq     loop_FEFD" }
+node: { title: "5" label: "58loc_FF0331:
+cmpa    #8
+bcc     loop_FF09" }
+node: { title: "6" label: "76FF0731:
+ldaa    #8" }
+node: { title: "7" label: "55loop_FF0931:
+bita    #$F0 ; 'ð'      ; loop_FF09
+beq     loc_FF11        ; exit when no upper bits = 1" }
+node: { title: "8" label: "76FF0D31:
+lsrd                    ; D = D/2
+dex                     ; decrement X
+bra     loop_FF09" }
+node: { title: "9" label: "58loc_FF1131:
+pshx
+ldx     #$FF22
+pshb
+asla                    ; A*2
+tab                     ; (A*2) to B
+abx                     ; what is B?
+ldd     0,x
+subd    2,x
+pula
+mul
+tab
+clra
+subd    0,x
+coma
+negb
+sbca    #$FF
+rts" vertical_order: 10 }
+// node 0
+edge: { sourcename: "0" targetname: "1" label: "false" color: red }
+edge: { sourcename: "0" targetname: "5" label: "true" color: darkgreen }
+// node 1
+edge: { sourcename: "1" targetname: "2" label: "false" color: red }
+edge: { sourcename: "1" targetname: "3" label: "true" color: darkgreen }
+// node 2
+edge: { sourcename: "2" targetname: "3" }
+// node 3
+edge: { sourcename: "3" targetname: "4" }
+// node 4
+edge: { sourcename: "4" targetname: "5" label: "false" color: red }
+edge: { sourcename: "4" targetname: "4" label: "true" color: darkgreen }
+// node 5
+edge: { sourcename: "5" targetname: "6" label: "false" color: red }
+edge: { sourcename: "5" targetname: "7" label: "true" color: darkgreen }
+// node 6
+edge: { sourcename: "6" targetname: "7" }
+// node 7
+edge: { sourcename: "7" targetname: "8" label: "false" color: red }
+edge: { sourcename: "7" targetname: "9" label: "true" color: darkgreen }
+// node 8
+edge: { sourcename: "8" targetname: "7" }
+// node 9
+}

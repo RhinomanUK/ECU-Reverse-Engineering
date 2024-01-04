@@ -1,0 +1,118 @@
+graph: {
+title: "Graph of sub_EB11"
+manhattan_edges: yes
+layoutalgorithm: mindepth
+finetuning: no
+layout_downfactor: 100
+layout_upfactor: 0
+layout_nearfactor: 0
+xlspace: 12
+yspace: 30
+// IDA palette
+colorentry 32: 0 0 0
+colorentry 33: 0 0 255
+colorentry 34: 0 0 255
+colorentry 35: 128 128 128
+colorentry 36: 128 128 128
+colorentry 37: 0 0 128
+colorentry 38: 0 0 128
+colorentry 39: 0 0 255
+colorentry 40: 0 0 255
+colorentry 41: 0 0 128
+colorentry 42: 0 128 0
+colorentry 43: 0 255 0
+colorentry 44: 0 128 0
+colorentry 45: 255 128 0
+colorentry 46: 0 128 0
+colorentry 47: 128 128 255
+colorentry 48: 255 0 0
+colorentry 49: 128 128 0
+colorentry 50: 1 1 1
+colorentry 51: 192 192 192
+colorentry 52: 0 0 255
+colorentry 53: 0 0 255
+colorentry 54: 0 0 255
+colorentry 55: 128 128 128
+colorentry 56: 128 128 255
+colorentry 57: 0 128 0
+colorentry 58: 0 0 128
+colorentry 59: 0 0 255
+colorentry 60: 128 0 128
+colorentry 61: 0 128 0
+colorentry 62: 0 128 0
+colorentry 63: 0 128 64
+colorentry 64: 0 0 128
+colorentry 65: 0 0 128
+colorentry 66: 255 0 255
+colorentry 67: 128 128 0
+colorentry 68: 0 0 128
+colorentry 69: 0 0 255
+colorentry 70: 0 0 128
+colorentry 71: 0 0 255
+colorentry 72: 0 0 0
+colorentry 73: 255 255 255
+colorentry 74: 192 192 192
+colorentry 75: 0 255 255
+colorentry 76: 0 0 0
+colorentry 77: 128 0 0
+colorentry 78: 128 128 128
+colorentry 79: 128 128 0
+colorentry 80: 255 0 255
+colorentry 81: 0 0 0
+colorentry 82: 0 0 255
+colorentry 83: 0 0 0
+node: { title: "0" label: "58sub_EB1131:
+lsld
+lsld
+std     byte_B3
+ldaa    status_A0
+bita    #1
+beq     loc_EB39        ;  MAP lookup from 3d LUT at E200" vertical_order: 0 }
+node: { title: "1" label: "69TPS_EB1B31:
+ldaa    TPS             ;  otherwise a TPS look up" }
+node: { title: "2" label: "58loc_EB3931:
+ldaa    MAPL_Tn         ; MAPL_Tn =
+jsr     BAROxMAP_F1CC   ; MAP_F1CC:
+std     byte_AF         ; temporary register (Heap)?
+ldd     byte_B3
+ldx     #$E200          ; MAPL_T1 look up
+jsr     tableLU_3D
+lsrd
+lsrd
+std     byte_56
+ldaa    MAPR_T1         ; MAPR_T1 lookup
+jsr     BAROxMAP_F1CC   ; MAP_F1CC:
+ldx     #$E200
+bsr     tableLU_3Db
+ldaa    MAPL_Raw
+beq     loc_EB5F        ; use MAPR if MAPL fault*" }
+node: { title: "3" label: "76EB5A31:
+ldd     result_58       ; get value from table look up
+std     byte_56         ; and save to byte_56
+rts" vertical_order: 8 }
+node: { title: "4" label: "58loc_EB5F31:
+ldaa    MAPR_Raw        ;  get MAPR_Raw 
+beq     locret_EB67" }
+node: { title: "5" label: "76EB6331:
+ldd     byte_56         ;  copy 56 to 58 
+std     result_58       ; MAP related, result from 3d LUT" }
+node: { title: "6" label: "58locret_EB6731:
+rts" vertical_order: 8 }
+node: { title: "7" label: "loc_EB1D" vertical_order: 8 color: red }
+// node 0
+edge: { sourcename: "0" targetname: "1" label: "false" color: red }
+edge: { sourcename: "0" targetname: "2" label: "true" color: darkgreen }
+// node 1
+edge: { sourcename: "1" targetname: "7" }
+// node 2
+edge: { sourcename: "2" targetname: "3" label: "false" color: red }
+edge: { sourcename: "2" targetname: "4" label: "true" color: darkgreen }
+// node 3
+// node 4
+edge: { sourcename: "4" targetname: "5" label: "false" color: red }
+edge: { sourcename: "4" targetname: "6" label: "true" color: darkgreen }
+// node 5
+edge: { sourcename: "5" targetname: "6" }
+// node 6
+// node 7
+}
