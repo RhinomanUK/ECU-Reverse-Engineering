@@ -1,0 +1,137 @@
+graph: {
+title: "Graph of CALC_WTS_CORR_A4"
+manhattan_edges: yes
+layoutalgorithm: mindepth
+finetuning: no
+layout_downfactor: 100
+layout_upfactor: 0
+layout_nearfactor: 0
+xlspace: 12
+yspace: 30
+// IDA palette
+colorentry 32: 0 0 0
+colorentry 33: 0 0 255
+colorentry 34: 0 0 255
+colorentry 35: 128 128 128
+colorentry 36: 128 128 128
+colorentry 37: 0 0 128
+colorentry 38: 0 0 128
+colorentry 39: 0 0 255
+colorentry 40: 0 0 255
+colorentry 41: 0 0 128
+colorentry 42: 0 128 0
+colorentry 43: 0 255 0
+colorentry 44: 0 128 0
+colorentry 45: 255 128 0
+colorentry 46: 0 128 0
+colorentry 47: 128 128 255
+colorentry 48: 255 0 0
+colorentry 49: 128 128 0
+colorentry 50: 1 1 1
+colorentry 51: 192 192 192
+colorentry 52: 0 0 255
+colorentry 53: 0 0 255
+colorentry 54: 0 0 255
+colorentry 55: 128 128 128
+colorentry 56: 128 128 255
+colorentry 57: 0 128 0
+colorentry 58: 0 0 128
+colorentry 59: 0 0 255
+colorentry 60: 128 0 128
+colorentry 61: 0 128 0
+colorentry 62: 0 128 0
+colorentry 63: 0 128 64
+colorentry 64: 0 0 128
+colorentry 65: 0 0 128
+colorentry 66: 255 0 255
+colorentry 67: 128 128 0
+colorentry 68: 0 0 128
+colorentry 69: 0 0 255
+colorentry 70: 0 0 128
+colorentry 71: 0 0 255
+colorentry 72: 0 0 0
+colorentry 73: 255 255 255
+colorentry 74: 192 192 192
+colorentry 75: 0 255 255
+colorentry 76: 0 0 0
+colorentry 77: 128 0 0
+colorentry 78: 128 128 128
+colorentry 79: 128 128 0
+colorentry 80: 255 0 255
+colorentry 81: 0 0 0
+colorentry 82: 0 0 255
+colorentry 83: 0 0 0
+node: { title: "0" label: "69CALC_WTS_CORR_A431:
+ldd     WTS_Corr_A4
+beq     CALC_WTS_CORR_AD; if AD = zero skip" vertical_order: 0 }
+node: { title: "1" label: "76CE5D31:
+ldaa    Count_161       ; counter for WTS_CORR_A4
+bne     loc_CE6D" }
+node: { title: "2" label: "76CE6231:
+ldaa    WTS_LIN
+ldab    #8
+mul
+ldx     #$C094          ; axis = WTS_LIN*8
+jsr     TABLE_LU_2Da" }
+node: { title: "3" label: "58loc_CE6D31:
+deca
+staa    Count_161       ; counter for WTS_CORR_A4
+bne     CALC_WTS_CORR_AD; if AD = zero skip" }
+node: { title: "4" label: "76CE7331:
+ldd     WTS_Corr_A4
+beq     loc_CE7D        ; byte_A4 = WTS v ???" }
+node: { title: "5" label: "76CE7731:
+ldx     #$C7E6
+jsr     Mult?" }
+node: { title: "6" label: "58loc_CE7D31:
+std     WTS_Corr_A4     ; byte_A4 = WTS v ???" }
+node: { title: "7" label: "55CALC_WTS_CORR_AD31:
+ldaa    WTS_Corr_AD     ; if AD = zero skip
+beq     locret_CE94" }
+node: { title: "8" label: "76CE8331:
+ldab    WTS_Cnt_162     ; get the current value
+bne     loc_CE8B        ; if its not zero get byte_170" }
+node: { title: "9" label: "76CE8831:
+ldab    WTS_Cnt_170     ; from tables" }
+node: { title: "10" label: "58loc_CE8B31:
+decb                    ; dec 170
+stab    WTS_Cnt_162     ; copy to 162
+bne     locret_CE94     ; if its not zero return" }
+node: { title: "11" label: "76CE9131:
+deca                    ; else dec the correction
+staa    WTS_Corr_AD     ; and store" }
+node: { title: "12" label: "58locret_CE9431:
+rts" vertical_order: 13 }
+// node 0
+edge: { sourcename: "0" targetname: "1" label: "false" color: red }
+edge: { sourcename: "0" targetname: "7" label: "true" color: darkgreen }
+// node 1
+edge: { sourcename: "1" targetname: "2" label: "false" color: red }
+edge: { sourcename: "1" targetname: "3" label: "true" color: darkgreen }
+// node 2
+edge: { sourcename: "2" targetname: "3" }
+// node 3
+edge: { sourcename: "3" targetname: "4" label: "false" color: red }
+edge: { sourcename: "3" targetname: "7" label: "true" color: darkgreen }
+// node 4
+edge: { sourcename: "4" targetname: "5" label: "false" color: red }
+edge: { sourcename: "4" targetname: "6" label: "true" color: darkgreen }
+// node 5
+edge: { sourcename: "5" targetname: "6" }
+// node 6
+edge: { sourcename: "6" targetname: "7" }
+// node 7
+edge: { sourcename: "7" targetname: "8" label: "false" color: red }
+edge: { sourcename: "7" targetname: "12" label: "true" color: darkgreen }
+// node 8
+edge: { sourcename: "8" targetname: "9" label: "false" color: red }
+edge: { sourcename: "8" targetname: "10" label: "true" color: darkgreen }
+// node 9
+edge: { sourcename: "9" targetname: "10" }
+// node 10
+edge: { sourcename: "10" targetname: "11" label: "false" color: red }
+edge: { sourcename: "10" targetname: "12" label: "true" color: darkgreen }
+// node 11
+edge: { sourcename: "11" targetname: "12" }
+// node 12
+}
