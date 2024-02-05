@@ -1,0 +1,180 @@
+graph: {
+title: "Graph of update_MAP_Params"
+manhattan_edges: yes
+layoutalgorithm: mindepth
+finetuning: no
+layout_downfactor: 100
+layout_upfactor: 0
+layout_nearfactor: 0
+xlspace: 12
+yspace: 30
+// IDA palette
+colorentry 32: 0 0 0
+colorentry 33: 0 0 255
+colorentry 34: 0 0 255
+colorentry 35: 128 128 128
+colorentry 36: 128 128 128
+colorentry 37: 0 0 128
+colorentry 38: 0 0 128
+colorentry 39: 0 0 255
+colorentry 40: 0 0 255
+colorentry 41: 0 0 128
+colorentry 42: 0 128 0
+colorentry 43: 0 255 0
+colorentry 44: 0 128 0
+colorentry 45: 255 128 0
+colorentry 46: 0 128 0
+colorentry 47: 128 128 255
+colorentry 48: 255 0 0
+colorentry 49: 128 128 0
+colorentry 50: 1 1 1
+colorentry 51: 192 192 192
+colorentry 52: 0 0 255
+colorentry 53: 0 0 255
+colorentry 54: 0 0 255
+colorentry 55: 128 128 128
+colorentry 56: 128 128 255
+colorentry 57: 0 128 0
+colorentry 58: 0 0 128
+colorentry 59: 0 0 255
+colorentry 60: 128 0 128
+colorentry 61: 0 128 0
+colorentry 62: 0 128 0
+colorentry 63: 0 128 64
+colorentry 64: 0 0 128
+colorentry 65: 0 0 128
+colorentry 66: 255 0 255
+colorentry 67: 128 128 0
+colorentry 68: 0 0 128
+colorentry 69: 0 0 255
+colorentry 70: 0 0 128
+colorentry 71: 0 0 255
+colorentry 72: 0 0 0
+colorentry 73: 255 255 255
+colorentry 74: 192 192 192
+colorentry 75: 0 255 255
+colorentry 76: 0 0 0
+colorentry 77: 128 0 0
+colorentry 78: 128 128 128
+colorentry 79: 128 128 0
+colorentry 80: 255 0 255
+colorentry 81: 0 0 0
+colorentry 82: 0 0 255
+colorentry 83: 0 0 0
+node: { title: "0" label: "69update_MAP_Params31:
+ldd     MAP_Cyl_Max
+addd    MAP_Cyl_Min     ; init to FFFFh
+rora
+rorb
+ldx     MAP_Cyl_Av      ; MAP average = (MAP_MAX-MAP_Min)/2
+std     MAP_Cyl_Av      ; =(byte_51+byte_53)/2
+stx     MAP_Cyl_Av_T1   ; previous MAP average
+clra                    ; MAP_T1 = last MAP
+clrb
+std     MAP_Cyl_Max     ; byte51 = 0000h
+ldd     #$FFFF
+std     MAP_Cyl_Min     ; byte_53=FFFF
+ldd     MAP_Buff_T3
+std     MAP_Buff_T4     ; byte_63 = byte_61
+ldd     MAP_Buff_T2
+std     MAP_Buff_T3     ; byte_61=byte_5F
+ldd     MAP_Buff_T1
+std     MAP_Buff_T2     ; byte_5F = byte_5D
+ldd     MAP_Buff_T0
+std     MAP_Buff_T1     ; byte_5D = byte_5B
+ldaa    MAP_Cyl_Av      ; MAP average = (MAP_MAX-MAP_Min)/2
+suba    MAP_Cyl_Av_T1   ; MAP - MAP_T1
+bcc     loc_F078        ; bra if MAP>MAP_T1" vertical_order: 0 }
+node: { title: "1" label: "76F06D31:
+cmpa    #$80 ; '€'      ; MAP-80h
+bcc     loc_F073        ; bra if dMAP>80h" }
+node: { title: "2" label: "76F07131:
+ldaa    #$80 ; '€'      ; else set minimum to 80h" }
+node: { title: "3" label: "58loc_F07331:
+staa    dMAP_6B         ; MAP_Cyl_Av - MAP_Cyl_Av_T1, updated every CPS event
+nega
+bra     loc_F080" }
+node: { title: "4" label: "58loc_F07831:
+cmpa    #$7F ; ''
+bcs     loc_F07E" }
+node: { title: "5" label: "76F07C31:
+ldaa    #$7F ; ''" }
+node: { title: "6" label: "58loc_F07E31:
+staa    dMAP_6B         ; MAP_Cyl_Av - MAP_Cyl_Av_T1, updated every CPS event" }
+node: { title: "7" label: "58loc_F08031:
+staa    dMAP_6A         ; MAP related?
+cmpa    dMAP_Thresold   ; =4h
+bcs     loc_F08F        ; bra if dMAP<4" }
+node: { title: "8" label: "76F08731:
+ldd     MAP_1ms         ; map sampled at 1ms = x*(5/65536) = (0.0253x -199.93)
+std     MAP             ; copy of MAP_16b
+std     MAP_Buff_T0
+bra     locret_F0B6" }
+node: { title: "9" label: "58loc_F08F31:
+ldd     MAP_Cyl_Av      ; MAP average = (MAP_MAX-MAP_Min)/2
+std     MAP             ; this is a copy of either MAP_4ms or MAP_Cyl_Av selected by dMAP
+ldd     word_C7CF       ; 8h if auto
+brset   CONFIG_3A $80 loc_F09D ; '€'; bra if auto trans" }
+node: { title: "10" label: "76F09A31:
+ldd     word_C7D1       ; 8h if manual" }
+node: { title: "11" label: "58loc_F09D31:
+xgdx
+ldd     MAP_Cyl_Av      ; MAP average = (MAP_MAX-MAP_Min)/2
+subd    MAP_Buff_T0
+bcs     loc_F0A8" }
+node: { title: "12" label: "76F0A431:
+idiv
+xgdx
+bra     loc_F0B2" }
+node: { title: "13" label: "58loc_F0A831:
+coma
+negb
+sbca    #$FF
+idiv
+xgdx
+coma
+negb
+sbca    #$FF" }
+node: { title: "14" label: "58loc_F0B231:
+addd    MAP_Buff_T0
+std     MAP_Buff_T0" }
+node: { title: "15" label: "58locret_F0B631:
+rts" vertical_order: 16 }
+// node 0
+edge: { sourcename: "0" targetname: "1" label: "false" color: red }
+edge: { sourcename: "0" targetname: "4" label: "true" color: darkgreen }
+// node 1
+edge: { sourcename: "1" targetname: "2" label: "false" color: red }
+edge: { sourcename: "1" targetname: "3" label: "true" color: darkgreen }
+// node 2
+edge: { sourcename: "2" targetname: "3" }
+// node 3
+edge: { sourcename: "3" targetname: "7" }
+// node 4
+edge: { sourcename: "4" targetname: "5" label: "false" color: red }
+edge: { sourcename: "4" targetname: "6" label: "true" color: darkgreen }
+// node 5
+edge: { sourcename: "5" targetname: "6" }
+// node 6
+edge: { sourcename: "6" targetname: "7" }
+// node 7
+edge: { sourcename: "7" targetname: "8" label: "false" color: red }
+edge: { sourcename: "7" targetname: "9" label: "true" color: darkgreen }
+// node 8
+edge: { sourcename: "8" targetname: "15" }
+// node 9
+edge: { sourcename: "9" targetname: "10" label: "false" color: red }
+edge: { sourcename: "9" targetname: "11" label: "true" color: darkgreen }
+// node 10
+edge: { sourcename: "10" targetname: "11" }
+// node 11
+edge: { sourcename: "11" targetname: "12" label: "false" color: red }
+edge: { sourcename: "11" targetname: "13" label: "true" color: darkgreen }
+// node 12
+edge: { sourcename: "12" targetname: "14" }
+// node 13
+edge: { sourcename: "13" targetname: "14" }
+// node 14
+edge: { sourcename: "14" targetname: "15" }
+// node 15
+}

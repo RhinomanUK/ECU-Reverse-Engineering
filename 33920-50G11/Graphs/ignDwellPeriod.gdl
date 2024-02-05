@@ -1,0 +1,129 @@
+graph: {
+title: "Graph of calc_IgnDwellPeriod"
+manhattan_edges: yes
+layoutalgorithm: mindepth
+finetuning: no
+layout_downfactor: 100
+layout_upfactor: 0
+layout_nearfactor: 0
+xlspace: 12
+yspace: 30
+// IDA palette
+colorentry 32: 0 0 0
+colorentry 33: 0 0 255
+colorentry 34: 0 0 255
+colorentry 35: 128 128 128
+colorentry 36: 128 128 128
+colorentry 37: 0 0 128
+colorentry 38: 0 0 128
+colorentry 39: 0 0 255
+colorentry 40: 0 0 255
+colorentry 41: 0 0 128
+colorentry 42: 0 128 0
+colorentry 43: 0 255 0
+colorentry 44: 0 128 0
+colorentry 45: 255 128 0
+colorentry 46: 0 128 0
+colorentry 47: 128 128 255
+colorentry 48: 255 0 0
+colorentry 49: 128 128 0
+colorentry 50: 1 1 1
+colorentry 51: 192 192 192
+colorentry 52: 0 0 255
+colorentry 53: 0 0 255
+colorentry 54: 0 0 255
+colorentry 55: 128 128 128
+colorentry 56: 128 128 255
+colorentry 57: 0 128 0
+colorentry 58: 0 0 128
+colorentry 59: 0 0 255
+colorentry 60: 128 0 128
+colorentry 61: 0 128 0
+colorentry 62: 0 128 0
+colorentry 63: 0 128 64
+colorentry 64: 0 0 128
+colorentry 65: 0 0 128
+colorentry 66: 255 0 255
+colorentry 67: 128 128 0
+colorentry 68: 0 0 128
+colorentry 69: 0 0 255
+colorentry 70: 0 0 128
+colorentry 71: 0 0 255
+colorentry 72: 0 0 0
+colorentry 73: 255 255 255
+colorentry 74: 192 192 192
+colorentry 75: 0 255 255
+colorentry 76: 0 0 0
+colorentry 77: 128 0 0
+colorentry 78: 128 128 128
+colorentry 79: 128 128 0
+colorentry 80: 255 0 255
+colorentry 81: 0 0 0
+colorentry 82: 0 0 255
+colorentry 83: 0 0 0
+node: { title: "0" label: "69calc_IgnDwellPeriod31:
+ldx     #$C775
+ldd     RPMdiv50        ; RPMdiv50 is a byte, as a double it is RPM/5.12
+suba    #$10            ; A= RPM-800RPM
+bcc     loc_DB20        ; bra if RPM>800" vertical_order: 0 }
+node: { title: "1" label: "76DB1E31:
+clra                    ; RPM=0 if below 800rpm
+clrb" }
+node: { title: "2" label: "58loc_DB2031:
+cmpa    #$80 ; '€'      ; (RPM-800) - 6400
+bcs     loc_DB29        ; bra if RPM<7200" }
+node: { title: "3" label: "76DB2431:
+ldd     #$800           ; else limit to 7200rpm
+bra     loc_DB2D        ; save scaled RPM value for 3D lookup" }
+node: { title: "4" label: "58loc_DB2931:
+lsrd                    ; apply scaling for table lookup
+lsrd
+lsrd
+lsrd" }
+node: { title: "5" label: "58loc_DB2D31:
+std     temp_18C        ; save scaled RPM value for 3D lookup
+ldaa    Batt_V
+suba    #$73 ; 's'      ; A = BattV-9V
+bcc     loc_DB37        ; bra if battV>9V" }
+node: { title: "6" label: "76DB3631:
+clra                    ; else set A to 0" }
+node: { title: "7" label: "58loc_DB3731:
+cmpa    #$60 ; '`'      ; (battV-9V)-7.5V
+bcs     loc_DB3D        ; bra i9f battV > 16.5V" }
+node: { title: "8" label: "76DB3B31:
+ldaa    #$60 ; '`'      ;  else limit to 16.5V" }
+node: { title: "9" label: "58loc_DB3D31:
+ldab    #8
+mul                     ; apply scaling for table look up
+stab    temp_18E        ; save scaled batt voltage for table look up
+ldab    #9
+jsr     TAB_LU_3D       ; do the 3d table lookup
+lsrd                    ; scale result (/8)
+lsrd
+lsrd
+std     IgnDwellPeriod  ; job done
+rts" vertical_order: 10 }
+// node 0
+edge: { sourcename: "0" targetname: "1" label: "false" color: red }
+edge: { sourcename: "0" targetname: "2" label: "true" color: darkgreen }
+// node 1
+edge: { sourcename: "1" targetname: "2" }
+// node 2
+edge: { sourcename: "2" targetname: "3" label: "false" color: red }
+edge: { sourcename: "2" targetname: "4" label: "true" color: darkgreen }
+// node 3
+edge: { sourcename: "3" targetname: "5" }
+// node 4
+edge: { sourcename: "4" targetname: "5" }
+// node 5
+edge: { sourcename: "5" targetname: "6" label: "false" color: red }
+edge: { sourcename: "5" targetname: "7" label: "true" color: darkgreen }
+// node 6
+edge: { sourcename: "6" targetname: "7" }
+// node 7
+edge: { sourcename: "7" targetname: "8" label: "false" color: red }
+edge: { sourcename: "7" targetname: "9" label: "true" color: darkgreen }
+// node 8
+edge: { sourcename: "8" targetname: "9" }
+// node 9
+}
