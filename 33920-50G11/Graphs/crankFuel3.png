@@ -1,0 +1,247 @@
+graph: {
+title: "Graph of calc_INJ_Crank"
+manhattan_edges: yes
+layoutalgorithm: mindepth
+finetuning: no
+layout_downfactor: 100
+layout_upfactor: 0
+layout_nearfactor: 0
+xlspace: 12
+yspace: 30
+// IDA palette
+colorentry 32: 0 0 0
+colorentry 33: 0 0 255
+colorentry 34: 0 0 255
+colorentry 35: 128 128 128
+colorentry 36: 128 128 128
+colorentry 37: 0 0 128
+colorentry 38: 0 0 128
+colorentry 39: 0 0 255
+colorentry 40: 0 0 255
+colorentry 41: 0 0 128
+colorentry 42: 0 128 0
+colorentry 43: 0 255 0
+colorentry 44: 0 128 0
+colorentry 45: 255 128 0
+colorentry 46: 0 128 0
+colorentry 47: 128 128 255
+colorentry 48: 255 0 0
+colorentry 49: 128 128 0
+colorentry 50: 1 1 1
+colorentry 51: 192 192 192
+colorentry 52: 0 0 255
+colorentry 53: 0 0 255
+colorentry 54: 0 0 255
+colorentry 55: 128 128 128
+colorentry 56: 128 128 255
+colorentry 57: 0 128 0
+colorentry 58: 0 0 128
+colorentry 59: 0 0 255
+colorentry 60: 128 0 128
+colorentry 61: 0 128 0
+colorentry 62: 0 128 0
+colorentry 63: 0 128 64
+colorentry 64: 0 0 128
+colorentry 65: 0 0 128
+colorentry 66: 255 0 255
+colorentry 67: 128 128 0
+colorentry 68: 0 0 128
+colorentry 69: 0 0 255
+colorentry 70: 0 0 128
+colorentry 71: 0 0 255
+colorentry 72: 0 0 0
+colorentry 73: 255 255 255
+colorentry 74: 192 192 192
+colorentry 75: 0 255 255
+colorentry 76: 0 0 0
+colorentry 77: 128 0 0
+colorentry 78: 128 128 128
+colorentry 79: 128 128 0
+colorentry 80: 255 0 255
+colorentry 81: 0 0 0
+colorentry 82: 0 0 255
+colorentry 83: 0 0 0
+node: { title: "0" label: "69calc_INJ_Crank31:
+ldaa    WTS_LIN
+ldx     #$C049          ; warm up enrichment? up to 50C
+jsr     TABLE_LU_2D     ; (WTS) table look up with max and min
+lsrd
+lsrd                    ; divide by four
+pshb                    ; D to stack
+psha
+ldx     #$AC ; '¬'      ; AC = IAT_Corr_AC
+jsr     Mult_16x8       ; WTS_Corr * IAT_Corr
+lsld                    ; multiply by two
+tsx                     ; X points to value from table
+addd    0,x
+addd    0,x
+addd    0,x             ; ?
+pulx                    ; X = LUT value from stack (no flags affected)
+bcc     loc_CBD4        ; if D has overflowed then set to max." vertical_order: 0 }
+node: { title: "1" label: "76CBD131:
+ldd     #$FFFF" }
+node: { title: "2" label: "58loc_CBD431:
+ldx     #$16A           ; PSE value multiplied by previous
+jsr     Mult_16x8       ; Mult_16x8:
+lsld                    ; result * 2
+std     INJ_PW          ; inj pw * 2us (one shot or shot one of two)
+ldaa    #$80 ; '€'
+ldab    WTS_LIN
+cmpb    byte_C7DC       ; B - 0 degs C
+bcc     loc_CBEE        ; bra if above 0C" }
+node: { title: "3" label: "69crankFuelLowWTS31:
+ldaa    TPSA
+ldx     #$C05E
+jsr     TABLE_LU_2D     ; (TPS) table look up with max and min" }
+node: { title: "4" label: "58loc_CBEE31:
+staa    temp_18C
+ldx     #$18C           ; TPS value from table
+ldd     INJ_PW          ; inj pw * 2us (one shot or shot one of two)
+jsr     Mult_16x8       ; inj_pw * tps value
+lsld
+std     INJ_PW          ; inj pw * 2us (one shot or shot one of two)
+ldaa    MAP_Cyl_Av      ; MAP average = (MAP_MAX-MAP_Min)/2 scale = MAP/5.03
+ldx     #$C069          ; injector high or low load correction?
+jsr     TABLE_LU_2D     ; (MAP) table look up with max and min
+staa    temp_18C
+ldx     #$18C           ; pointer top MAP value from table
+ldd     INJ_PW          ; inj pw * 2us (one shot or shot one of two)
+jsr     Mult_16x8       ; inj_pw * map value
+lsld
+std     INJ_PW          ; comes here during cranking
+brset   STATUS_38 $10 loc_CC62; bra if memory test active" }
+node: { title: "5" label: "69crankFuelRPM31:
+ldd     CPS_Count_div256; Closed Loop correction?
+subd    #$9C ; 'œ'      ; CPS - 500rpm
+bcc     loc_CC1F        ; bra if RPM<500" }
+node: { title: "6" label: "76CC1D31:
+clra                    ; else zero
+clrb" }
+node: { title: "7" label: "58loc_CC1F31:
+cpd     #$280           ; CPS - 120rpm
+bcs     loc_CC2D        ; bra if CPS > 120rpm" }
+node: { title: "8" label: "76CC2531:
+ldx     #$C058          ; else load default from end of table
+ldaa    5,x
+tab
+bra     loc_CC56        ; skip table look up" }
+node: { title: "9" label: "58loc_CC2D31:
+lsld
+ldx     #$C055          ; C055 is table with limits
+jsr     TABLE_LU_2Da    ; TABLE_LU_2Da:
+ldx     byte_C7DF       ; word=05h
+subd    INJ_byte_BE     ; crank fuel - INJ_byte_BE
+bcc     loc_CC4D        ; bra if crank fuel > inj_byte_BE" }
+node: { title: "10" label: "76CC3B31:
+coma                    ; else invert result
+negb
+sbca    #$FF            ; invert again????
+idiv                    ; =D/5
+xgdx
+subd    INJ_byte_BE     ; RPM correction during cranking?
+bcs     loc_CC47" }
+node: { title: "11" label: "76CC4531:
+clra
+clrb" }
+node: { title: "12" label: "58loc_CC4731:
+coma
+negb
+sbca    #$FF
+bra     loc_CC56" }
+node: { title: "13" label: "58loc_CC4D31:
+idiv
+xgdx
+addd    INJ_byte_BE     ; RPM correction during cranking?
+bcc     loc_CC56" }
+node: { title: "14" label: "76CC5331:
+ldd     #$FFFF" }
+node: { title: "15" label: "58loc_CC5631:
+std     INJ_byte_BE     ; RPM correction during cranking?
+ldx     #$BE ; '¾'      ; X = ptr to inj_byte_BE
+ldd     INJ_PW          ; inj pw * 2us (one shot or shot one of two)
+jsr     Mult_16x8       ; inj_pw * inj_byte_BE
+std     INJ_PW          ; inj pw * 2us (one shot or shot one of two)" }
+node: { title: "16" label: "58loc_CC6231:
+ldab    WTS_LIN
+cmpb    byte_C7DB       ; WTS - (-25C)
+bcc     NO_SPLIT_INJ_PW2" }
+node: { title: "17" label: "69SPLIT_INJ_PW31:
+sei                     ; disable interrupts
+clr     INJ_PW2         ; clear second inj pulse
+bset    STATUS_26 $40 ; '@'
+ldab    TMSK1           ; TMSK1 Main Timer Interrupt Mask Register 1
+orab    #$40 ; '@'
+stab    TMSK1           ; enable interrupt on OC2 match
+ldd     INJ_PW          ; loads D but then only calcs on A?
+cmpa    byte_C7DD       ; INJ_PW-3072
+bcs     loc_CC87        ; bra if inj_pw<3072" }
+node: { title: "18" label: "76CC7F31:
+suba    byte_C7DD       ; else A=A-3072
+staa    INJ_PW2         ; inj_pw2 = remainder
+ldaa    byte_C7DD       ; schedule 6ms? pulse" }
+node: { title: "19" label: "58loc_CC8731:
+jsr     INJ_TIMING      ; INJ_TIMING:
+cli
+rts" vertical_order: 21 }
+node: { title: "20" label: "55NO_SPLIT_INJ_PW231:
+sei
+clr     INJ_PW2         ; second inj pw when in two shot mode
+bclr    STATUS_26 $40 ; '@'
+ldaa    TMSK1           ; TMSK1 Main Timer Interrupt Mask Register 1
+anda    #$BF ; '¿'
+staa    TMSK1           ; TMSK1 Main Timer Interrupt Mask Register 1
+ldd     INJ_PW          ; inj pw * 2us (one shot or shot one of two)
+jsr     INJ_TIMING      ; job done?
+cli
+rts" vertical_order: 21 }
+// node 0
+edge: { sourcename: "0" targetname: "1" label: "false" color: red }
+edge: { sourcename: "0" targetname: "2" label: "true" color: darkgreen }
+// node 1
+edge: { sourcename: "1" targetname: "2" }
+// node 2
+edge: { sourcename: "2" targetname: "3" label: "false" color: red }
+edge: { sourcename: "2" targetname: "4" label: "true" color: darkgreen }
+// node 3
+edge: { sourcename: "3" targetname: "4" }
+// node 4
+edge: { sourcename: "4" targetname: "5" label: "false" color: red }
+edge: { sourcename: "4" targetname: "16" label: "true" color: darkgreen }
+// node 5
+edge: { sourcename: "5" targetname: "6" label: "false" color: red }
+edge: { sourcename: "5" targetname: "7" label: "true" color: darkgreen }
+// node 6
+edge: { sourcename: "6" targetname: "7" }
+// node 7
+edge: { sourcename: "7" targetname: "8" label: "false" color: red }
+edge: { sourcename: "7" targetname: "9" label: "true" color: darkgreen }
+// node 8
+edge: { sourcename: "8" targetname: "15" }
+// node 9
+edge: { sourcename: "9" targetname: "10" label: "false" color: red }
+edge: { sourcename: "9" targetname: "13" label: "true" color: darkgreen }
+// node 10
+edge: { sourcename: "10" targetname: "11" label: "false" color: red }
+edge: { sourcename: "10" targetname: "12" label: "true" color: darkgreen }
+// node 11
+edge: { sourcename: "11" targetname: "12" }
+// node 12
+edge: { sourcename: "12" targetname: "15" }
+// node 13
+edge: { sourcename: "13" targetname: "14" label: "false" color: red }
+edge: { sourcename: "13" targetname: "15" label: "true" color: darkgreen }
+// node 14
+edge: { sourcename: "14" targetname: "15" }
+// node 15
+edge: { sourcename: "15" targetname: "16" }
+// node 16
+edge: { sourcename: "16" targetname: "17" label: "false" color: red }
+edge: { sourcename: "16" targetname: "20" label: "true" color: darkgreen }
+// node 17
+edge: { sourcename: "17" targetname: "18" label: "false" color: red }
+edge: { sourcename: "17" targetname: "19" label: "true" color: darkgreen }
+// node 18
+edge: { sourcename: "18" targetname: "19" }
+// node 19
+// node 20
+}
