@@ -1,0 +1,12 @@
+LEXMOTO LS-Z 125 2024 ECU
+MSE 8.0
+Euro 5
+
+SPC572L - 80 pin
+
+JTAG Connections:
+    PA6 = TCK = 48
+    PA8 = TDI = 49
+    PA7 = TMS = 50
+    PA9 = TDO = 51
+    PA5 = TRST = 52
